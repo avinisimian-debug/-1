@@ -11,7 +11,7 @@ import { prepareAudioForWhisper } from "@/lib/prepare-audio";
 import type { TranscriptionResult } from "@/lib/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 600;
+export const maxDuration = 300;
 
 interface GptAnalysisBase {
   overview?: string;
