@@ -349,7 +349,7 @@ export function PdfReportTemplate({
           }}
         >
           <span>{labels.generatedBy}</span>
-          <span>MeetScribe</span>
+          <span>Staz AI</span>
         </div>
       </div>
     </div>

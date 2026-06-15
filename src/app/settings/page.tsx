@@ -21,12 +21,12 @@ export default function SettingsPage() {
   return (
     <DashboardShell title={t.settingsTitle} description={t.settingsDesc}>
       <div className="mx-auto w-full max-w-2xl space-y-6">
-        <section className="glass-card rounded-2xl p-6">
+        <section className="glass-card rounded-lg p-6">
           <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/15">
-              <Crown className="h-4 w-4 text-amber-400" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-indigo-50">
+              <Crown className="h-4 w-4 text-indigo-600" />
             </div>
-            <h2 className="text-base font-bold text-white">{t.settingsPlan}</h2>
+            <h2 className="text-base font-semibold text-zinc-900">{t.settingsPlan}</h2>
           </div>
 
           {!isPro && isProSaleActive() && (
@@ -43,18 +43,18 @@ export default function SettingsPage() {
                 <div
                   key={tier}
                   className={cn(
-                    "relative rounded-xl border p-5 text-start transition-all",
+                    "relative rounded-lg border p-5 text-start transition-all",
                     selected
-                      ? "border-amber-500/40 bg-amber-500/5 ring-1 ring-amber-500/20"
-                      : "border-white/[0.06] bg-white/[0.02]",
+                      ? "border-indigo-300 bg-indigo-50/50 ring-1 ring-indigo-200"
+                      : "border-zinc-200 bg-white",
                   )}
                 >
                   {selected && (
-                    <span className="absolute end-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
-                      <Check className="h-3 w-3 text-black" />
+                    <span className="absolute end-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900">
+                      <Check className="h-3 w-3 text-white" />
                     </span>
                   )}
-                  <p className="text-sm font-bold capitalize text-white">
+                  <p className="text-sm font-semibold capitalize text-zinc-900">
                     {tier === "pro" ? "Pro" : "Free"}
                   </p>
                   {tier === "pro" ? (
@@ -62,12 +62,12 @@ export default function SettingsPage() {
                       <ProPlanPrice />
                     </div>
                   ) : (
-                    <p className="mt-1 text-2xl font-bold text-amber-400">
+                    <p className="mt-1 text-2xl font-semibold text-zinc-900">
                       $0
                       <span className="text-sm font-normal text-zinc-500">/mo</span>
                     </p>
                   )}
-                  <ul className="mt-4 space-y-2 text-xs text-zinc-400">
+                  <ul className="mt-4 space-y-2 text-xs text-zinc-500">
                     <li>{limits.maxFileSizeLabel} / file</li>
                     <li>{limits.maxDurationLabel}</li>
                     <li>{limits.transcriptionsPerMonth} / month</li>
@@ -76,7 +76,7 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={downgradeToFree}
-                      className="mt-4 text-xs text-zinc-500 underline hover:text-zinc-300"
+                      className="mt-4 text-xs text-zinc-500 underline hover:text-zinc-700"
                     >
                       Switch to Free (demo)
                     </button>
@@ -89,14 +89,14 @@ export default function SettingsPage() {
           <PlanFeatureComparison />
 
           {isPro ? (
-            <p className="mt-4 text-center text-xs text-emerald-400/80">
+            <p className="mt-4 text-center text-xs text-emerald-600">
               {t.settingsProActive}
             </p>
           ) : (
-            <div className="mt-6 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5" data-paypal-section>
+            <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-5" data-paypal-section>
               <div className="mb-4 flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-amber-400" />
-                <h3 className="text-sm font-bold text-white">{t.paypalTitle}</h3>
+                <CreditCard className="h-4 w-4 text-zinc-500" />
+                <h3 className="text-sm font-semibold text-zinc-900">{t.paypalTitle}</h3>
               </div>
               <p className="mb-4 text-xs text-zinc-500">{t.paypalDesc}</p>
               <div className="mb-4">
@@ -104,59 +104,59 @@ export default function SettingsPage() {
                 <p className="mt-1 text-xs text-zinc-500">PayPal</p>
               </div>
               <PayPalCheckout onSuccess={syncPlan} />
-              <p className="mt-4 text-center text-[10px] text-zinc-600">
+              <p className="mt-4 text-center text-[10px] text-zinc-400">
                 {t.paypalSandboxNote}
               </p>
             </div>
           )}
         </section>
 
-        <section className="glass-card rounded-2xl p-6">
-          <h2 className="mb-4 text-base font-bold text-white">{t.settingsProfile}</h2>
+        <section className="glass-card rounded-lg p-6">
+          <h2 className="mb-4 text-base font-semibold text-zinc-900">{t.settingsProfile}</h2>
           <div className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs text-zinc-500">Name</label>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-500">Name</label>
               <input
                 readOnly
                 defaultValue={session?.user?.name ?? ""}
-                className="w-full rounded-xl border border-white/[0.06] bg-black/30 px-4 py-2.5 text-sm text-zinc-300"
+                className="input-field"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs text-zinc-500">Email</label>
+              <label className="mb-1.5 block text-xs font-medium text-zinc-500">Email</label>
               <input
                 readOnly
                 defaultValue={session?.user?.email ?? ""}
-                className="w-full rounded-xl border border-white/[0.06] bg-black/30 px-4 py-2.5 text-sm text-zinc-300"
+                className="input-field"
               />
             </div>
           </div>
         </section>
 
-        <section className="glass-card rounded-2xl p-6">
+        <section className="glass-card rounded-lg p-6">
           <div className="mb-4 flex items-center gap-3">
-            <Bell className="h-4 w-4 text-violet-400" />
-            <h2 className="text-base font-bold text-white">{t.settingsNotifications}</h2>
+            <Bell className="h-4 w-4 text-zinc-400" />
+            <h2 className="text-base font-semibold text-zinc-900">{t.settingsNotifications}</h2>
           </div>
           <p className="text-sm text-zinc-500">
             Email updates enabled for {session?.user?.email}
           </p>
         </section>
 
-        <section className="glass-card rounded-2xl p-6">
+        <section className="glass-card rounded-lg p-6">
           <div className="mb-4 flex items-center gap-3">
-            <CreditCard className="h-4 w-4 text-amber-400" />
-            <h2 className="text-base font-bold text-white">{t.settingsBilling}</h2>
+            <CreditCard className="h-4 w-4 text-zinc-400" />
+            <h2 className="text-base font-semibold text-zinc-900">{t.settingsBilling}</h2>
           </div>
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-            <p className="text-sm font-medium text-amber-300">
+          <div className="rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3">
+            <p className="text-sm font-medium text-indigo-900">
               {isPro ? `Pro Plan — ${getProPlanPriceLabel()}/month` : "Free Plan — $0/month"}
             </p>
           </div>
           {!isPro && (
             <Link
               href="#"
-              className="btn-cinema mt-4 inline-flex rounded-lg px-4 py-2 text-xs font-semibold text-white"
+              className="btn-cinema mt-4 inline-flex rounded-md px-4 py-2 text-xs font-medium"
               onClick={(e) => {
                 e.preventDefault();
                 document.querySelector("[data-paypal-section]")?.scrollIntoView({ behavior: "smooth" });
@@ -167,10 +167,10 @@ export default function SettingsPage() {
           )}
         </section>
 
-        <section className="glass-card rounded-2xl p-6">
+        <section className="glass-card rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <Shield className="h-4 w-4 text-violet-400" />
-            <h2 className="text-base font-bold text-white">{t.settingsSecurity}</h2>
+            <Shield className="h-4 w-4 text-zinc-400" />
+            <h2 className="text-base font-semibold text-zinc-900">{t.settingsSecurity}</h2>
           </div>
         </section>
       </div>

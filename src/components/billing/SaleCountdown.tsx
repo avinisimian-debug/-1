@@ -39,8 +39,8 @@ function CountdownUnit({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <div className="countdown-digit relative w-full overflow-hidden rounded-lg border border-amber-500/25 bg-black/50 px-2 py-2.5 text-center sm:px-3 sm:py-3">
-        <span className="countdown-digit-inner font-mono text-xl font-bold tabular-nums text-amber-300 sm:text-2xl">
+      <div className="countdown-digit relative w-full overflow-hidden rounded-md border border-zinc-200 bg-white px-2 py-2.5 text-center shadow-sm sm:px-3 sm:py-3">
+        <span className="countdown-digit-inner font-mono text-xl font-semibold tabular-nums text-zinc-900 sm:text-2xl">
           {value}
         </span>
         <div className="pointer-events-none absolute inset-0 shimmer opacity-60" />
@@ -75,28 +75,28 @@ export function SaleCountdown({ compact = false }: { compact?: boolean }) {
     <div
       className={
         compact
-          ? "sale-countdown rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-violet-500/5 to-transparent p-4"
-          : "sale-countdown gradient-border animate-glow-pulse rounded-2xl p-5 sm:p-6"
+          ? "sale-countdown rounded-lg border border-indigo-200 bg-indigo-50 p-4"
+          : "sale-countdown rounded-lg p-5 sm:p-6"
       }
     >
       <div className="relative z-10">
         <div className="mb-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-          <span className="sale-badge inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-black shadow-lg shadow-amber-500/25">
+          <span className="sale-badge inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
             <Sparkles className="h-3.5 w-3.5" />
             {t.saleBadge}
           </span>
-          <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-violet-300">
+          <span className="rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-700">
             -{PRO_PLAN_DISCOUNT_PERCENT}%
           </span>
         </div>
 
         {!compact && (
-          <p className="mb-4 text-center text-sm text-zinc-400 sm:text-start">
+          <p className="mb-4 text-center text-sm text-zinc-600 sm:text-start">
             {t.saleTitle}
           </p>
         )}
 
-        <p className="mb-3 text-center text-xs font-medium uppercase tracking-widest text-amber-400/80 sm:text-start">
+        <p className="mb-3 text-center text-xs font-medium uppercase tracking-widest text-zinc-500 sm:text-start">
           {t.saleEndsIn}
         </p>
 

@@ -44,13 +44,13 @@ export default function HistoryPage() {
       <div className="mx-auto w-full max-w-4xl">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1 sm:max-w-sm">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.historySearch}
-              className="w-full rounded-xl border border-white/[0.06] bg-white/[0.03] py-2.5 ps-10 pe-4 text-sm text-zinc-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:outline-none"
+              className="input-field py-2.5 ps-10"
             />
           </div>
           <p className="text-sm text-zinc-500">
@@ -59,24 +59,24 @@ export default function HistoryPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="glass-card rounded-2xl px-6 py-16 text-center">
-            <FileAudio className="mx-auto h-10 w-10 text-zinc-700" />
+          <div className="glass-card rounded-lg px-6 py-16 text-center">
+            <FileAudio className="mx-auto h-10 w-10 text-zinc-300" />
             <p className="mt-4 text-sm text-zinc-500">{t.historyEmpty}</p>
           </div>
         ) : (
-          <div className="glass-card overflow-hidden rounded-2xl">
-            <ul className="divide-y divide-white/[0.04]">
+          <div className="glass-card overflow-hidden rounded-lg">
+            <ul className="divide-y divide-zinc-100">
               {filtered.map((item) => (
                 <li
                   key={item.id}
-                  className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                  className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-zinc-50"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-600/15">
-                      <FileAudio className="h-4 w-4 text-violet-400" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-indigo-50">
+                      <FileAudio className="h-4 w-4 text-indigo-600" />
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-200">
+                      <p className="truncate text-sm font-medium text-zinc-800">
                         {item.result.fileName}
                       </p>
                       <p className="text-xs text-zinc-500">
@@ -92,7 +92,7 @@ export default function HistoryPage() {
                   <button
                     type="button"
                     onClick={() => handleView(item.id)}
-                    className="rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white"
+                    className="btn-secondary px-3 py-1.5 text-xs font-medium"
                   >
                     {t.historyView}
                   </button>
@@ -100,7 +100,7 @@ export default function HistoryPage() {
                     type="button"
                     onClick={() => handleDelete(item.id)}
                     aria-label={t.historyDelete}
-                    className="rounded-lg p-1.5 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+                    className="rounded-md p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -110,7 +110,7 @@ export default function HistoryPage() {
           </div>
         )}
 
-        <p className="mt-4 text-center text-[11px] text-zinc-600">{t.historyLimitNote}</p>
+        <p className="mt-4 text-center text-[11px] text-zinc-400">{t.historyLimitNote}</p>
       </div>
     </DashboardShell>
   );

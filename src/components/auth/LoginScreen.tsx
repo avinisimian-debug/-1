@@ -2,17 +2,8 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import {
-  ArrowRight,
-  Clapperboard,
-  Film,
-  Globe,
-  Mail,
-  Sparkles,
-  Star,
-  User,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, Globe, Mail, Sparkles, User, Zap } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 import { useLocale } from "@/context/LocaleContext";
 import type { Locale } from "@/lib/i18n/translations";
 
@@ -77,121 +68,90 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="cinema-bg relative min-h-screen overflow-hidden">
-      {/* Ambient orbs */}
-      <div className="pointer-events-none absolute -left-32 top-20 h-96 w-96 rounded-full bg-violet-600/20 blur-[120px]" />
-      <div className="pointer-events-none absolute -right-32 bottom-20 h-80 w-80 rounded-full bg-amber-500/15 blur-[100px]" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/5 blur-[80px]" />
-
-      {/* Language picker */}
+    <div className="min-h-screen bg-[#fafafa]">
       <div className="absolute right-4 top-4 z-20 flex items-center gap-2 sm:right-8 sm:top-8">
-        <Globe className="h-4 w-4 text-zinc-500" />
+        <Globe className="h-4 w-4 text-zinc-400" />
         <select
           value={locale}
           onChange={(e) => setLocale(e.target.value as Locale)}
           aria-label={t.langLabel}
-          className="rounded-lg border border-white/[0.08] bg-black/40 px-3 py-1.5 text-sm text-zinc-300 backdrop-blur-xl focus:border-violet-500/40 focus:outline-none"
+          className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 shadow-sm focus:border-indigo-300 focus:outline-none"
         >
           {locales.map((l) => (
-            <option key={l} value={l} className="bg-zinc-900">
+            <option key={l} value={l}>
               {localeLabels[l]}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-4 py-16 lg:flex-row lg:gap-16 lg:px-8">
-        {/* Left — hero */}
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-4 py-16 lg:flex-row lg:gap-20 lg:px-8">
         <div className="mb-12 max-w-xl text-center lg:mb-0 lg:text-start">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
-            <Clapperboard className="h-3.5 w-3.5" />
+          <div className="mb-8 lg:hidden">
+            <Logo size="lg" />
+          </div>
+
+          <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+            <Sparkles className="h-3.5 w-3.5" />
             {t.authTagline}
           </div>
 
-          <h1
-            className="text-glow text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl"
-            style={{ fontFamily: "var(--font-syne)" }}
-          >
+          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-zinc-900 sm:text-5xl">
             {t.authTitle}
           </h1>
 
-          <p className="mt-5 text-lg leading-relaxed text-zinc-400">
+          <p className="mt-5 text-lg leading-relaxed text-zinc-500">
             {t.authSubtitle}
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-4 lg:justify-start">
+          <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
             {[
               { icon: Zap, text: t.authFeature1 },
               { icon: Sparkles, text: t.authFeature2 },
-              { icon: Film, text: t.authFeature3 },
+              { icon: User, text: t.authFeature3 },
             ].map(({ icon: Icon, text }) => (
               <div
                 key={text}
-                className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-xs text-zinc-400"
+                className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-600 shadow-sm"
               >
-                <Icon className="h-3.5 w-3.5 shrink-0 text-violet-400" />
+                <Icon className="h-3.5 w-3.5 shrink-0 text-indigo-600" />
                 {text}
               </div>
             ))}
           </div>
 
-          <div className="mt-10 grid grid-cols-3 gap-4">
-            {[
-              { value: t.authStat1, icon: Film },
-              { value: t.authStat2, icon: Star },
-              { value: t.authStat3, icon: Sparkles },
-            ].map(({ value, icon: Icon }) => (
-              <div
-                key={value}
-                className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-4 text-center"
-              >
-                <Icon className="mx-auto mb-2 h-4 w-4 text-amber-400" />
-                <p className="text-sm font-bold text-white">{value}</p>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-8 text-xs text-zinc-600">{t.authSocialProof}</p>
+          <p className="mt-10 text-xs text-zinc-400">{t.authSocialProof}</p>
         </div>
 
-        {/* Right — login card */}
         <div className="w-full max-w-md">
-          <div className="gradient-border glass-card rounded-3xl p-8 shadow-2xl shadow-violet-900/20">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-amber-500 shadow-lg shadow-violet-600/30">
-                <Clapperboard className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <p
-                  className="text-lg font-bold text-white"
-                  style={{ fontFamily: "var(--font-syne)" }}
-                >
-                  MeetScribe
-                </p>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-amber-400/80">
-                  {t.studioGrade}
-                </p>
-              </div>
+          <div className="glass-card rounded-lg p-8 shadow-sm">
+            <div className="mb-8 hidden lg:block">
+              <Logo size="md" showTagline />
             </div>
+
+            <h2 className="mb-1 text-lg font-semibold text-zinc-900">
+              {t.authSubmit}
+            </h2>
+            <p className="mb-6 text-sm text-zinc-500">{t.authUpdates}</p>
 
             <button
               type="button"
               onClick={handleGoogle}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/[0.1] bg-white px-4 py-3 text-sm font-semibold text-zinc-800 transition-all hover:bg-zinc-100 hover:shadow-lg"
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50"
             >
               <GoogleIcon />
               {t.authGoogle}
             </button>
 
             <div className="my-6 flex items-center gap-3">
-              <div className="h-px flex-1 bg-white/[0.08]" />
-              <span className="text-xs text-zinc-600">or</span>
-              <div className="h-px flex-1 bg-white/[0.08]" />
+              <div className="h-px flex-1 bg-zinc-200" />
+              <span className="text-xs text-zinc-400">or</span>
+              <div className="h-px flex-1 bg-zinc-200" />
             </div>
 
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs text-zinc-500">
+                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
                   <User className="h-3 w-3" />
                   {t.authName}
                 </label>
@@ -199,13 +159,13 @@ export function LoginScreen() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.08] bg-black/40 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-violet-500/40 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
+                  className="input-field"
                   placeholder={t.authName}
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs text-zinc-500">
+                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
                   <Mail className="h-3 w-3" />
                   {t.authEmail}
                 </label>
@@ -213,28 +173,22 @@ export function LoginScreen() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.08] bg-black/40 px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:border-violet-500/40 focus:outline-none focus:ring-1 focus:ring-violet-500/20"
+                  className="input-field"
                   placeholder="you@email.com"
                 />
               </div>
 
-              {error && (
-                <p className="text-sm text-red-400">{error}</p>
-              )}
+              {error && <p className="text-sm text-red-600">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-cinema flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold text-white disabled:opacity-60"
+                className="btn-cinema flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium disabled:opacity-60"
               >
                 {loading ? t.authLoading : t.authSubmit}
                 {!loading && <ArrowRight className="h-4 w-4" />}
               </button>
             </form>
-
-            <p className="mt-5 text-center text-[11px] leading-relaxed text-zinc-600">
-              {t.authUpdates}
-            </p>
           </div>
         </div>
       </div>

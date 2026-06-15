@@ -4,16 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
-  Clapperboard,
   Crown,
   History,
   LayoutDashboard,
   LogOut,
   Settings,
-  Sparkles,
   Users,
   X,
 } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { useUsage } from "@/hooks/useUsage";
@@ -44,35 +43,20 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
     .map((n) => n[0])
     .join("")
     .slice(0, 2)
-    .toUpperCase() ?? "MS";
+    .toUpperCase() ?? "SA";
 
   return (
     <aside
       className={cn(
-        "relative z-10 flex h-full w-64 flex-col border-r border-white/[0.06] bg-black/40 backdrop-blur-xl",
+        "relative z-10 flex h-full w-64 flex-col border-r border-zinc-200 bg-white",
         className,
       )}
     >
-      <div className="border-b border-white/[0.06] px-5 py-6">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-amber-500 shadow-lg shadow-violet-600/30">
-            <Clapperboard className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <p
-              className="font-display text-base font-bold tracking-tight text-white"
-              style={{ fontFamily: "var(--font-syne)" }}
-            >
-              MeetScribe
-            </p>
-            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-amber-400/80">
-              {t.studioGrade}
-            </p>
-          </div>
-        </div>
+      <div className="border-b border-zinc-200 px-5 py-5">
+        <Logo size="md" showTagline />
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-5">
+      <nav className="flex-1 space-y-0.5 px-3 py-4">
         {NAV_ITEMS.map((item) => {
           const Icon = iconMap[item.icon];
           const label = t[item.labelKey as keyof Translations] as string;
@@ -87,22 +71,19 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
               href={item.href}
               onClick={onNavigate}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-gradient-to-r from-violet-600/20 to-amber-500/10 text-white shadow-inner"
-                  : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200",
+                  ? "bg-zinc-100 text-zinc-900"
+                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
               )}
             >
               <Icon
                 className={cn(
-                  "h-4 w-4 transition-colors",
-                  isActive ? "text-amber-400" : "text-zinc-600 group-hover:text-violet-400",
+                  "h-4 w-4",
+                  isActive ? "text-zinc-900" : "text-zinc-400 group-hover:text-zinc-600",
                 )}
               />
               {label}
-              {isActive && (
-                <span className="ms-auto h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-              )}
             </Link>
           );
         })}
@@ -112,65 +93,43 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
             href="/admin/users"
             onClick={onNavigate}
             className={cn(
-              "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+              "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               pathname.startsWith("/admin")
-                ? "bg-gradient-to-r from-violet-600/20 to-amber-500/10 text-white shadow-inner"
-                : "text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200",
+                ? "bg-zinc-100 text-zinc-900"
+                : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
             )}
           >
-            <Users
-              className={cn(
-                "h-4 w-4",
-                pathname.startsWith("/admin")
-                  ? "text-amber-400"
-                  : "text-zinc-600 group-hover:text-violet-400",
-              )}
-            />
+            <Users className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600" />
             {t.navUsers}
           </Link>
         )}
       </nav>
 
-      <div className="border-t border-white/[0.06] p-4 space-y-3">
-        <div
-          className={
-            isPro
-              ? "gradient-border rounded-xl p-4"
-              : "rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-          }
-        >
+      <div className="space-y-3 border-t border-zinc-200 p-4">
+        <div className="rounded-md border border-zinc-200 bg-zinc-50 p-4">
           <div className="flex items-center gap-2">
-            {isPro ? (
-              <Crown className="h-4 w-4 text-amber-400" />
-            ) : (
-              <Sparkles className="h-4 w-4 text-violet-400" />
-            )}
-            <p
-              className={cn(
-                "text-xs font-semibold",
-                isPro ? "text-amber-300" : "text-zinc-300",
-              )}
-            >
+            {isPro && <Crown className="h-3.5 w-3.5 text-indigo-600" />}
+            <p className="text-xs font-semibold text-zinc-800">
               {isPro ? t.planPro : t.planFree}
             </p>
           </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">
+          <p className="mt-1.5 text-[11px] text-zinc-500">
             {limits.maxFileSizeLabel} · {limits.maxDurationLabel}
           </p>
-          <div className="mt-3 h-1 overflow-hidden rounded-full bg-zinc-800">
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-zinc-200">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-amber-400 transition-all"
+              className="h-full rounded-full bg-zinc-900 transition-all"
               style={{ width: `${percent}%` }}
             />
           </div>
-          <p className="mt-1.5 text-[10px] text-zinc-600">
+          <p className="mt-1.5 text-[10px] text-zinc-500">
             {count} / {limit} {t.planUsed}
           </p>
           {!isPro && (
             <Link
               href="/settings"
               onClick={onNavigate}
-              className="btn-cinema mt-3 flex w-full items-center justify-center rounded-lg px-3 py-2 text-xs font-semibold text-white"
+              className="btn-cinema mt-3 flex w-full items-center justify-center rounded-md px-3 py-2 text-xs font-medium"
             >
               {t.planUpgrade}
             </Link>
@@ -178,15 +137,15 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
         </div>
 
         {session?.user && (
-          <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-amber-500 text-[10px] font-bold text-white">
+          <div className="flex items-center gap-3 rounded-md border border-zinc-200 bg-white px-3 py-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-semibold text-white">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-zinc-300">
+              <p className="truncate text-xs font-medium text-zinc-800">
                 {session.user.name}
               </p>
-              <p className="truncate text-[10px] text-zinc-600">
+              <p className="truncate text-[10px] text-zinc-500">
                 {session.user.email}
               </p>
             </div>
@@ -194,7 +153,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
               type="button"
               onClick={() => signOut()}
               aria-label={t.navSignOut}
-              className="rounded-lg p-1.5 text-zinc-500 hover:bg-white/[0.06] hover:text-red-400"
+              className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
             >
               <LogOut className="h-3.5 w-3.5" />
             </button>
@@ -218,15 +177,15 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       <button
         type="button"
         aria-label="Close menu"
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-zinc-900/20 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="absolute inset-y-0 start-0 w-64 shadow-2xl">
+      <div className="absolute inset-y-0 start-0 w-64 bg-white shadow-xl">
         <button
           type="button"
           aria-label="Close menu"
           onClick={onClose}
-          className="absolute end-3 top-4 z-10 rounded-lg p-1.5 text-zinc-400 hover:bg-white/10 hover:text-white"
+          className="absolute end-3 top-4 z-10 rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100"
         >
           <X className="h-5 w-5" />
         </button>

@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { tmpdir } from "os";
 
 export interface StoredUser {
   id: string;
@@ -13,7 +14,15 @@ export interface StoredUser {
   paypalTransactionId?: string;
 }
 
-const DATA_DIR = join(process.cwd(), "data");
+function getDataDir(): string {
+  // Vercel serverless: only /tmp is writable
+  if (process.env.VERCEL) {
+    return join(tmpdir(), "meetscribe-data");
+  }
+  return join(process.cwd(), "data");
+}
+
+const DATA_DIR = getDataDir();
 const USERS_FILE = join(DATA_DIR, "users.json");
 
 async function ensureDataDir() {

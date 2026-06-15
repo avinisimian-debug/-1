@@ -32,20 +32,18 @@ export function ProcessingState({
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <div className="gradient-border glass-card rounded-2xl p-8 sm:p-10">
+      <div className="glass-card rounded-lg p-8 sm:p-10">
         <div className="flex flex-col items-center text-center">
           <div className="relative mb-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600/20 to-amber-500/20 ring-1 ring-white/10">
-              <Loader2 className="h-9 w-9 animate-spin text-amber-400" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50">
+              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
             </div>
-            <div className="absolute -bottom-1 -end-1 flex h-7 w-7 items-center justify-center rounded-full bg-black ring-2 ring-violet-500/30">
-              <span className="text-xs font-bold text-amber-400">
-                {stageIndex + 1}/{PROCESSING_STAGES.length}
-              </span>
+            <div className="absolute -bottom-1 -end-1 flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-semibold text-white ring-2 ring-white">
+              {stageIndex + 1}
             </div>
           </div>
 
-          <h2 className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>
+          <h2 className="text-xl font-semibold text-zinc-900">
             {currentLabel}
           </h2>
           <p className="mt-2 text-sm text-zinc-500">{t.procWait}</p>
@@ -55,9 +53,9 @@ export function ProcessingState({
           </div>
 
           <div className="mt-8 w-full">
-            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
+            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-600 via-purple-500 to-amber-400 transition-all duration-700 ease-out"
+                className="h-full rounded-full bg-zinc-900 transition-all duration-700 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -73,18 +71,18 @@ export function ProcessingState({
                 <li
                   key={s.key}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition-all",
-                    isCurrent && "bg-amber-500/5 text-amber-200 ring-1 ring-amber-500/20",
-                    isComplete && "text-zinc-400",
-                    !isCurrent && !isComplete && "text-zinc-600",
+                    "flex items-center gap-3 rounded-md px-4 py-3 text-sm transition-all",
+                    isCurrent && "bg-indigo-50 text-indigo-900 ring-1 ring-indigo-200",
+                    isComplete && "text-zinc-600",
+                    !isCurrent && !isComplete && "text-zinc-400",
                   )}
                 >
                   {isComplete ? (
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
                   ) : isCurrent ? (
-                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-amber-400" />
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-indigo-600" />
                   ) : (
-                    <div className="h-4 w-4 shrink-0 rounded-full border border-zinc-700" />
+                    <div className="h-4 w-4 shrink-0 rounded-full border border-zinc-300" />
                   )}
                   {label}
                 </li>

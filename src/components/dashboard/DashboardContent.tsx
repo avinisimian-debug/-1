@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clapperboard, Globe, ListChecks, Sparkles, Upload, Wand2 } from "lucide-react";
+import { Globe, ListChecks, Sparkles, Upload, Wand2 } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { TestimonialsCarousel } from "@/components/dashboard/TestimonialsCarousel";
 import { ResultsView } from "@/components/results/ResultsView";
@@ -26,7 +27,7 @@ const LANGUAGES = [
   { code: "ru", labelKey: "langRu" as const },
 ];
 
-const HISTORY_VIEW_KEY = "meetscribe-view-result";
+const HISTORY_VIEW_KEY = "stazai-view-result";
 
 export function DashboardContent() {
   const { t } = useLocale();
@@ -71,45 +72,36 @@ export function DashboardContent() {
     <DashboardShell title={t.dashTitle} description={t.dashDesc}>
       {displayStatus === "idle" && (
         <div className="mx-auto max-w-3xl space-y-6">
-          <section className="gradient-border overflow-hidden rounded-3xl">
-            <div className="relative bg-gradient-to-br from-violet-950/40 via-[#0a0a0c] to-amber-950/20 px-6 pb-6 pt-8 sm:px-10 sm:pb-8 sm:pt-10">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.12),transparent_55%)]" />
-              <div className="relative flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-amber-500 shadow-xl shadow-violet-600/25">
-                  <Clapperboard className="h-7 w-7 text-white" />
-                </div>
+          <section className="glass-card overflow-hidden rounded-lg">
+            <div className="border-b border-zinc-200 bg-white px-6 py-8 sm:px-10">
+              <div className="flex items-start gap-4">
+                <Logo size="md" />
                 <div className="min-w-0 flex-1">
-                  <h2
-                    className="text-2xl font-bold leading-tight text-white sm:text-3xl"
-                    style={{ fontFamily: "var(--font-syne)" }}
-                  >
+                  <h2 className="text-2xl font-semibold leading-tight text-zinc-900 sm:text-3xl">
                     {t.dashHero}
                   </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-zinc-400 sm:text-base">
+                  <p className="mt-2 text-sm leading-relaxed text-zinc-500 sm:text-base">
                     {t.dashHeroDesc}
                   </p>
                 </div>
               </div>
-              <div className="relative mt-6 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2">
                 {features.map(({ icon: Icon, label }) => (
                   <span
                     key={label}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-600"
                   >
-                    <Icon className="h-3.5 w-3.5 text-amber-400" />
+                    <Icon className="h-3.5 w-3.5 text-indigo-600" />
                     {label}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className="border-t border-white/[0.06] bg-black/20 px-4 py-6 sm:px-8 sm:py-8">
+            <div className="px-4 py-6 sm:px-8 sm:py-8">
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h3
-                    className="text-base font-bold text-white"
-                    style={{ fontFamily: "var(--font-syne)" }}
-                  >
+                  <h3 className="text-base font-semibold text-zinc-900">
                     {t.dashNewTranscription}
                   </h3>
                   <p className="mt-0.5 text-xs text-zinc-500">{t.uploadBrowse}</p>
@@ -117,14 +109,14 @@ export function DashboardContent() {
                 <div className="flex flex-wrap items-center gap-2">
                   {hasFeature(plan, "languageSelect") && (
                     <label className="flex items-center gap-2">
-                      <Globe className="h-3.5 w-3.5 text-violet-400" />
+                      <Globe className="h-3.5 w-3.5 text-zinc-400" />
                       <select
                         value={language}
                         onChange={(e) => setLanguage(e.target.value)}
-                        className="rounded-lg border border-white/[0.08] bg-black/30 px-2 py-1.5 text-xs text-zinc-300"
+                        className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"
                       >
                         {LANGUAGES.map((l) => (
-                          <option key={l.code} value={l.code} className="bg-zinc-900">
+                          <option key={l.code} value={l.code}>
                             {t[l.labelKey]}
                           </option>
                         ))}
@@ -134,8 +126,8 @@ export function DashboardContent() {
                   <span
                     className={
                       isPro
-                        ? "rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold text-amber-400"
-                        : "rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-[11px] font-medium text-zinc-400"
+                        ? "rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-medium text-indigo-700"
+                        : "rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-medium text-zinc-600"
                     }
                   >
                     {isPro
@@ -146,15 +138,15 @@ export function DashboardContent() {
               </div>
 
               {!canTranscribe && (
-                <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-300">
+                <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {t.dashUsageLimit}{" "}
-                  <Link href="/settings" className="underline text-amber-400">
+                  <Link href="/settings" className="font-medium underline">
                     {t.planUpgrade}
                   </Link>
                 </div>
               )}
 
-              <p className="mb-4 text-center text-[11px] text-zinc-600">
+              <p className="mb-4 text-center text-[11px] text-zinc-400">
                 {t.dashUsageRemaining}: {limit - count} / {limit}
               </p>
 
@@ -165,15 +157,15 @@ export function DashboardContent() {
             </div>
           </section>
 
-          <div className="flex items-start gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] px-5 py-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-600/15">
-              <Upload className="h-3.5 w-3.5 text-violet-400" />
+          <div className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white px-5 py-4 shadow-sm">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-50">
+              <Upload className="h-3.5 w-3.5 text-indigo-600" />
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                 {t.dashProTip}
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-zinc-400">
+              <p className="mt-1 text-sm leading-relaxed text-zinc-600">
                 {t.dashProTipDesc}
               </p>
             </div>

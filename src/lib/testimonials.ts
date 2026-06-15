@@ -15,7 +15,7 @@ const en: Testimonial[] = [
     name: "Dana Cohen",
     role: "Product Manager",
     quote:
-      "MeetScribe saves me hours every week. The executive summary is accurate enough to send straight to leadership.",
+      "Staz AI saves me hours every week. The executive summary is accurate enough to send straight to leadership.",
     initials: "DC",
     accent: "#8b5cf6",
   },
@@ -63,7 +63,7 @@ const he: Testimonial[] = [
     name: "דנה כהן",
     role: "מנהלת מוצר",
     quote:
-      "MeetScribe חוסך לי שעות כל שבוע. הסיכום המנהלים מדויק מספיק לשלוח ישר להנהלה.",
+      "Staz AI חוסך לי שעות כל שבוע. הסיכום המנהלים מדויק מספיק לשלוח ישר להנהלה.",
     initials: "דכ",
     accent: "#8b5cf6",
   },

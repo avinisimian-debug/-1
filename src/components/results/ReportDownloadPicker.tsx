@@ -87,10 +87,10 @@ export function ReportDownloadPicker({
               value={format}
               onChange={(e) => setFormat(e.target.value as DownloadFormat)}
               disabled={isDownloading}
-              className="w-full appearance-none rounded-xl border border-white/[0.08] bg-black/30 py-2.5 ps-3 pe-9 text-sm text-zinc-200 outline-none transition-colors hover:border-violet-500/30 focus:border-violet-500/40 disabled:opacity-60"
+              className="input-field appearance-none py-2.5 ps-3 pe-9"
             >
               {formatOptions.map((opt) => (
-                <option key={opt.value} value={opt.value} className="bg-zinc-900">
+                <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
@@ -103,7 +103,7 @@ export function ReportDownloadPicker({
           type="button"
           onClick={handleDownload}
           disabled={isDownloading}
-          className="btn-cinema inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="btn-cinema inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium disabled:opacity-60"
         >
           {isDownloading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

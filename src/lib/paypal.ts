@@ -54,7 +54,7 @@ export async function createPayPalOrder(): Promise<string> {
       intent: "CAPTURE",
       purchase_units: [
         {
-          description: "MeetScribe Pro Plan — Monthly",
+          description: "Staz AI Pro Plan — Monthly",
           amount: {
             currency_code: PRO_PLAN_CURRENCY,
             value: getProPlanPrice(),

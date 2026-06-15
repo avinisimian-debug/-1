@@ -34,7 +34,7 @@ export function ProPlanPrice({
 
   if (!onSale) {
     return (
-      <p className={cn(priceClass, "text-amber-400", className)}>
+      <p className={cn(priceClass, "text-zinc-900", className)}>
         {getProPlanPriceLabel()}
         <span className="text-sm font-normal text-zinc-500">/mo</span>
       </p>
@@ -52,13 +52,13 @@ export function ProPlanPrice({
         >
           {PRO_PLAN_REGULAR_PRICE_LABEL}
         </span>
-        <span className={cn(priceClass, "text-amber-400 text-glow")}>
+        <span className={cn(priceClass, "text-zinc-900")}>
           {PRO_PLAN_SALE_PRICE_LABEL}
           <span className="text-sm font-normal text-zinc-500">/mo</span>
         </span>
       </div>
       {showBadge && (
-        <span className="inline-block rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+        <span className="inline-block rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
           {t.saleFirstMonth}
         </span>
       )}

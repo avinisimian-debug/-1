@@ -45,6 +45,7 @@ function isAdminEmail(email: string | null | undefined): boolean {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   providers,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
@@ -52,11 +53,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async signIn({ user, account }) {
       if (!user.email || !user.name) return;
 
-      await registerOrUpdateUser({
-        name: user.name,
-        email: user.email,
-        provider: account?.provider === "google" ? "google" : "email",
-      });
+      try {
+        await registerOrUpdateUser({
+          name: user.name,
+          email: user.email,
+          provider: account?.provider === "google" ? "google" : "email",
+        });
+      } catch (err) {
+        // Don't block login if user persistence fails (e.g. read-only FS)
+        console.error("Failed to persist user on sign-in:", err);
+      }
     },
   },
   callbacks: {

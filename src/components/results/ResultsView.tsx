@@ -28,16 +28,16 @@ interface ResultsViewProps {
 }
 
 const SENTIMENT_COLORS = {
-  positive: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  neutral: "border-zinc-500/30 bg-zinc-500/10 text-zinc-400",
-  mixed: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  negative: "border-red-500/30 bg-red-500/10 text-red-400",
+  positive: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  neutral: "border-zinc-200 bg-zinc-50 text-zinc-600",
+  mixed: "border-amber-200 bg-amber-50 text-amber-700",
+  negative: "border-red-200 bg-red-50 text-red-700",
 };
 
 const PRIORITY_STYLES = {
-  high: "bg-red-500/15 text-red-400 border-red-500/25",
-  medium: "bg-amber-500/15 text-amber-400 border-amber-500/25",
-  low: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
+  high: "bg-red-50 text-red-700 border-red-200",
+  medium: "bg-amber-50 text-amber-700 border-amber-200",
+  low: "bg-zinc-50 text-zinc-500 border-zinc-200",
 };
 
 export function ResultsView({ result, onReset }: ResultsViewProps) {
@@ -96,21 +96,18 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
     <div className="mx-auto w-full max-w-4xl">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-400/80">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">
             {t.resComplete}
           </p>
-          <h2
-            className="mt-1 text-2xl font-bold text-white"
-            style={{ fontFamily: "var(--font-syne)" }}
-          >
+          <h2 className="mt-1 text-2xl font-semibold text-zinc-900">
             {result.fileName}
           </h2>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
             <span className="inline-flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5 text-violet-400" />
+              <Clock className="h-3.5 w-3.5 text-zinc-400" />
               {result.duration}
             </span>
-            <span className="text-zinc-700">·</span>
+            <span className="text-zinc-300">·</span>
             <span>
               {t.resProcessed} {result.processedAt}
             </span>
@@ -133,7 +130,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
               <button
                 type="button"
                 onClick={handleCopySummary}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-medium text-zinc-300 hover:text-white"
+                className="btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-medium"
               >
                 <Copy className="h-3.5 w-3.5 text-violet-400" />
                 {copied ? t.resCopied : t.resCopySummary}
@@ -142,7 +139,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-medium text-zinc-400 hover:text-white"
+              className="btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-500"
             >
               {t.resNewUpload}
             </button>
@@ -155,18 +152,18 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
         </div>
       </div>
 
-      <div className="glass-card overflow-hidden rounded-2xl">
-        <div className="flex overflow-x-auto border-b border-white/[0.06]">
+      <div className="glass-card overflow-hidden rounded-lg">
+        <div className="flex overflow-x-auto border-b border-zinc-200">
           {tabs.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               type="button"
               onClick={() => setActiveTab(key)}
               className={cn(
-                "flex shrink-0 items-center justify-center gap-2 px-4 py-4 text-sm font-medium transition-all",
+                "flex shrink-0 items-center justify-center gap-2 px-4 py-3.5 text-sm font-medium transition-all",
                 activeTab === key
-                  ? "border-b-2 border-amber-400 bg-amber-500/5 text-amber-300"
-                  : "text-zinc-500 hover:bg-white/[0.03] hover:text-zinc-300",
+                  ? "border-b-2 border-zinc-900 text-zinc-900"
+                  : "text-zinc-500 hover:text-zinc-700",
               )}
             >
               <Icon className="h-4 w-4" />
@@ -214,24 +211,24 @@ function SummaryTab({
   return (
     <div className="space-y-8">
       {hasFeature(plan, "sentimentAnalysis") && result.sentiment && (
-        <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+        <section className="rounded-md border border-zinc-200 bg-zinc-50 p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
             {t.resSentiment}
           </p>
-          <p className="mt-2 text-sm text-zinc-300">{result.sentiment.description}</p>
+          <p className="mt-2 text-sm text-zinc-600">{result.sentiment.description}</p>
         </section>
       )}
       {result.summary.overview && (
         <section>
           <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-            <FileText className="h-4 w-4 text-amber-400" />
+            <FileText className="h-4 w-4 text-zinc-400" />
             {t.resOverview}
           </h3>
-          <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-transparent p-5">
+          <div className="rounded-md border border-indigo-100 bg-indigo-50/50 p-5">
             {result.summary.overview.split("\n").filter(Boolean).map((para, i) => (
               <p
                 key={i}
-                className={cn("text-sm leading-relaxed text-zinc-300", i > 0 && "mt-4")}
+                className={cn("text-sm leading-relaxed text-zinc-700", i > 0 && "mt-4")}
               >
                 {para}
               </p>
@@ -241,13 +238,13 @@ function SummaryTab({
       )}
       <section>
         <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-          <Sparkles className="h-4 w-4 text-amber-400" />
+          <Sparkles className="h-4 w-4 text-zinc-400" />
           {t.resExecutive}
         </h3>
         <ul className="space-y-3">
           {result.summary.executive.map((point, i) => (
-            <li key={i} className="flex gap-3 text-sm leading-relaxed text-zinc-300">
-              <span className="mt-2 h-1 w-4 shrink-0 rounded-full bg-gradient-to-r from-violet-500 to-amber-400" />
+            <li key={i} className="flex gap-3 text-sm leading-relaxed text-zinc-700">
+              <span className="mt-2 h-1 w-4 shrink-0 rounded-full bg-zinc-900" />
               {point}
             </li>
           ))}
@@ -255,16 +252,16 @@ function SummaryTab({
       </section>
       <section>
         <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-          <CheckSquare className="h-4 w-4 text-violet-400" />
+          <CheckSquare className="h-4 w-4 text-zinc-400" />
           {t.resTakeaways}
         </h3>
         <ul className="space-y-3">
           {result.summary.keyTakeaways.map((point, i) => (
             <li
               key={i}
-              className="flex gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] px-4 py-3.5 text-sm leading-relaxed text-zinc-300"
+              className="flex gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-sm leading-relaxed text-zinc-700"
             >
-              <span className="font-mono text-xs font-bold text-amber-400/80">
+              <span className="font-mono text-xs font-bold text-zinc-400">
                 {String(i + 1).padStart(2, "0")}
               </span>
               {point}
@@ -286,12 +283,12 @@ function ChaptersTab({
       {chapters.map((ch, i) => (
         <li
           key={i}
-          className="flex items-center gap-4 rounded-xl border border-white/[0.04] bg-white/[0.02] px-4 py-3.5 transition-colors hover:border-violet-500/20"
+          className="flex items-center gap-4 rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3.5 transition-colors hover:border-zinc-300"
         >
-          <span className="w-14 shrink-0 font-mono text-sm font-semibold text-amber-400">
+          <span className="w-14 shrink-0 font-mono text-sm font-semibold text-indigo-600">
             {ch.timestamp}
           </span>
-          <span className="text-sm text-zinc-300">{ch.title}</span>
+          <span className="text-sm text-zinc-700">{ch.title}</span>
         </li>
       ))}
     </ul>
@@ -322,9 +319,9 @@ function ActionItemsTab({
         <p className="text-sm text-zinc-500">
           {completedCount} / {items.length} {t.resCompleted}
         </p>
-        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-800">
+        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-200">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-400 transition-all"
+            className="h-full rounded-full bg-emerald-600 transition-all"
             style={{ width: `${(completedCount / items.length) * 100}%` }}
           />
         </div>
@@ -334,24 +331,24 @@ function ActionItemsTab({
           <li key={item.id}>
             <label
               className={cn(
-                "flex cursor-pointer items-start gap-4 rounded-xl border px-4 py-4 transition-all",
+                "flex cursor-pointer items-start gap-4 rounded-md border px-4 py-4 transition-all",
                 item.completed
-                  ? "border-white/[0.03] bg-white/[0.01] opacity-60"
-                  : "border-white/[0.06] bg-white/[0.02] hover:border-violet-500/20",
+                  ? "border-zinc-100 bg-zinc-50 opacity-60"
+                  : "border-zinc-200 bg-white hover:border-zinc-300",
               )}
             >
               <input
                 type="checkbox"
                 checked={item.completed}
                 onChange={() => onToggle(item.id)}
-                className="mt-1 h-4 w-4 shrink-0 rounded border-zinc-600 bg-zinc-900 text-violet-600"
+                className="mt-1 h-4 w-4 shrink-0 rounded border-zinc-300 text-indigo-600"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      item.completed ? "text-zinc-500 line-through" : "text-zinc-200",
+                      item.completed ? "text-zinc-400 line-through" : "text-zinc-800",
                     )}
                   >
                     {item.task}
@@ -426,13 +423,13 @@ function TranscriptTab({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.resSearchTranscript}
-            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] py-2 ps-9 pe-3 text-sm text-zinc-300 placeholder:text-zinc-600 focus:border-violet-500/40 focus:outline-none"
+            className="input-field py-2 ps-9 pe-3"
           />
         </div>
         <button
           type="button"
           onClick={handleCopy}
-          className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white"
+          className="btn-secondary inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium"
         >
           <Copy className="h-3.5 w-3.5" />
           {copied ? t.resCopied : t.resCopySummary}
@@ -445,14 +442,14 @@ function TranscriptTab({
           {filtered.map((entry, i) => (
             <div
               key={i}
-              className="group flex gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-white/[0.03]"
+              className="group flex gap-4 rounded-md px-3 py-3 transition-colors hover:bg-zinc-50"
             >
-              <span className="w-12 shrink-0 font-mono text-xs text-amber-400/70">
+              <span className="w-12 shrink-0 font-mono text-xs text-zinc-400">
                 {entry.timestamp}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-violet-400/80">{entry.speaker}</p>
-                <p className="mt-1 text-sm leading-relaxed text-zinc-300">{entry.text}</p>
+                <p className="text-xs font-semibold text-indigo-600">{entry.speaker}</p>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-700">{entry.text}</p>
               </div>
             </div>
           ))}
