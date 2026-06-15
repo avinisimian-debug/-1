@@ -12,7 +12,9 @@ import {
   Sparkles,
   User,
 } from "lucide-react";
+import { LockedTab } from "@/components/billing/LockedFeatureTrigger";
 import { ReportDownloadPicker } from "@/components/results/ReportDownloadPicker";
+import { useFeatureGate } from "@/context/FeatureGateContext";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { buildSummaryText, buildTranscriptText, copyToClipboard } from "@/lib/export";
@@ -43,18 +45,25 @@ const PRIORITY_STYLES = {
 export function ResultsView({ result, onReset }: ResultsViewProps) {
   const { t } = useLocale();
   const { plan } = usePlan();
+  const { promptUpgrade } = useFeatureGate();
   const [activeTab, setActiveTab] = useState<TabKey>("summary");
   const [actionItems, setActionItems] = useState(result.actionItems);
   const [copied, setCopied] = useState(false);
 
+  const hasChaptersData = (result.chapters?.length ?? 0) > 0;
   const showChapters =
-    hasFeature(plan, "meetingChapters") && (result.chapters?.length ?? 0) > 0;
+    hasFeature(plan, "meetingChapters") && hasChaptersData;
 
-  const tabs: { key: TabKey; label: string; icon: typeof Sparkles }[] = [
+  const tabs: { key: TabKey; label: string; icon: typeof Sparkles; locked?: boolean }[] = [
     { key: "summary", label: t.resSummary, icon: Sparkles },
     { key: "actions", label: t.resActions, icon: ListChecks },
-    ...(showChapters
-      ? [{ key: "chapters" as const, label: t.resChapters, icon: BookOpen }]
+    ...(!hasFeature(plan, "meetingChapters") || showChapters
+      ? [{
+          key: "chapters" as const,
+          label: t.resChapters,
+          icon: BookOpen,
+          locked: !hasFeature(plan, "meetingChapters"),
+        }]
       : []),
     { key: "transcript", label: t.resTranscript, icon: FileText },
   ];
@@ -111,7 +120,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
             <span>
               {t.resProcessed} {result.processedAt}
             </span>
-            {hasFeature(plan, "sentimentAnalysis") && result.sentiment && (
+            {hasFeature(plan, "sentimentAnalysis") && result.sentiment ? (
               <span
                 className={cn(
                   "rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
@@ -120,7 +129,15 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
               >
                 {result.sentiment.label}
               </span>
-            )}
+            ) : !hasFeature(plan, "sentimentAnalysis") ? (
+              <button
+                type="button"
+                onClick={() => promptUpgrade("sentimentAnalysis")}
+                className="rounded-full border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-0.5 text-[11px] font-medium text-zinc-500 transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
+              >
+                + {t.gateSentimentTeaser}
+              </button>
+            ) : null}
           </div>
         </div>
 
@@ -154,22 +171,33 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
 
       <div className="glass-card overflow-hidden rounded-lg">
         <div className="flex overflow-x-auto border-b border-zinc-200">
-          {tabs.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              className={cn(
-                "flex shrink-0 items-center justify-center gap-2 px-4 py-3.5 text-sm font-medium transition-all",
-                activeTab === key
-                  ? "border-b-2 border-zinc-900 text-zinc-900"
-                  : "text-zinc-500 hover:text-zinc-700",
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              <span>{label}</span>
-            </button>
-          ))}
+          {tabs.map(({ key, label, icon: Icon, locked }) =>
+            locked ? (
+              <LockedTab
+                key={key}
+                feature="meetingChapters"
+                label={label}
+                icon={<Icon className="h-4 w-4" />}
+                active={activeTab === key}
+                onSelect={() => setActiveTab(key)}
+              />
+            ) : (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveTab(key)}
+                className={cn(
+                  "flex shrink-0 items-center justify-center gap-2 px-4 py-3.5 text-sm font-medium transition-all",
+                  activeTab === key
+                    ? "border-b-2 border-zinc-900 text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-700",
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </button>
+            ),
+          )}
         </div>
 
         <div className="p-5 sm:p-6">
@@ -181,10 +209,11 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
               items={actionItems}
               onToggle={toggleActionItem}
               showPriority={hasFeature(plan, "actionPriorities")}
+              onPrioritiesLocked={() => promptUpgrade("actionPriorities")}
               t={t}
             />
           )}
-          {activeTab === "chapters" && result.chapters && (
+          {activeTab === "chapters" && result.chapters && hasFeature(plan, "meetingChapters") && (
             <ChaptersTab chapters={result.chapters} />
           )}
           {activeTab === "transcript" && (
@@ -299,11 +328,13 @@ function ActionItemsTab({
   items,
   onToggle,
   showPriority,
+  onPrioritiesLocked,
   t,
 }: {
   items: ActionItem[];
   onToggle: (id: string) => void;
   showPriority: boolean;
+  onPrioritiesLocked?: () => void;
   t: ReturnType<typeof useLocale>["t"];
 }) {
   const completedCount = items.filter((i) => i.completed).length;
@@ -315,6 +346,22 @@ function ActionItemsTab({
 
   return (
     <div>
+      {!showPriority && onPrioritiesLocked && (
+        <button
+          type="button"
+          onClick={onPrioritiesLocked}
+          className="mb-4 flex w-full items-center justify-between rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-start transition-colors hover:border-indigo-300 hover:bg-indigo-50/50"
+        >
+          <span className="text-xs text-zinc-600">
+            <span className="font-medium text-zinc-800">+ {t.gatePrioritiesTeaser}</span>
+            {" — "}
+            {t.gatePrioritiesLine1}
+          </span>
+          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-indigo-600">
+            Pro
+          </span>
+        </button>
+      )}
       <div className="mb-5 flex items-center justify-between">
         <p className="text-sm text-zinc-500">
           {completedCount} / {items.length} {t.resCompleted}

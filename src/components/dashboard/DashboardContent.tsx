@@ -5,14 +5,17 @@ import Link from "next/link";
 import { Globe, ListChecks, Sparkles, Upload, Wand2 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { TestimonialsCarousel } from "@/components/dashboard/TestimonialsCarousel";
 import { ResultsView } from "@/components/results/ResultsView";
 import { ErrorState } from "@/components/upload/ErrorState";
 import { FileUploadZone } from "@/components/upload/FileUploadZone";
 import { ProcessingState } from "@/components/upload/ProcessingState";
+import { useFeatureGate } from "@/context/FeatureGateContext";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { useTranscription } from "@/hooks/useTranscription";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { useUsage } from "@/hooks/useUsage";
 import { hasFeature } from "@/lib/plan-features";
 import type { TranscriptionResult } from "@/lib/types";
@@ -32,6 +35,7 @@ const HISTORY_VIEW_KEY = "stazai-view-result";
 export function DashboardContent() {
   const { t } = useLocale();
   const { isPro, limits, plan } = usePlan();
+  const { promptUpgrade } = useFeatureGate();
   const { count, limit } = useUsage();
   const [language, setLanguage] = useState("auto");
   const {
@@ -62,6 +66,11 @@ export function DashboardContent() {
   const displayResult = result ?? historyResult;
   const displayStatus = displayResult ? "complete" : status;
 
+  const onboarding = useOnboarding({
+    transcriptionStatus: displayStatus,
+    usageCount: count,
+  });
+
   const features = [
     { icon: Wand2, label: t.authFeature1 },
     { icon: Sparkles, label: t.authFeature2 },
@@ -70,8 +79,32 @@ export function DashboardContent() {
 
   return (
     <DashboardShell title={t.dashTitle} description={t.dashDesc}>
+      {onboarding.showOnboarding && (
+        <OnboardingChecklist
+          open={onboarding.modalOpen}
+          progress={onboarding.progress}
+          completed={onboarding.completed}
+          isStepComplete={onboarding.isStepComplete}
+          onDismiss={onboarding.dismiss}
+          onGoToStep={onboarding.goToStep}
+        />
+      )}
+
       {displayStatus === "idle" && (
         <div className="mx-auto max-w-3xl space-y-6">
+          {onboarding.showOnboarding && onboarding.dismissed && (
+            <OnboardingChecklist
+              variant="card"
+              open={false}
+              progress={onboarding.progress}
+              completed={onboarding.completed}
+              isStepComplete={onboarding.isStepComplete}
+              onDismiss={onboarding.dismiss}
+              onGoToStep={onboarding.goToStep}
+              onOpenModal={onboarding.openModal}
+            />
+          )}
+
           <section className="glass-card overflow-hidden rounded-lg">
             <div className="border-b border-zinc-200 bg-white px-6 py-8 sm:px-10">
               <div className="flex items-start gap-4">
@@ -98,7 +131,7 @@ export function DashboardContent() {
               </div>
             </div>
 
-            <div className="px-4 py-6 sm:px-8 sm:py-8">
+            <div id="onboarding-upload-zone" className="px-4 py-6 sm:px-8 sm:py-8">
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <h3 className="text-base font-semibold text-zinc-900">
@@ -107,7 +140,7 @@ export function DashboardContent() {
                   <p className="mt-0.5 text-xs text-zinc-500">{t.uploadBrowse}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  {hasFeature(plan, "languageSelect") && (
+                  {hasFeature(plan, "languageSelect") ? (
                     <label className="flex items-center gap-2">
                       <Globe className="h-3.5 w-3.5 text-zinc-400" />
                       <select
@@ -122,6 +155,18 @@ export function DashboardContent() {
                         ))}
                       </select>
                     </label>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => promptUpgrade("languageSelect")}
+                      className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-500 transition-colors hover:border-indigo-200 hover:bg-indigo-50/50"
+                    >
+                      <Globe className="h-3.5 w-3.5 text-zinc-400" />
+                      {t.langAuto}
+                      <span className="rounded bg-zinc-100 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-zinc-500">
+                        Pro
+                      </span>
+                    </button>
                   )}
                   <span
                     className={
@@ -171,7 +216,7 @@ export function DashboardContent() {
             </div>
           </div>
 
-          <TestimonialsCarousel />
+          <TestimonialsCarousel variant="premium" />
         </div>
       )}
 

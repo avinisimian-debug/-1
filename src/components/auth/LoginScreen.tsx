@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { ArrowRight, Globe, Mail, Sparkles, User, Zap } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { TrustSection } from "@/components/trust/TrustSection";
 import { useLocale } from "@/context/LocaleContext";
 import type { Locale } from "@/lib/i18n/translations";
 
@@ -85,7 +86,8 @@ export function LoginScreen() {
         </select>
       </div>
 
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center px-4 py-16 lg:flex-row lg:gap-20 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-16 lg:px-8">
+        <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center lg:flex-row lg:gap-20">
         <div className="mb-12 max-w-xl text-center lg:mb-0 lg:text-start">
           <div className="mb-8 lg:hidden">
             <Logo size="lg" />
@@ -120,7 +122,7 @@ export function LoginScreen() {
             ))}
           </div>
 
-          <p className="mt-10 text-xs text-zinc-400">{t.authSocialProof}</p>
+          <p className="mt-10 text-xs text-zinc-400 lg:hidden">{t.authSocialProof}</p>
         </div>
 
         <div className="w-full max-w-md">
@@ -190,6 +192,11 @@ export function LoginScreen() {
               </button>
             </form>
           </div>
+        </div>
+        </div>
+
+        <div className="mt-16 border-t border-zinc-200 pt-12">
+          <TrustSection variant="landing" />
         </div>
       </div>
     </div>

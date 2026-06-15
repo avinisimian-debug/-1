@@ -174,6 +174,89 @@ export interface Translations {
   saleHours: string;
   saleMinutes: string;
   saleSeconds: string;
+  // Pricing table
+  pricingTitle: string;
+  pricingSubtitle: string;
+  pricingMonthly: string;
+  pricingYearly: string;
+  pricingYearlySave: string;
+  pricingMostPopular: string;
+  pricingCurrentPlan: string;
+  pricingPerMonthEquiv: string;
+  pricingSavePercent: string;
+  pricingBasicName: string;
+  pricingBasicDesc: string;
+  pricingBasicOutcome1: string;
+  pricingBasicOutcome2: string;
+  pricingBasicOutcome3: string;
+  pricingBasicCta: string;
+  pricingProName: string;
+  pricingProDesc: string;
+  pricingProOutcome1: string;
+  pricingProOutcome2: string;
+  pricingProOutcome3: string;
+  pricingProCta: string;
+  pricingEnterpriseName: string;
+  pricingEnterpriseDesc: string;
+  pricingEnterpriseOutcome1: string;
+  pricingEnterpriseOutcome2: string;
+  pricingEnterpriseOutcome3: string;
+  pricingEnterpriseCta: string;
+  // Onboarding
+  onboardTag: string;
+  onboardTitle: string;
+  onboardSubtitle: string;
+  onboardProgress: string;
+  onboardDismiss: string;
+  onboardExpand: string;
+  onboardComplete: string;
+  onboardCompleteDesc: string;
+  onboardStep1Title: string;
+  onboardStep1Desc: string;
+  onboardStep1Outcome: string;
+  onboardStep1Cta: string;
+  onboardStep2Title: string;
+  onboardStep2Desc: string;
+  onboardStep2Outcome: string;
+  onboardStep2Cta: string;
+  onboardStep3Title: string;
+  onboardStep3Desc: string;
+  onboardStep3Outcome: string;
+  onboardStep3Cta: string;
+  onboardStep3Waiting: string;
+  // Feature gate
+  gateEyebrow: string;
+  gateStartTrial: string;
+  gateNotNow: string;
+  gatePriceHint: string;
+  gateLanguageTitle: string;
+  gateLanguageLine1: string;
+  gateLanguageLine2: string;
+  gateLargeFilesTitle: string;
+  gateLargeFilesLine1: string;
+  gateLargeFilesLine2: string;
+  gateSentimentTitle: string;
+  gateSentimentLine1: string;
+  gateSentimentLine2: string;
+  gateChaptersTitle: string;
+  gateChaptersLine1: string;
+  gateChaptersLine2: string;
+  gatePrioritiesTitle: string;
+  gatePrioritiesLine1: string;
+  gatePrioritiesLine2: string;
+  gateSentimentTeaser: string;
+  gatePrioritiesTeaser: string;
+  // Trust & live activity
+  trustUsedBy: string;
+  trustTeamsCount: string;
+  liveActivityLabel: string;
+  liveActivityDismiss: string;
+  liveActivityJustNow: string;
+  liveActivityMinutesAgo: string;
+  liveActivitySignup: string;
+  liveActivityTranscription: string;
+  liveActivityUpgrade: string;
+  liveActivityExport: string;
 }
 
 const en: Translations = {
@@ -337,6 +420,85 @@ const en: Translations = {
   saleHours: "Hours",
   saleMinutes: "Min",
   saleSeconds: "Sec",
+  pricingTitle: "Plans that pay for themselves",
+  pricingSubtitle: "Choose the path to faster decisions — not just more features.",
+  pricingMonthly: "Monthly",
+  pricingYearly: "Yearly",
+  pricingYearlySave: "Save {percent}% on yearly billing",
+  pricingMostPopular: "Most Popular",
+  pricingCurrentPlan: "Current plan",
+  pricingPerMonthEquiv: "/mo billed yearly",
+  pricingSavePercent: "Save {percent}%",
+  pricingBasicName: "Basic",
+  pricingBasicDesc: "For individuals getting started with AI transcription.",
+  pricingBasicOutcome1: "Capture meeting notes in under 2 minutes",
+  pricingBasicOutcome2: "Send recap emails without manual typing",
+  pricingBasicOutcome3: "Never lose what was said in a quick call",
+  pricingBasicCta: "Get started free",
+  pricingProName: "Pro",
+  pricingProDesc: "For professionals who run on meetings and need outcomes fast.",
+  pricingProOutcome1: "Cut post-meeting admin by 3+ hours per week",
+  pricingProOutcome2: "Ship leadership-ready summaries the same day",
+  pricingProOutcome3: "Turn every recording into tracked action items",
+  pricingProCta: "Upgrade to Pro",
+  pricingEnterpriseName: "Enterprise",
+  pricingEnterpriseDesc: "For teams that need scale, control, and dedicated support.",
+  pricingEnterpriseOutcome1: "Standardize insights across your entire organization",
+  pricingEnterpriseOutcome2: "Onboard teams in days, not weeks",
+  pricingEnterpriseOutcome3: "Dedicated support with SLA guarantees",
+  pricingEnterpriseCta: "Contact sales",
+  onboardTag: "Quick start",
+  onboardTitle: "Get value in your first 5 minutes",
+  onboardSubtitle: "Complete these 3 steps to unlock the full power of Staz AI.",
+  onboardProgress: "Setup progress",
+  onboardDismiss: "I'll finish this later",
+  onboardExpand: "Expand",
+  onboardComplete: "You're all set!",
+  onboardCompleteDesc: "Your workspace is ready. Start turning meetings into action.",
+  onboardStep1Title: "Connect your profile",
+  onboardStep1Desc: "Confirm your name and email so reports are personalized.",
+  onboardStep1Outcome: "Outcome: Branded summaries ready to share",
+  onboardStep1Cta: "Go to profile",
+  onboardStep2Title: "Create your first project",
+  onboardStep2Desc: "Upload a recording to start your first AI transcription.",
+  onboardStep2Outcome: "Outcome: First transcript in under 2 minutes",
+  onboardStep2Cta: "Upload recording",
+  onboardStep3Title: "Review your AI summary",
+  onboardStep3Desc: "Open your executive summary and action items.",
+  onboardStep3Outcome: "Outcome: Actionable insights without manual notes",
+  onboardStep3Cta: "View summary",
+  onboardStep3Waiting: "Complete your upload — your summary appears here automatically.",
+  gateEyebrow: "Upgrade to unlock",
+  gateStartTrial: "Start free trial",
+  gateNotNow: "Not now",
+  gatePriceHint: "Pro from {price}/mo · cancel anytime",
+  gateLanguageTitle: "Transcribe in any language",
+  gateLanguageLine1: "Choose Hebrew, English, Arabic, and more before you upload.",
+  gateLanguageLine2: "Get accurate transcripts for global teams without re-recording.",
+  gateLargeFilesTitle: "Upload longer recordings",
+  gateLargeFilesLine1: "Process files up to 500 MB and meetings over 3 hours.",
+  gateLargeFilesLine2: "Stop splitting recordings — one upload, one complete report.",
+  gateSentimentTitle: "Meeting sentiment analysis",
+  gateSentimentLine1: "See whether the conversation was positive, mixed, or tense at a glance.",
+  gateSentimentLine2: "Coach teams and follow up with the right tone, faster.",
+  gateChaptersTitle: "Auto-generated meeting chapters",
+  gateChaptersLine1: "Jump to key moments with timestamped chapter markers.",
+  gateChaptersLine2: "Share highlights without making colleagues watch the full recording.",
+  gatePrioritiesTitle: "Action item priorities",
+  gatePrioritiesLine1: "High, medium, and low labels so your team knows what to do first.",
+  gatePrioritiesLine2: "Turn meetings into a ranked to-do list — not a wall of notes.",
+  gateSentimentTeaser: "Sentiment",
+  gatePrioritiesTeaser: "Priorities",
+  trustUsedBy: "Used by teams at",
+  trustTeamsCount: "From 2,400+ teams worldwide",
+  liveActivityLabel: "Live activity",
+  liveActivityDismiss: "Dismiss",
+  liveActivityJustNow: "Just now",
+  liveActivityMinutesAgo: "{n} min ago",
+  liveActivitySignup: "{name} from {location} just signed up",
+  liveActivityTranscription: "{name} from {location} completed a transcription",
+  liveActivityUpgrade: "{name} from {location} upgraded to Pro",
+  liveActivityExport: "{name} from {location} exported a PDF report",
 };
 
 const he: Translations = {
@@ -500,6 +662,85 @@ const he: Translations = {
   saleHours: "שעות",
   saleMinutes: "דקות",
   saleSeconds: "שניות",
+  pricingTitle: "חבילות שמשתלמות מיידית",
+  pricingSubtitle: "בחרו את הדרך להחלטות מהירות יותר — לא רק עוד פיצ'רים.",
+  pricingMonthly: "חודשי",
+  pricingYearly: "שנתי",
+  pricingYearlySave: "חסכו {percent}% בתשלום שנתי",
+  pricingMostPopular: "הכי פופולרי",
+  pricingCurrentPlan: "החבילה הנוכחית",
+  pricingPerMonthEquiv: "/חודש בתשלום שנתי",
+  pricingSavePercent: "חיסכון {percent}%",
+  pricingBasicName: "Basic",
+  pricingBasicDesc: "לאנשים שרוצים להתחיל עם תמלול AI.",
+  pricingBasicOutcome1: "תיעוד פגישות תוך פחות מ-2 דקות",
+  pricingBasicOutcome2: "שליחת סיכומים בלי הקלדה ידנית",
+  pricingBasicOutcome3: "לא מאבדים מה שנאמר בשיחה קצרה",
+  pricingBasicCta: "התחל בחינם",
+  pricingProName: "Pro",
+  pricingProDesc: "לאנשי מקצוע שחיים מפגישות וצריכים תוצאות מהר.",
+  pricingProOutcome1: "חיסכון של 3+ שעות עבודה אחרי כל פגישה בשבוע",
+  pricingProOutcome2: "סיכומים מוכנים להנהלה באותו יום",
+  pricingProOutcome3: "הפיכת כל הקלטה למשימות מעקב",
+  pricingProCta: "שדרג ל-Pro",
+  pricingEnterpriseName: "Enterprise",
+  pricingEnterpriseDesc: "לצוותים שצריכים קנה מידה, שליטה ותמיכה ייעודית.",
+  pricingEnterpriseOutcome1: "תובנות אחידות בכל הארגון",
+  pricingEnterpriseOutcome2: "הטמעת צוותים תוך ימים, לא שבועות",
+  pricingEnterpriseOutcome3: "תמיכה ייעודית עם SLA מובטח",
+  pricingEnterpriseCta: "צור קשר עם מכירות",
+  onboardTag: "התחלה מהירה",
+  onboardTitle: "קבלו ערך תוך 5 דקות",
+  onboardSubtitle: "השלימו 3 שלבים כדי לפתוח את מלוא הכוח של Staz AI.",
+  onboardProgress: "התקדמות הגדרה",
+  onboardDismiss: "אסיים את זה אחר כך",
+  onboardExpand: "הרחב",
+  onboardComplete: "הכל מוכן!",
+  onboardCompleteDesc: "סביבת העבודה שלך מוכנה. התחילו להפוך פגישות לפעולה.",
+  onboardStep1Title: "חברו את הפרופיל",
+  onboardStep1Desc: "אשרו שם ואימייל כדי שדוחות יהיו מותאמים אישית.",
+  onboardStep1Outcome: "תוצאה: סיכומים ממותגים מוכנים לשיתוף",
+  onboardStep1Cta: "עבור לפרופיל",
+  onboardStep2Title: "צרו את הפרויקט הראשון",
+  onboardStep2Desc: "העלו הקלטה כדי להתחיל את התמלול הראשון שלכם.",
+  onboardStep2Outcome: "תוצאה: תמלול ראשון תוך פחות מ-2 דקות",
+  onboardStep2Cta: "העלה הקלטה",
+  onboardStep3Title: "סקור את סיכום ה-AI",
+  onboardStep3Desc: "פתחו את הסיכום המנהלים ורשימת המשימות.",
+  onboardStep3Outcome: "תוצאה: תובנות מעשיות בלי רשימות ידניות",
+  onboardStep3Cta: "צפה בסיכום",
+  onboardStep3Waiting: "השלימו העלאה — הסיכום יופיע כאן אוטומטית.",
+  gateEyebrow: "שדרגו כדי לפתוח",
+  gateStartTrial: "התחילו ניסיון חינם",
+  gateNotNow: "לא עכשיו",
+  gatePriceHint: "Pro מ-{price}/חודש · ביטול בכל עת",
+  gateLanguageTitle: "תמלול בכל שפה",
+  gateLanguageLine1: "בחרו עברית, אנגלית, ערבית ועוד לפני ההעלאה.",
+  gateLanguageLine2: "תמלול מדויק לצוותים גלובליים בלי להקליט מחדש.",
+  gateLargeFilesTitle: "העלאת הקלטות ארוכות",
+  gateLargeFilesLine1: "עיבוד קבצים עד 500 MB ופגישות מעל 3 שעות.",
+  gateLargeFilesLine2: "בלי לפצל הקלטות — העלאה אחת, דוח מלא אחד.",
+  gateSentimentTitle: "ניתוח אווירת הפגישה",
+  gateSentimentLine1: "ראו במבט אחד אם השיחה הייתה חיובית, מעורבת או מתוחה.",
+  gateSentimentLine2: "אמנו צוותים ופנו מחדש בטון הנכון, מהר יותר.",
+  gateChaptersTitle: "פרקי פגישה אוטומטיים",
+  gateChaptersLine1: "קפצו לרגעים מרכזיים עם סימוני פרקים וחותמות זמן.",
+  gateChaptersLine2: "שתפו היילייטים בלי לגרום לעמיתים לצפות בהקלטה המלאה.",
+  gatePrioritiesTitle: "עדיפויות למשימות",
+  gatePrioritiesLine1: "תוויות גבוהה, בינונית ונמוכה כדי שהצוות יידע מה לעשות קודם.",
+  gatePrioritiesLine2: "הפכו פגישות לרשימת משימות מדורגת — לא קיר של הערות.",
+  gateSentimentTeaser: "סנטימנט",
+  gatePrioritiesTeaser: "עדיפויות",
+  trustUsedBy: "בשימוש צוותים ב-",
+  trustTeamsCount: "מעל 2,400 צוותים ברחבי העולם",
+  liveActivityLabel: "פעילות חיה",
+  liveActivityDismiss: "סגור",
+  liveActivityJustNow: "עכשיו",
+  liveActivityMinutesAgo: "לפני {n} דק׳",
+  liveActivitySignup: "{name} מ{location} הצטרף/ה עכשיו",
+  liveActivityTranscription: "{name} מ{location} סיים/ה תמלול",
+  liveActivityUpgrade: "{name} מ{location} שדרג/ה ל-Pro",
+  liveActivityExport: "{name} מ{location} ייצא/ה דוח PDF",
 };
 
 const ar: Translations = {

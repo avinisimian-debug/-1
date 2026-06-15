@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { TrustSection } from "@/components/trust/TrustSection";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { useUsage } from "@/hooks/useUsage";
@@ -104,6 +105,10 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
           </Link>
         )}
       </nav>
+
+      <div className="px-3 pb-2">
+        <TrustSection variant="sidebar" />
+      </div>
 
       <div className="space-y-3 border-t border-zinc-200 p-4">
         <div className="rounded-md border border-zinc-200 bg-zinc-50 p-4">

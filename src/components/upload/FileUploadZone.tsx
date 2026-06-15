@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { FileAudio, FileVideo, Lock, Upload, X } from "lucide-react";
+import { useFeatureGate } from "@/context/FeatureGateContext";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { ACCEPTED_EXTENSIONS, ACCEPTED_FILE_TYPES } from "@/lib/constants";
@@ -30,6 +31,7 @@ function formatFileSize(bytes: number): string {
 
 export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) {
   const { limits, isPro } = usePlan();
+  const { promptUpgrade } = useFeatureGate();
   const { t } = useLocale();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +44,16 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         return;
       }
       if (file.size > limits.maxFileSizeBytes) {
+        if (!isPro) {
+          promptUpgrade("largeFiles");
+        }
         setError(isPro ? t.uploadErrorSizePro : t.uploadErrorSize);
         return;
       }
       setError(null);
       onFileSelect(file);
     },
-    [onFileSelect, limits, isPro, t],
+    [onFileSelect, limits, isPro, t, promptUpgrade],
   );
 
   const handleDrop = useCallback(
