@@ -6,6 +6,7 @@ import { Mail, Shield, Users } from "lucide-react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import type { StoredUser } from "@/lib/users-store";
+import { SkeletonTable } from "@/shared/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 function formatDate(iso: string, locale: string) {
@@ -53,6 +54,20 @@ export default function AdminUsersPage() {
     );
   }
 
+  if (loading) {
+    return (
+      <DashboardShell title={t.adminTitle} description={t.adminDesc}>
+        <div className="mx-auto w-full max-w-5xl">
+          <div className="mb-6 flex items-center gap-3" aria-hidden="true">
+            <div className="h-10 w-10 rounded-md bg-muted skeleton-shimmer" />
+            <div className="h-8 w-24 rounded-md bg-muted skeleton-shimmer" />
+          </div>
+          <SkeletonTable rows={8} columns={5} />
+        </div>
+      </DashboardShell>
+    );
+  }
+
   return (
     <DashboardShell title={t.adminTitle} description={t.adminDesc}>
       <div className="mx-auto w-full max-w-5xl">
@@ -67,10 +82,6 @@ export default function AdminUsersPage() {
             </p>
           </div>
         </div>
-
-        {loading && (
-          <p className="text-center text-sm text-zinc-500">...</p>
-        )}
 
         {error && (
           <p className="text-center text-sm text-red-600">{error}</p>
