@@ -23,6 +23,8 @@ export interface Translations {
   authStat3: string;
   authErrorName: string;
   authErrorEmail: string;
+  authErrorSignIn: string;
+  authGoogleUnavailable: string;
   authLoading: string;
   // Nav
   navDashboard: string;
@@ -278,6 +280,9 @@ const en: Translations = {
   authStat3: "4.9★ rating",
   authErrorName: "Please enter your name",
   authErrorEmail: "Please enter a valid email",
+  authErrorSignIn: "Sign-in failed. Please try again.",
+  authGoogleUnavailable:
+    "Google sign-in is not configured. Use email or contact support.",
   authLoading: "Signing in...",
   navDashboard: "Dashboard",
   navHistory: "History",
@@ -520,6 +525,9 @@ const he: Translations = {
   authStat3: "דירוג 4.9★",
   authErrorName: "נא להזין שם",
   authErrorEmail: "נא להזין אימייל תקין",
+  authErrorSignIn: "ההתחברות נכשלה. נסה שוב.",
+  authGoogleUnavailable:
+    "התחברות עם Google לא מוגדרת. השתמש באימייל או פנה לתמיכה.",
   authLoading: "מתחבר...",
   navDashboard: "לוח בקרה",
   navHistory: "היסטוריה",

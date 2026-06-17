@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { getProviders, signIn, useSession } from "next-auth/react";
 import { ArrowRight, Globe, Mail, Sparkles, User, Zap } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { TrustSection } from "@/components/trust/TrustSection";
@@ -33,10 +33,33 @@ function GoogleIcon() {
 
 export function LoginScreen() {
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
+  const { update } = useSession();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleEnabled, setGoogleEnabled] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    getProviders()
+      .then((providers) => {
+        if (active) {
+          setGoogleEnabled(Boolean(providers?.google));
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setGoogleEnabled(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,20 +75,46 @@ export function LoginScreen() {
     }
 
     setLoading(true);
-    const result = await signIn("credentials", {
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      redirect: false,
-    });
-    setLoading(false);
+    try {
+      const result = await signIn("credentials", {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        redirect: false,
+        callbackUrl: "/",
+      });
 
-    if (result?.error) {
-      setError(t.authErrorEmail);
+      if (result?.ok) {
+        await update();
+        return;
+      }
+
+      setError(
+        result?.error === "CredentialsSignin"
+          ? t.authErrorSignIn
+          : t.authErrorEmail,
+      );
+    } catch {
+      setError(t.authErrorSignIn);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleGoogle = () => {
-    signIn("google", { callbackUrl: "/" });
+  const handleGoogle = async () => {
+    setError(null);
+
+    if (!googleEnabled) {
+      setError(t.authGoogleUnavailable);
+      return;
+    }
+
+    setGoogleLoading(true);
+    try {
+      await signIn("google", { callbackUrl: "/" });
+    } catch {
+      setError(t.authErrorSignIn);
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -139,10 +188,11 @@ export function LoginScreen() {
             <button
               type="button"
               onClick={handleGoogle}
-              className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50"
+              disabled={googleLoading || loading}
+              className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <GoogleIcon />
-              {t.authGoogle}
+              {googleLoading ? t.authLoading : t.authGoogle}
             </button>
 
             <div className="my-6 flex items-center gap-3">
@@ -184,7 +234,7 @@ export function LoginScreen() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || googleLoading}
                 className="btn-cinema flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium disabled:opacity-60"
               >
                 {loading ? t.authLoading : t.authSubmit}
