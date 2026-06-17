@@ -53,19 +53,21 @@ export function PdfReportTemplate({
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div>
-            <p
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt={labels.brand}
               style={{
-                margin: 0,
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.25em",
-                textTransform: "uppercase",
-                color: "rgba(251, 191, 36, 0.9)",
+                height: "40px",
+                width: "auto",
+                marginBottom: "16px",
+                display: "block",
+                background: "#ffffff",
+                borderRadius: "8px",
+                padding: "4px 10px",
               }}
-            >
-              {labels.brand}
-            </p>
+            />
             <h1
               style={{
                 margin: "8px 0 0",

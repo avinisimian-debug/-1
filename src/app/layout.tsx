@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/providers/AppProviders";
-import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/brand";
+import { BRAND_DESCRIPTION, BRAND_LOGO_PATH, BRAND_NAME } from "@/lib/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: `${BRAND_NAME} — Professional AI Transcription`,
   description: BRAND_DESCRIPTION,
+  icons: {
+    icon: BRAND_LOGO_PATH,
+    apple: BRAND_LOGO_PATH,
+  },
 };
 
 export default function RootLayout({

@@ -2,7 +2,9 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import type { Provider } from "next-auth/providers";
+import { getGoogleClientId, getGoogleOAuthConfig } from "@/lib/auth-oauth";
 import { registerOrUpdateUser } from "@/lib/users-store";
+import { verifyGoogleIdToken } from "@/lib/verify-google-token";
 
 const providers: Provider[] = [
   Credentials({
@@ -29,12 +31,30 @@ const providers: Provider[] = [
   }),
 ];
 
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+const googleOAuth = getGoogleOAuthConfig();
+if (googleOAuth) {
   providers.unshift(
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: googleOAuth.clientId,
+      clientSecret: googleOAuth.clientSecret,
       allowDangerousEmailAccountLinking: true,
+    }),
+  );
+}
+
+if (getGoogleClientId()) {
+  providers.push(
+    Credentials({
+      id: "google-credential",
+      name: "Google",
+      credentials: {
+        credential: { label: "Credential", type: "text" },
+      },
+      async authorize(credentials) {
+        const token = credentials?.credential as string | undefined;
+        if (!token) return null;
+        return verifyGoogleIdToken(token);
+      },
     }),
   );
 }
@@ -57,7 +77,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         await registerOrUpdateUser({
           name: user.name,
           email: user.email,
-          provider: account?.provider === "google" ? "google" : "email",
+          provider:
+            account?.provider === "google" ||
+            account?.provider === "google-credential"
+              ? "google"
+              : "email",
         });
       } catch (err) {
         // Don't block login if user persistence fails (e.g. read-only FS)

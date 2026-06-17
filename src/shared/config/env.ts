@@ -24,9 +24,11 @@ export const env = createEnv({
     /** Production URL (no trailing slash). Required on Vercel. */
     AUTH_URL: z.string().url().optional(),
 
-    /** Google OAuth — optional; credentials-only auth works without these */
+    /** Google OAuth — use GOOGLE_CLIENT_ID/SECRET or AUTH_GOOGLE_ID/SECRET */
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+    AUTH_GOOGLE_ID: z.string().min(1).optional(),
+    AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
 
     /** Admin panel access at /admin/users */
     ADMIN_EMAIL: z.string().email().optional(),
@@ -43,6 +45,9 @@ export const env = createEnv({
   client: {
     /** PayPal button — must match PAYPAL_CLIENT_ID in sandbox/live */
     NEXT_PUBLIC_PAYPAL_CLIENT_ID: z.string().min(1).optional(),
+
+    /** Google Sign-In button (GIS) — same value as GOOGLE_CLIENT_ID */
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   },
 
   runtimeEnv: {
@@ -52,12 +57,15 @@ export const env = createEnv({
     AUTH_URL: process.env.AUTH_URL,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
+    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
     PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID,
     PAYPAL_CLIENT_SECRET: process.env.PAYPAL_CLIENT_SECRET,
     PAYPAL_MODE: process.env.PAYPAL_MODE,
     FFMPEG_BIN: process.env.FFMPEG_BIN,
     NEXT_PUBLIC_PAYPAL_CLIENT_ID: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   },
 
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

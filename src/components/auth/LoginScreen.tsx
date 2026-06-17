@@ -1,12 +1,53 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProviders, signIn, useSession } from "next-auth/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { ArrowRight, Globe, Mail, Sparkles, User, Zap } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { TrustSection } from "@/components/trust/TrustSection";
 import { useLocale } from "@/context/LocaleContext";
 import type { Locale } from "@/lib/i18n/translations";
+
+type GoogleAuthMode = "oauth" | "gis" | "none";
+
+interface AuthConfigResponse {
+  google?: boolean;
+  mode?: GoogleAuthMode;
+  clientId?: string;
+}
+
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+interface GoogleAccountsId {
+  initialize: (config: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => void;
+    auto_select?: boolean;
+    cancel_on_tap_outside?: boolean;
+  }) => void;
+  renderButton: (
+    parent: HTMLElement,
+    options: {
+      theme?: "outline" | "filled_blue" | "filled_black";
+      size?: "large" | "medium" | "small";
+      width?: number;
+      text?: "signin_with" | "continue_with";
+      locale?: string;
+    },
+  ) => void;
+}
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: GoogleAccountsId;
+      };
+    };
+  }
+}
 
 function GoogleIcon() {
   return (
@@ -39,20 +80,54 @@ export function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [googleEnabled, setGoogleEnabled] = useState(false);
+  const [googleMode, setGoogleMode] = useState<GoogleAuthMode>("none");
+  const [googleClientId, setGoogleClientId] = useState<string | null>(null);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+  const gsiInitialized = useRef(false);
+
+  const completeGoogleSignIn = useCallback(
+    async (credential: string) => {
+      setError(null);
+      setGoogleLoading(true);
+
+      try {
+        const result = await signIn("google-credential", {
+          credential,
+          redirect: false,
+          callbackUrl: "/",
+        });
+
+        if (result?.ok) {
+          await update();
+          return;
+        }
+
+        setError(t.authErrorSignIn);
+      } catch {
+        setError(t.authErrorSignIn);
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    [t.authErrorSignIn, update],
+  );
 
   useEffect(() => {
     let active = true;
 
-    getProviders()
-      .then((providers) => {
-        if (active) {
-          setGoogleEnabled(Boolean(providers?.google));
-        }
+    fetch("/api/auth/config")
+      .then((res) => res.json())
+      .then((data: AuthConfigResponse) => {
+        if (!active) return;
+
+        const mode = data.mode ?? (data.google ? "oauth" : "none");
+        setGoogleMode(mode);
+        setGoogleClientId(data.clientId ?? null);
       })
       .catch(() => {
         if (active) {
-          setGoogleEnabled(false);
+          setGoogleMode("none");
+          setGoogleClientId(null);
         }
       });
 
@@ -60,6 +135,56 @@ export function LoginScreen() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (googleMode !== "gis" || !googleClientId || !googleButtonRef.current) {
+      return;
+    }
+
+    const mountGoogleButton = () => {
+      const google = window.google?.accounts?.id;
+      const container = googleButtonRef.current;
+      if (!google || !container || gsiInitialized.current) return;
+
+      container.innerHTML = "";
+      google.initialize({
+        client_id: googleClientId,
+        callback: (response) => {
+          void completeGoogleSignIn(response.credential);
+        },
+      });
+      google.renderButton(container, {
+        theme: "outline",
+        size: "large",
+        width: container.offsetWidth || 320,
+        text: "continue_with",
+        locale,
+      });
+      gsiInitialized.current = true;
+    };
+
+    if (window.google?.accounts?.id) {
+      mountGoogleButton();
+      return;
+    }
+
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[src="https://accounts.google.com/gsi/client"]',
+    );
+    const script = existing ?? document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = mountGoogleButton;
+
+    if (!existing) {
+      document.body.appendChild(script);
+    }
+
+    return () => {
+      gsiInitialized.current = false;
+    };
+  }, [completeGoogleSignIn, googleClientId, googleMode, locale]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,17 +225,17 @@ export function LoginScreen() {
     }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogleOAuth = async () => {
     setError(null);
 
-    if (!googleEnabled) {
+    if (googleMode !== "oauth") {
       setError(t.authGoogleUnavailable);
       return;
     }
 
     setGoogleLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/" });
+      await signIn("google", { callbackUrl: `${window.location.origin}/` });
     } catch {
       setError(t.authErrorSignIn);
       setGoogleLoading(false);
@@ -137,112 +262,128 @@ export function LoginScreen() {
 
       <div className="mx-auto max-w-6xl px-4 py-16 lg:px-8">
         <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center lg:flex-row lg:gap-20">
-        <div className="mb-12 max-w-xl text-center lg:mb-0 lg:text-start">
-          <div className="mb-8 lg:hidden">
-            <Logo size="lg" />
-          </div>
-
-          <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-            <Sparkles className="h-3.5 w-3.5" />
-            {t.authTagline}
-          </div>
-
-          <h1 className="text-4xl font-semibold leading-tight tracking-tight text-zinc-900 sm:text-5xl">
-            {t.authTitle}
-          </h1>
-
-          <p className="mt-5 text-lg leading-relaxed text-zinc-500">
-            {t.authSubtitle}
-          </p>
-
-          <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
-            {[
-              { icon: Zap, text: t.authFeature1 },
-              { icon: Sparkles, text: t.authFeature2 },
-              { icon: User, text: t.authFeature3 },
-            ].map(({ icon: Icon, text }) => (
-              <div
-                key={text}
-                className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-600 shadow-sm"
-              >
-                <Icon className="h-3.5 w-3.5 shrink-0 text-indigo-600" />
-                {text}
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-10 text-xs text-zinc-400 lg:hidden">{t.authSocialProof}</p>
-        </div>
-
-        <div className="w-full max-w-md">
-          <div className="glass-card rounded-lg p-8 shadow-sm">
-            <div className="mb-8 hidden lg:block">
-              <Logo size="md" showTagline />
+          <div className="mb-12 max-w-xl text-center lg:mb-0 lg:text-start">
+            <div className="mb-8 lg:hidden">
+              <Logo size="lg" />
             </div>
 
-            <h2 className="mb-1 text-lg font-semibold text-zinc-900">
-              {t.authSubmit}
-            </h2>
-            <p className="mb-6 text-sm text-zinc-500">{t.authUpdates}</p>
-
-            <button
-              type="button"
-              onClick={handleGoogle}
-              disabled={googleLoading || loading}
-              className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <GoogleIcon />
-              {googleLoading ? t.authLoading : t.authGoogle}
-            </button>
-
-            <div className="my-6 flex items-center gap-3">
-              <div className="h-px flex-1 bg-zinc-200" />
-              <span className="text-xs text-zinc-400">or</span>
-              <div className="h-px flex-1 bg-zinc-200" />
+            <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+              <Sparkles className="h-3.5 w-3.5" />
+              {t.authTagline}
             </div>
 
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
-                  <User className="h-3 w-3" />
-                  {t.authName}
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="input-field"
-                  placeholder={t.authName}
-                />
-              </div>
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-zinc-900 sm:text-5xl">
+              {t.authTitle}
+            </h1>
 
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
-                  <Mail className="h-3 w-3" />
-                  {t.authEmail}
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="input-field"
-                  placeholder="you@email.com"
-                />
-              </div>
+            <p className="mt-5 text-lg leading-relaxed text-zinc-500">
+              {t.authSubtitle}
+            </p>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+            <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
+              {[
+                { icon: Zap, text: t.authFeature1 },
+                { icon: Sparkles, text: t.authFeature2 },
+                { icon: User, text: t.authFeature3 },
+              ].map(({ icon: Icon, text }) => (
+                <div
+                  key={text}
+                  className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-600 shadow-sm"
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-indigo-600" />
+                  {text}
+                </div>
+              ))}
+            </div>
 
-              <button
-                type="submit"
-                disabled={loading || googleLoading}
-                className="btn-cinema flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium disabled:opacity-60"
-              >
-                {loading ? t.authLoading : t.authSubmit}
-                {!loading && <ArrowRight className="h-4 w-4" />}
-              </button>
-            </form>
+            <p className="mt-10 text-xs text-zinc-400 lg:hidden">
+              {t.authSocialProof}
+            </p>
           </div>
-        </div>
+
+          <div className="w-full max-w-md">
+            <div className="glass-card rounded-lg p-8 shadow-sm">
+              <div className="mb-8 hidden lg:block">
+                <Logo size="md" showTagline />
+              </div>
+
+              <h2 className="mb-1 text-lg font-semibold text-zinc-900">
+                {t.authSubmit}
+              </h2>
+              <p className="mb-6 text-sm text-zinc-500">{t.authUpdates}</p>
+
+              {googleMode === "gis" ? (
+                <div className="space-y-2">
+                  <div
+                    ref={googleButtonRef}
+                    className="flex min-h-[44px] w-full justify-center [&>div]:!w-full"
+                  />
+                  {googleLoading && (
+                    <p className="text-center text-xs text-zinc-500">
+                      {t.authLoading}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleGoogleOAuth}
+                  disabled={googleLoading || loading || googleMode === "none"}
+                  className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <GoogleIcon />
+                  {googleLoading ? t.authLoading : t.authGoogle}
+                </button>
+              )}
+
+              <div className="my-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-zinc-200" />
+                <span className="text-xs text-zinc-400">or</span>
+                <div className="h-px flex-1 bg-zinc-200" />
+              </div>
+
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
+                <div>
+                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                    <User className="h-3 w-3" />
+                    {t.authName}
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="input-field"
+                    placeholder={t.authName}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                    <Mail className="h-3 w-3" />
+                    {t.authEmail}
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="input-field"
+                    placeholder="you@email.com"
+                  />
+                </div>
+
+                {error && <p className="text-sm text-red-600">{error}</p>}
+
+                <button
+                  type="submit"
+                  disabled={loading || googleLoading}
+                  className="btn-cinema flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium disabled:opacity-60"
+                >
+                  {loading ? t.authLoading : t.authSubmit}
+                  {!loading && <ArrowRight className="h-4 w-4" />}
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
 
         <div className="mt-16 border-t border-zinc-200 pt-12">
