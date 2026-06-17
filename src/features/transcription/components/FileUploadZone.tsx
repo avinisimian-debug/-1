@@ -76,8 +76,14 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
           if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
         }}
         onDrop={handleDrop}
-        onDragOver={(e) => { e.preventDefault(); if (!disabled) setIsDragging(true); }}
-        onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!disabled) setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+        }}
         onClick={() => !disabled && inputRef.current?.click()}
         className={cn(
           "group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed p-10 text-center transition-all sm:p-14",
@@ -114,7 +120,10 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
             { icon: FileAudio, label: "MP3 / WAV" },
             { icon: FileVideo, label: "MP4 / M4A" },
           ].map(({ icon: Icon, label }) => (
-            <span key={label} className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-500">
+            <span
+              key={label}
+              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-500"
+            >
               <Icon className="h-3.5 w-3.5 text-zinc-400" />
               {label}
             </span>
@@ -129,7 +138,9 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         {!isPro && (
           <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-indigo-600">
             <Lock className="h-3 w-3" />
-            <Link href="/settings" className="underline-offset-2 hover:underline">{t.uploadUpgradeLink}</Link>
+            <Link href="/settings" className="underline-offset-2 hover:underline">
+              {t.uploadUpgradeLink}
+            </Link>
             {t.uploadUpgrade}
           </p>
         )}

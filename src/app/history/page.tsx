@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Clock, FileAudio, Search, Trash2 } from "lucide-react";
-import { HISTORY_VIEW_KEY } from "@/components/dashboard/DashboardContent";
+import { HISTORY_VIEW_KEY } from "@/features/transcription";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";

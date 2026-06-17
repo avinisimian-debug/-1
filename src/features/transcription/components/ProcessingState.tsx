@@ -3,9 +3,9 @@
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { PROCESSING_STAGES } from "@/lib/constants";
-import type { ProcessingStage } from "@/lib/types";
-import { SelectedFileBadge } from "./FileUploadZone";
 import { cn } from "@/lib/utils";
+import type { ProcessingStage } from "../types";
+import { SelectedFileBadge } from "./FileUploadZone";
 
 const STAGE_LABELS: Record<ProcessingStage, keyof ReturnType<typeof useLocale>["t"]> = {
   uploading: "procUploading",
@@ -43,9 +43,7 @@ export function ProcessingState({
             </div>
           </div>
 
-          <h2 className="text-xl font-semibold text-zinc-900">
-            {currentLabel}
-          </h2>
+          <h2 className="text-xl font-semibold text-zinc-900">{currentLabel}</h2>
           <p className="mt-2 text-sm text-zinc-500">{t.procWait}</p>
 
           <div className="mt-5">

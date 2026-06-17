@@ -14,6 +14,56 @@ const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      colors: {
+        background: "var(--background)",
+        surface: {
+          DEFAULT: "var(--surface)",
+          raised: "var(--surface-raised)",
+          sunken: "var(--surface-sunken)",
+        },
+        foreground: "var(--foreground)",
+        "text-secondary": "var(--text-secondary)",
+        primary: {
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+          hover: "var(--primary-hover)",
+          active: "var(--primary-active)",
+        },
+        border: {
+          DEFAULT: "var(--border)",
+          strong: "var(--border-strong)",
+        },
+        input: "var(--input)",
+        ring: "var(--ring)",
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
+        secondary: {
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
+        },
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+          hover: "var(--accent-hover)",
+          active: "var(--accent-active)",
+          muted: "var(--accent-muted)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+          hover: "var(--destructive-hover)",
+        },
+      },
       /* Semantic aliases — values defined in globals.css @theme */
       borderRadius: {
         sm: "var(--radius-sm)",
@@ -40,6 +90,20 @@ const config: Config = {
       },
       spacing: {
         /* rem-based spacing scale (4px grid) */
+        px: "1px",
+        0: "var(--space-0)",
+        1: "var(--space-1)",
+        2: "var(--space-2)",
+        3: "var(--space-3)",
+        4: "var(--space-4)",
+        5: "var(--space-5)",
+        6: "var(--space-6)",
+        8: "var(--space-8)",
+        10: "var(--space-10)",
+        12: "var(--space-12)",
+        16: "var(--space-16)",
+        20: "var(--space-20)",
+        24: "var(--space-24)",
         "4.5": "1.125rem",
         "13": "3.25rem",
         "15": "3.75rem",

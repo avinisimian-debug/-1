@@ -2,14 +2,14 @@
 
 import { useRef, useState } from "react";
 import { ChevronDown, Download, Loader2 } from "lucide-react";
-import { PdfReportTemplate } from "@/components/results/PdfReportTemplate";
-import type { PdfReportLabels } from "@/components/results/PdfReportTemplate";
 import { useLocale } from "@/context/LocaleContext";
 import { downloadPdfReport } from "@/lib/export-pdf";
 import { downloadFullReport, downloadTranscript } from "@/lib/export";
 import { isRtl } from "@/lib/i18n/translations";
-import type { ActionItem, TranscriptionResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/shared/ui/button";
+import type { ActionItem, TranscriptionResult } from "../types";
+import { PdfReportTemplate, type PdfReportLabels } from "./PdfReportTemplate";
 
 export type DownloadFormat = "pdf" | "full-txt" | "transcript-txt";
 
@@ -87,7 +87,7 @@ export function ReportDownloadPicker({
               value={format}
               onChange={(e) => setFormat(e.target.value as DownloadFormat)}
               disabled={isDownloading}
-              className="input-field appearance-none py-2.5 ps-3 pe-9"
+              className="h-8 w-full min-w-0 appearance-none rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
             >
               {formatOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -99,11 +99,11 @@ export function ReportDownloadPicker({
           </div>
         </label>
 
-        <button
+        <Button
           type="button"
           onClick={handleDownload}
           disabled={isDownloading}
-          className="btn-cinema inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium disabled:opacity-60"
+          className="gap-2 px-5"
         >
           {isDownloading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -111,7 +111,7 @@ export function ReportDownloadPicker({
             <Download className="h-4 w-4" />
           )}
           {isDownloading ? t.resGeneratingDownload : t.resDownload}
-        </button>
+        </Button>
       </div>
     </>
   );

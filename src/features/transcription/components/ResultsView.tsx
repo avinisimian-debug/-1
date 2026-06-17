@@ -13,14 +13,16 @@ import {
   User,
 } from "lucide-react";
 import { LockedTab } from "@/components/billing/LockedFeatureTrigger";
-import { ReportDownloadPicker } from "@/components/results/ReportDownloadPicker";
 import { useFeatureGate } from "@/context/FeatureGateContext";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { buildSummaryText, buildTranscriptText, copyToClipboard } from "@/lib/export";
 import { hasFeature } from "@/lib/plan-features";
-import type { ActionItem, TranscriptionResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import type { ActionItem, TranscriptionResult } from "../types";
+import { ReportDownloadPicker } from "./ReportDownloadPicker";
 
 type TabKey = "summary" | "actions" | "chapters" | "transcript";
 
@@ -144,22 +146,26 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
         <div className="flex flex-col gap-2 sm:items-end">
           <div className="flex flex-wrap gap-2">
             {hasFeature(plan, "copyToClipboard") && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={handleCopySummary}
-                className="btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-medium"
+                className="gap-2"
               >
                 <Copy className="h-3.5 w-3.5 text-violet-400" />
                 {copied ? t.resCopied : t.resCopySummary}
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={onReset}
-              className="btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-500"
+              className="gap-2 text-zinc-500"
             >
               {t.resNewUpload}
-            </button>
+            </Button>
           </div>
           <ReportDownloadPicker
             result={result}
@@ -465,22 +471,24 @@ function TranscriptTab({
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-xs">
           <Search className="absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
-          <input
+          <Input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.resSearchTranscript}
-            className="input-field py-2 ps-9 pe-3"
+            className="ps-9"
           />
         </div>
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={handleCopy}
-          className="btn-secondary inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium"
+          className="gap-2"
         >
           <Copy className="h-3.5 w-3.5" />
           {copied ? t.resCopied : t.resCopySummary}
-        </button>
+        </Button>
       </div>
       {filtered.length === 0 ? (
         <p className="py-8 text-center text-sm text-zinc-500">{t.resNoResults}</p>

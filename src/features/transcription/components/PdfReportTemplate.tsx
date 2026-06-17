@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import type { ActionItem, TranscriptionResult } from "@/lib/types";
+import type { ActionItem, TranscriptionResult } from "../types";
 
 export interface PdfReportLabels {
   brand: string;

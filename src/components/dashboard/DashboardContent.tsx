@@ -7,18 +7,21 @@ import { Logo } from "@/components/brand/Logo";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { TestimonialsCarousel } from "@/components/dashboard/TestimonialsCarousel";
-import { ResultsView } from "@/components/results/ResultsView";
-import { ErrorState } from "@/components/upload/ErrorState";
-import { FileUploadZone } from "@/components/upload/FileUploadZone";
-import { ProcessingState } from "@/components/upload/ProcessingState";
+import {
+  ErrorState,
+  FileUploadZone,
+  HISTORY_VIEW_KEY,
+  ProcessingState,
+  ResultsView,
+  useTranscription,
+  type TranscriptionResult,
+} from "@/features/transcription";
 import { useFeatureGate } from "@/context/FeatureGateContext";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import { useTranscription } from "@/hooks/useTranscription";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useUsage } from "@/hooks/useUsage";
 import { hasFeature } from "@/lib/plan-features";
-import type { TranscriptionResult } from "@/lib/types";
 
 const LANGUAGES = [
   { code: "auto", labelKey: "langAuto" as const },
@@ -29,8 +32,6 @@ const LANGUAGES = [
   { code: "fr", labelKey: "langFr" as const },
   { code: "ru", labelKey: "langRu" as const },
 ];
-
-const HISTORY_VIEW_KEY = "stazai-view-result";
 
 export function DashboardContent() {
   const { t } = useLocale();
@@ -245,5 +246,3 @@ export function DashboardContent() {
     </DashboardShell>
   );
 }
-
-export { HISTORY_VIEW_KEY };

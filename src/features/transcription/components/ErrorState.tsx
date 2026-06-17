@@ -2,6 +2,7 @@
 
 import { AlertCircle, RotateCcw } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { Button } from "@/shared/ui/button";
 
 interface ErrorStateProps {
   message: string;
@@ -22,15 +23,13 @@ export function ErrorState({ message, fileName, onRetry }: ErrorStateProps) {
           {t.transcriptionFailed}
         </h2>
         {fileName && <p className="mt-2 text-sm text-zinc-500">{fileName}</p>}
-        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-red-700">{message}</p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="btn-cinema mt-6 inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium"
-        >
+        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-red-700">
+          {message}
+        </p>
+        <Button type="button" onClick={onRetry} className="mt-6 gap-2">
           <RotateCcw className="h-4 w-4" />
           {t.tryAgain}
-        </button>
+        </Button>
       </div>
     </div>
   );
