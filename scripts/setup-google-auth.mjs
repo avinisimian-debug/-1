@@ -9,7 +9,7 @@ import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { stdin as input, stdout as output } from "process";
 
-const PRODUCTION_URL = "https://1-cswh.vercel.app";
+const PRODUCTION_URL = "https://1stazai.com";
 const CONSOLE_URL =
   "https://console.cloud.google.com/apis/credentials/oauthclient";
 

@@ -13,7 +13,6 @@ import {
   Zap,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
-import { LoginDemoSection } from "@/components/auth/LoginDemoSection";
 import { LoginLiveStats } from "@/components/auth/LoginLiveStats";
 import { LoginProductPreview } from "@/components/auth/LoginProductPreview";
 import { SaleCountdown } from "@/components/billing/SaleCountdown";
@@ -331,8 +330,6 @@ export function LoginScreen() {
             ))}
           </div>
         </section>
-
-        <LoginDemoSection className="mt-20" />
 
         <section className="mt-20 rounded-2xl border border-zinc-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-sm sm:p-10">
           <PricingTable

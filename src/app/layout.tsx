@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://1stazai.com"),
   applicationName: BRAND_NAME,
   title: {
     default: BRAND_NAME,

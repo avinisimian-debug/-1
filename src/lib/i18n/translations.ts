@@ -31,7 +31,9 @@ export interface Translations {
   authHowStep3Desc: string;
   authLiveLabel: string;
   authLiveToday: string;
+  authLiveTodayLabel: string;
   authLiveUsers: string;
+  authLiveUsersLabel: string;
   authDemoEyebrow: string;
   authDemoTitle: string;
   authDemoSubtitle: string;
@@ -314,7 +316,9 @@ const en: Translations = {
   authHowStep3Desc: "Export PDF or copy the executive summary",
   authLiveLabel: "Live",
   authLiveToday: "{n} transcriptions today",
+  authLiveTodayLabel: "transcriptions today",
   authLiveUsers: "{n}+ users joined",
+  authLiveUsersLabel: "users joined",
   authDemoEyebrow: "Product demo",
   authDemoTitle: "See Staz AI in action",
   authDemoSubtitle:
@@ -586,7 +590,9 @@ const he: Translations = {
   authHowStep3Desc: "ייצוא PDF או העתקת סיכום מנהלים",
   authLiveLabel: "פעילות חיה",
   authLiveToday: "{n} תמלולים היום",
+  authLiveTodayLabel: "תמלולים היום",
   authLiveUsers: "{n}+ משתמשים הצטרפו",
+  authLiveUsersLabel: "משתמשים הצטרפו",
   authDemoEyebrow: "הדגמה",
   authDemoTitle: "ראו את Staz AI בפעולה",
   authDemoSubtitle:

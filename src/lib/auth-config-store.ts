@@ -72,6 +72,8 @@ export async function saveRuntimeAuthConfig(
 export function getAuthSetupOrigins(requestOrigin?: string | null): string[] {
   const origins = new Set<string>([
     "http://localhost:3000",
+    "https://1stazai.com",
+    "https://www.1stazai.com",
     "https://1-cswh.vercel.app",
   ]);
 
