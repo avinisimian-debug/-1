@@ -88,7 +88,7 @@ export default function AdminAuthSetupPage() {
       if (!res.ok) {
         throw new Error(data.error ?? "Save failed");
       }
-      setMessage("Google הופעל! חזור למסך ההתחברות ונסה שוב.");
+      setMessage("Google הופעל! חזרו למסך ההתחברות ונסו שוב.");
       setClientId("");
       await load();
     } catch (err) {
