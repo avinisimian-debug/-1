@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import {
   ArrowRight,
@@ -13,7 +13,11 @@ import {
   Zap,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { LoginDemoSection } from "@/components/auth/LoginDemoSection";
+import { LoginLiveStats } from "@/components/auth/LoginLiveStats";
 import { LoginProductPreview } from "@/components/auth/LoginProductPreview";
+import { SaleCountdown } from "@/components/billing/SaleCountdown";
+import { PricingTable } from "@/components/billing/PricingTable";
 import { TrustSection } from "@/components/trust/TrustSection";
 import { useLocale } from "@/context/LocaleContext";
 import type { Locale } from "@/lib/i18n/translations";
@@ -22,10 +26,19 @@ import { cn } from "@/lib/utils";
 export function LoginScreen() {
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
   const { update } = useSession();
+  const signupRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const scrollToSignup = useCallback(() => {
+    signupRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const nameInput = document.getElementById("login-name");
+    if (nameInput instanceof HTMLInputElement) {
+      window.setTimeout(() => nameInput.focus(), 400);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,6 +136,13 @@ export function LoginScreen() {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16 lg:px-8">
+        <div className="mb-8 grid gap-4 lg:grid-cols-2">
+          <SaleCountdown />
+          <div className="flex items-center rounded-2xl border border-zinc-200/80 bg-white/90 px-5 py-4 shadow-sm">
+            <LoginLiveStats />
+          </div>
+        </div>
+
         <div className="flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center gap-12 lg:flex-row lg:items-start lg:gap-14 xl:gap-20">
           <div className="w-full max-w-xl text-center lg:max-w-none lg:flex-1 lg:pt-4 lg:text-start">
             <div className="mb-8 flex justify-center lg:hidden">
@@ -176,7 +196,11 @@ export function LoginScreen() {
             </p>
           </div>
 
-          <div className="w-full max-w-md shrink-0 lg:max-w-[26rem] lg:sticky lg:top-8">
+          <div
+            ref={signupRef}
+            id="signup-form"
+            className="w-full max-w-md shrink-0 scroll-mt-24 lg:max-w-[26rem] lg:sticky lg:top-8"
+          >
             <div className="rounded-2xl border border-zinc-200/80 bg-white p-8 shadow-xl shadow-zinc-900/8 sm:p-9">
               <div className="mb-8 hidden lg:block">
                 <Logo size="md" showTagline tagline={t.authTagline} />
@@ -306,6 +330,16 @@ export function LoginScreen() {
               </div>
             ))}
           </div>
+        </section>
+
+        <LoginDemoSection className="mt-20" />
+
+        <section className="mt-20 rounded-2xl border border-zinc-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-sm sm:p-10">
+          <PricingTable
+            currentPlan="free"
+            landing
+            onLandingSignup={scrollToSignup}
+          />
         </section>
 
         <div className="mt-16 border-t border-zinc-200/80 pt-12">

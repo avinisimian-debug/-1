@@ -24,6 +24,9 @@ interface PricingTableProps {
   onSelectPro?: () => void;
   onSelectBasic?: () => void;
   className?: string;
+  /** Public landing page — CTAs scroll to signup instead of in-app upgrade */
+  landing?: boolean;
+  onLandingSignup?: () => void;
 }
 
 type TierConfig = {
@@ -172,11 +175,23 @@ export function PricingTable({
   onSelectPro,
   onSelectBasic,
   className,
+  landing = false,
+  onLandingSignup,
 }: PricingTableProps) {
   const { t } = useLocale();
   const [interval, setInterval] = useState<BillingInterval>("monthly");
-  const activeTier = appPlanToPricingTier(currentPlan);
+  const activeTier = landing ? null : appPlanToPricingTier(currentPlan);
   const proOnSale = isProSaleActive();
+
+  const handleBasicCta = () => {
+    if (landing) onLandingSignup?.();
+    else onSelectBasic?.();
+  };
+
+  const handleProCta = () => {
+    if (landing) onLandingSignup?.();
+    else onSelectPro?.();
+  };
 
   return (
     <div className={cn("w-full", className)}>
@@ -193,7 +208,7 @@ export function PricingTable({
       <div className="grid gap-6 lg:grid-cols-3">
         {TIERS.map((tier) => {
           const isPopular = tier.popular;
-          const isCurrent = tier.id === activeTier;
+          const isCurrent = !landing && tier.id === activeTier;
           const saleMonthly =
             tier.id === "pro" && proOnSale && interval === "monthly"
               ? parseFloat(PRO_PLAN_SALE_PRICE)
@@ -301,7 +316,7 @@ export function PricingTable({
               ) : tier.id === "pro" ? (
                 <button
                   type="button"
-                  onClick={onSelectPro}
+                  onClick={handleProCta}
                   disabled={isCurrent}
                   className={cn(
                     "inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-default disabled:opacity-60",
@@ -314,7 +329,7 @@ export function PricingTable({
               ) : (
                 <button
                   type="button"
-                  onClick={onSelectBasic}
+                  onClick={handleBasicCta}
                   disabled={isCurrent}
                   className="btn-secondary inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-default disabled:opacity-60"
                 >

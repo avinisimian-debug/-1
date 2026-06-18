@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import type { PlanTier } from "@/lib/constants";
 import { transcribeAudio } from "@/features/transcription/server/transcribe.use-case";
+import { incrementTranscriptionsToday } from "@/lib/stats-store";
 import { BadRequestError, withApiHandler } from "@/shared/api";
 import { isFailure } from "@/shared/lib/result";
 
@@ -21,6 +22,8 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   if (isFailure(result)) {
     throw result.error;
   }
+
+  await incrementTranscriptionsToday();
 
   return result.data;
 });

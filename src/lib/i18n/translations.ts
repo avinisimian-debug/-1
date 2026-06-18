@@ -29,6 +29,16 @@ export interface Translations {
   authHowStep2Desc: string;
   authHowStep3Title: string;
   authHowStep3Desc: string;
+  authLiveLabel: string;
+  authLiveToday: string;
+  authLiveUsers: string;
+  authDemoEyebrow: string;
+  authDemoTitle: string;
+  authDemoSubtitle: string;
+  authDemoPlay: string;
+  authDemoDuration: string;
+  authDemoProcessing: string;
+  authDemoReady: string;
   authUpdates: string;
   authSocialProof: string;
   authFeature1: string;
@@ -292,7 +302,7 @@ const en: Translations = {
   authCardTitle: "Get started free",
   authCardSubtitle: "Create your free account in 30 seconds — name and email only.",
   authFreeBadge: "No credit card required",
-  authBenefit1: "3 free transcriptions every month",
+  authBenefit1: "10 free transcriptions every month",
   authBenefit2: "PDF reports & action items included",
   authBenefit3: "Hebrew, English & 5+ languages",
   authHowTitle: "How it works",
@@ -302,6 +312,17 @@ const en: Translations = {
   authHowStep2Desc: "Transcript, summary & tasks in minutes",
   authHowStep3Title: "Share & act",
   authHowStep3Desc: "Export PDF or copy the executive summary",
+  authLiveLabel: "Live",
+  authLiveToday: "{n} transcriptions today",
+  authLiveUsers: "{n}+ users joined",
+  authDemoEyebrow: "Product demo",
+  authDemoTitle: "See Staz AI in action",
+  authDemoSubtitle:
+    "Watch how a meeting recording becomes a transcript, executive summary, and action items in under a minute.",
+  authDemoPlay: "Play interactive demo",
+  authDemoDuration: "~30 seconds",
+  authDemoProcessing: "AI is processing your meeting...",
+  authDemoReady: "Your report is ready",
   authUpdates: "We'll send product updates & tips only. Unsubscribe anytime.",
   authSocialProof: "Trusted by creators, teams & studios worldwide",
   authFeature1: "AI transcription in seconds",
@@ -553,7 +574,7 @@ const he: Translations = {
   authCardTitle: "התחילו בחינם",
   authCardSubtitle: "צרו חשבון חינמי תוך שניות — רק שם ואימייל.",
   authFreeBadge: "ללא צורך בכרטיס אשראי",
-  authBenefit1: "3 תמלולים חינם בכל חודש",
+  authBenefit1: "10 תמלולים חינם בכל חודש",
   authBenefit2: "דוחות PDF ומשימות כלולים",
   authBenefit3: "עברית, אנגלית ועוד שפות",
   authHowTitle: "איך זה עובד",
@@ -563,6 +584,17 @@ const he: Translations = {
   authHowStep2Desc: "תמלול, סיכום ומשימות תוך דקות",
   authHowStep3Title: "שיתוף ופעולה",
   authHowStep3Desc: "ייצוא PDF או העתקת סיכום מנהלים",
+  authLiveLabel: "פעילות חיה",
+  authLiveToday: "{n} תמלולים היום",
+  authLiveUsers: "{n}+ משתמשים הצטרפו",
+  authDemoEyebrow: "הדגמה",
+  authDemoTitle: "ראו את Staz AI בפעולה",
+  authDemoSubtitle:
+    "צפו איך הקלטת פגישה הופכת לתמלול, סיכום מנהלים ומשימות — תוך פחות מדקה.",
+  authDemoPlay: "הפעלת הדגמה אינטראקטיבית",
+  authDemoDuration: "~30 שניות",
+  authDemoProcessing: "ה-AI מעבד את הפגישה שלכם...",
+  authDemoReady: "הדוח שלכם מוכן",
   authUpdates: "נשלח עדכונים וטיפים בלבד. אפשר לבטל בכל עת.",
   authSocialProof: "נבחר על ידי יוצרים, צוותים ואולפנים ברחבי העולם",
   authFeature1: "תמלול AI תוך שניות",
