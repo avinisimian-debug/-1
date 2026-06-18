@@ -5,3 +5,6 @@ export const BRAND_DESCRIPTION =
 
 /** Full horizontal brand lockup (shield + wordmark). */
 export const BRAND_LOGO_PATH = "/logo.png";
+
+/** Square brand mark for favicons / PWA. */
+export const BRAND_ICON_PATH = "/icon-192.png";

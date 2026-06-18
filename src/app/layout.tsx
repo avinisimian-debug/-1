@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/providers/AppProviders";
-import { BRAND_DESCRIPTION, BRAND_LOGO_PATH, BRAND_NAME } from "@/lib/brand";
+import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,12 +15,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: `${BRAND_NAME} — Professional AI Transcription`,
+  applicationName: BRAND_NAME,
+  title: {
+    default: BRAND_NAME,
+    template: `%s · ${BRAND_NAME}`,
+  },
   description: BRAND_DESCRIPTION,
   icons: {
-    icon: BRAND_LOGO_PATH,
-    apple: BRAND_LOGO_PATH,
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

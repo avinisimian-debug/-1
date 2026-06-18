@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { BRAND_LOGO_PATH, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
+import { BRAND_ICON_PATH, BRAND_LOGO_PATH, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -23,20 +23,16 @@ export function LogoMark({
   className?: string;
 }) {
   return (
-    <div
-      className={cn("relative shrink-0 overflow-hidden rounded-md", className)}
+    <Image
+      src={BRAND_ICON_PATH}
+      alt=""
+      width={size}
+      height={size}
+      className={cn("shrink-0 rounded-md", className)}
       style={{ width: size, height: size }}
+      draggable={false}
       aria-hidden
-    >
-      <Image
-        src={BRAND_LOGO_PATH}
-        alt=""
-        width={size * 4}
-        height={size}
-        className="h-full w-auto max-w-none object-cover object-left"
-        draggable={false}
-      />
-    </div>
+    />
   );
 }
 
