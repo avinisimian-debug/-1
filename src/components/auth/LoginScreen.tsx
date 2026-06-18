@@ -20,62 +20,52 @@ interface GoogleCredentialResponse {
   credential: string;
 }
 
-interface GoogleAccountsId {
-  initialize: (config: {
-    client_id: string;
-    callback: (response: GoogleCredentialResponse) => void;
-    auto_select?: boolean;
-    cancel_on_tap_outside?: boolean;
-  }) => void;
-  renderButton: (
-    parent: HTMLElement,
-    options: {
-      theme?: "outline" | "filled_blue" | "filled_black";
-      size?: "large" | "medium" | "small";
-      width?: number;
-      text?: "signin_with" | "continue_with";
-      locale?: string;
-    },
-  ) => void;
-}
-
 declare global {
   interface Window {
     google?: {
       accounts: {
-        id: GoogleAccountsId;
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+            auto_select?: boolean;
+            cancel_on_tap_outside?: boolean;
+            itp_support?: boolean;
+          }) => void;
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              theme?: "outline" | "filled_blue" | "filled_black";
+              size?: "large" | "medium" | "small";
+              width?: number;
+              text?: "signin_with" | "continue_with";
+              locale?: string;
+              shape?: "rectangular" | "pill" | "circle" | "square";
+            },
+          ) => void;
+          prompt: (
+            momentListener?: (notification: {
+              isNotDisplayed: () => boolean;
+              isSkippedMoment: () => boolean;
+            }) => void,
+          ) => void;
+        };
       };
     };
   }
 }
 
-function GoogleIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden>
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-      />
-    </svg>
-  );
+function deriveNameFromEmail(email: string): string {
+  const local = email.split("@")[0] ?? "User";
+  return local
+    .replace(/[._-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
 }
 
 export function LoginScreen() {
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
   const { update } = useSession();
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,7 +73,7 @@ export function LoginScreen() {
   const [googleMode, setGoogleMode] = useState<GoogleAuthMode>("none");
   const [googleClientId, setGoogleClientId] = useState<string | null>(null);
   const googleButtonRef = useRef<HTMLDivElement>(null);
-  const gsiInitialized = useRef(false);
+  const gsiReady = useRef(false);
 
   const completeGoogleSignIn = useCallback(
     async (credential: string) => {
@@ -119,16 +109,11 @@ export function LoginScreen() {
       .then((res) => res.json())
       .then((data: AuthConfigResponse) => {
         if (!active) return;
-
-        const mode = data.mode ?? (data.google ? "oauth" : "none");
-        setGoogleMode(mode);
+        setGoogleMode(data.mode ?? (data.google ? "oauth" : "none"));
         setGoogleClientId(data.clientId ?? null);
       })
       .catch(() => {
-        if (active) {
-          setGoogleMode("none");
-          setGoogleClientId(null);
-        }
+        if (active) setGoogleMode("none");
       });
 
     return () => {
@@ -136,65 +121,92 @@ export function LoginScreen() {
     };
   }, []);
 
+  const mountGoogleSignIn = useCallback(() => {
+    const clientId = googleClientId;
+    const container = googleButtonRef.current;
+    const google = window.google?.accounts?.id;
+
+    if (!clientId || !container || !google || gsiReady.current) return;
+
+    container.innerHTML = "";
+    google.initialize({
+      client_id: clientId,
+      callback: (response) => {
+        void completeGoogleSignIn(response.credential);
+      },
+      auto_select: true,
+      cancel_on_tap_outside: true,
+      itp_support: true,
+    });
+
+    google.renderButton(container, {
+      theme: "outline",
+      size: "large",
+      width: Math.max(container.offsetWidth, 320),
+      text: "continue_with",
+      locale,
+      shape: "rectangular",
+    });
+
+    google.prompt();
+    gsiReady.current = true;
+  }, [completeGoogleSignIn, googleClientId, locale]);
+
   useEffect(() => {
-    if (googleMode !== "gis" || !googleClientId || !googleButtonRef.current) {
-      return;
-    }
-
-    const mountGoogleButton = () => {
-      const google = window.google?.accounts?.id;
-      const container = googleButtonRef.current;
-      if (!google || !container || gsiInitialized.current) return;
-
-      container.innerHTML = "";
-      google.initialize({
-        client_id: googleClientId,
-        callback: (response) => {
-          void completeGoogleSignIn(response.credential);
-        },
-      });
-      google.renderButton(container, {
-        theme: "outline",
-        size: "large",
-        width: container.offsetWidth || 320,
-        text: "continue_with",
-        locale,
-      });
-      gsiInitialized.current = true;
-    };
+    if (!googleClientId) return;
 
     if (window.google?.accounts?.id) {
-      mountGoogleButton();
+      mountGoogleSignIn();
       return;
     }
 
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[src="https://accounts.google.com/gsi/client"]',
-    );
-    const script = existing ?? document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = mountGoogleButton;
-
-    if (!existing) {
+    const scriptId = "google-gsi-script";
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
       document.body.appendChild(script);
     }
 
+    script.addEventListener("load", mountGoogleSignIn);
     return () => {
-      gsiInitialized.current = false;
+      script?.removeEventListener("load", mountGoogleSignIn);
+      gsiReady.current = false;
     };
-  }, [completeGoogleSignIn, googleClientId, googleMode, locale]);
+  }, [googleClientId, mountGoogleSignIn]);
+
+  const handleGoogleRedirect = async () => {
+    setError(null);
+    setGoogleLoading(true);
+
+    try {
+      await signIn("google", { callbackUrl: `${window.location.origin}/` });
+    } catch {
+      setError(t.authErrorSignIn);
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleClick = async () => {
+    if (googleMode === "oauth") {
+      await handleGoogleRedirect();
+      return;
+    }
+
+    if (!googleClientId) {
+      setError(t.authGoogleUnavailable);
+    }
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!name.trim()) {
-      setError(t.authErrorName);
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       setError(t.authErrorEmail);
       return;
     }
@@ -202,8 +214,8 @@ export function LoginScreen() {
     setLoading(true);
     try {
       const result = await signIn("credentials", {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
+        name: deriveNameFromEmail(normalizedEmail),
+        email: normalizedEmail,
         redirect: false,
         callbackUrl: "/",
       });
@@ -225,22 +237,8 @@ export function LoginScreen() {
     }
   };
 
-  const handleGoogleOAuth = async () => {
-    setError(null);
-
-    if (googleMode !== "oauth") {
-      setError(t.authGoogleUnavailable);
-      return;
-    }
-
-    setGoogleLoading(true);
-    try {
-      await signIn("google", { callbackUrl: `${window.location.origin}/` });
-    } catch {
-      setError(t.authErrorSignIn);
-      setGoogleLoading(false);
-    }
-  };
+  const showOfficialGoogleButton = Boolean(googleClientId);
+  const showFallbackGoogleButton = !showOfficialGoogleButton;
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -310,63 +308,59 @@ export function LoginScreen() {
               <h2 className="mb-1 text-lg font-semibold text-zinc-900">
                 {t.authSubmit}
               </h2>
-              <p className="mb-6 text-sm text-zinc-500">{t.authUpdates}</p>
+              <p className="mb-6 text-sm text-zinc-500">{t.authGoogleHint}</p>
 
-            {googleMode !== "none" && (
-              <>
-              {googleMode === "gis" ? (
-                <div className="space-y-2">
+              <div className="space-y-2">
+                {showOfficialGoogleButton && (
                   <div
                     ref={googleButtonRef}
-                    className="flex min-h-[44px] w-full justify-center [&>div]:!w-full"
+                    className="flex min-h-[44px] w-full justify-center overflow-hidden [&>div]:!w-full"
                   />
-                  {googleLoading && (
-                    <p className="text-center text-xs text-zinc-500">
-                      {t.authLoading}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleGoogleOAuth}
-                  disabled={googleLoading || loading}
-                  className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <GoogleIcon />
-                  {googleLoading ? t.authLoading : t.authGoogle}
-                </button>
-              )}
+                )}
+
+                {showFallbackGoogleButton && (
+                  <button
+                    type="button"
+                    onClick={handleGoogleClick}
+                    disabled={googleLoading || loading}
+                    className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden>
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      />
+                    </svg>
+                    {googleLoading ? t.authLoading : t.authGoogle}
+                  </button>
+                )}
+
+                {googleLoading && (
+                  <p className="text-center text-xs text-zinc-500">
+                    {t.authLoading}
+                  </p>
+                )}
+              </div>
 
               <div className="my-6 flex items-center gap-3">
                 <div className="h-px flex-1 bg-zinc-200" />
-                <span className="text-xs text-zinc-400">or</span>
+                <span className="text-xs text-zinc-400">{t.authEmailOr}</span>
                 <div className="h-px flex-1 bg-zinc-200" />
               </div>
-              </>
-            )}
 
-            {googleMode === "none" && (
-              <div className="my-6 flex items-center gap-3">
-                <div className="h-px flex-1 bg-zinc-200" />
-              </div>
-            )}
-
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
-                <div>
-                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
-                    <User className="h-3 w-3" />
-                    {t.authName}
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="input-field"
-                    placeholder={t.authName}
-                  />
-                </div>
-
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div>
                   <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
                     <Mail className="h-3 w-3" />
@@ -377,7 +371,8 @@ export function LoginScreen() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="input-field"
-                    placeholder="you@email.com"
+                    placeholder="you@gmail.com"
+                    autoComplete="email"
                   />
                 </div>
 
@@ -388,7 +383,7 @@ export function LoginScreen() {
                   disabled={loading || googleLoading}
                   className="btn-cinema flex w-full items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium disabled:opacity-60"
                 >
-                  {loading ? t.authLoading : t.authSubmit}
+                  {loading ? t.authLoading : t.authEmailSubmit}
                   {!loading && <ArrowRight className="h-4 w-4" />}
                 </button>
               </form>

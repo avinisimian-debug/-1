@@ -13,6 +13,9 @@ export interface Translations {
   authEmail: string;
   authSubmit: string;
   authGoogle: string;
+  authGoogleHint: string;
+  authEmailOr: string;
+  authEmailSubmit: string;
   authUpdates: string;
   authSocialProof: string;
   authFeature1: string;
@@ -270,6 +273,9 @@ const en: Translations = {
   authEmail: "Email for updates",
   authSubmit: "Get started free",
   authGoogle: "Continue with Google",
+  authGoogleHint: "Sign in with your Google account — fast and secure.",
+  authEmailOr: "or",
+  authEmailSubmit: "Continue with email",
   authUpdates: "We'll send product updates & tips. Unsubscribe anytime.",
   authSocialProof: "Trusted by creators, teams & studios worldwide",
   authFeature1: "AI transcription in seconds",
@@ -515,6 +521,9 @@ const he: Translations = {
   authEmail: "אימייל לעדכונים",
   authSubmit: "התחל בחינם",
   authGoogle: "המשך עם Google",
+  authGoogleHint: "התחבר עם חשבון Google שלך — מהיר ומאובטח.",
+  authEmailOr: "או",
+  authEmailSubmit: "המשך עם אימייל",
   authUpdates: "נשלח עדכונים וטיפים. אפשר לבטל בכל עת.",
   authSocialProof: "בשימוש יוצרים, צוותים ואולפנים ברחבי העולם",
   authFeature1: "תמלול AI תוך שניות",

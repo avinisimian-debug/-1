@@ -11,6 +11,6 @@ export async function GET() {
   return NextResponse.json({
     google: mode !== "none",
     mode,
-    clientId: mode === "gis" ? clientId : undefined,
+    clientId: clientId ?? undefined,
   });
 }
