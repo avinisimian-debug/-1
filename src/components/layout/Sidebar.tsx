@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import {
   Crown,
   History,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Settings,
@@ -90,19 +91,34 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
         })}
 
         {session?.user?.isAdmin && (
-          <Link
-            href="/admin/users"
-            onClick={onNavigate}
-            className={cn(
-              "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              pathname.startsWith("/admin")
-                ? "bg-zinc-100 text-zinc-900"
-                : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
-            )}
-          >
-            <Users className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600" />
-            {t.navUsers}
-          </Link>
+          <>
+            <Link
+              href="/admin/users"
+              onClick={onNavigate}
+              className={cn(
+                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                pathname === "/admin/users"
+                  ? "bg-zinc-100 text-zinc-900"
+                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
+              )}
+            >
+              <Users className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600" />
+              {t.navUsers}
+            </Link>
+            <Link
+              href="/admin/auth-setup"
+              onClick={onNavigate}
+              className={cn(
+                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                pathname === "/admin/auth-setup"
+                  ? "bg-zinc-100 text-zinc-900"
+                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
+              )}
+            >
+              <KeyRound className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600" />
+              Google Setup
+            </Link>
+          </>
         )}
       </nav>
 

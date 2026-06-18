@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
-import { getGoogleClientId } from "@/lib/auth-oauth";
+import { resolveGoogleClientId } from "@/lib/auth-oauth";
 
 export interface VerifiedGoogleUser {
   id: string;
@@ -11,7 +11,7 @@ export interface VerifiedGoogleUser {
 export async function verifyGoogleIdToken(
   credential: string,
 ): Promise<VerifiedGoogleUser | null> {
-  const clientId = getGoogleClientId();
+  const clientId = await resolveGoogleClientId();
   if (!clientId) return null;
 
   try {

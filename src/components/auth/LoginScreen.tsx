@@ -312,6 +312,8 @@ export function LoginScreen() {
               </h2>
               <p className="mb-6 text-sm text-zinc-500">{t.authUpdates}</p>
 
+            {googleMode !== "none" && (
+              <>
               {googleMode === "gis" ? (
                 <div className="space-y-2">
                   <div
@@ -328,7 +330,7 @@ export function LoginScreen() {
                 <button
                   type="button"
                   onClick={handleGoogleOAuth}
-                  disabled={googleLoading || loading || googleMode === "none"}
+                  disabled={googleLoading || loading}
                   className="flex w-full items-center justify-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <GoogleIcon />
@@ -341,8 +343,16 @@ export function LoginScreen() {
                 <span className="text-xs text-zinc-400">or</span>
                 <div className="h-px flex-1 bg-zinc-200" />
               </div>
+              </>
+            )}
 
-              <form onSubmit={handleEmailSubmit} className="space-y-4">
+            {googleMode === "none" && (
+              <div className="my-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-zinc-200" />
+              </div>
+            )}
+
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div>
                   <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600">
                     <User className="h-3 w-3" />
