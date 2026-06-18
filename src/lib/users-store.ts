@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
+import { isProGranted } from "@/lib/pro-grants";
 
 export interface StoredUser {
   id: string;
@@ -57,18 +58,25 @@ export async function registerOrUpdateUser(input: {
     existing.name = input.name;
     existing.lastLoginAt = now;
     existing.provider = input.provider;
+    if (await isProGranted(email)) {
+      existing.plan = "pro";
+      existing.paidAt = existing.paidAt ?? now;
+    }
     await writeUsers(users);
     return existing;
   }
+
+  const grantedPro = await isProGranted(email);
 
   const user: StoredUser = {
     id: email,
     name: input.name,
     email,
     provider: input.provider,
-    plan: "free",
+    plan: grantedPro ? "pro" : "free",
     registeredAt: now,
     lastLoginAt: now,
+    ...(grantedPro ? { paidAt: now } : {}),
   };
 
   users.unshift(user);
@@ -92,8 +100,13 @@ export async function getUserCount(): Promise<number> {
 export async function getUserPlan(
   email: string,
 ): Promise<"free" | "pro"> {
+  const normalized = email.toLowerCase();
+  if (await isProGranted(normalized)) {
+    return "pro";
+  }
+
   const users = await readUsers();
-  const user = users.find((u) => u.email === email.toLowerCase());
+  const user = users.find((u) => u.email === normalized);
   return user?.plan ?? "free";
 }
 
