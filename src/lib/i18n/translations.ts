@@ -184,8 +184,18 @@ export interface Translations {
   adminProvider: string;
   adminRegistered: string;
   adminLastLogin: string;
+  adminPlan: string;
+  adminProCount: string;
+  adminCopyEmails: string;
+  adminExportCsv: string;
+  adminMailAll: string;
+  adminRefresh: string;
+  adminFilterAll: string;
+  adminFilterPro: string;
+  adminFilterFree: string;
   adminNoAccess: string;
   adminEmpty: string;
+  adminEmailsCopied: string;
   // PayPal
   paypalTitle: string;
   paypalDesc: string;
@@ -464,8 +474,18 @@ const en: Translations = {
   adminProvider: "Sign-in method",
   adminRegistered: "Registered",
   adminLastLogin: "Last login",
+  adminPlan: "Plan",
+  adminProCount: "Pro subscribers",
+  adminCopyEmails: "Copy all emails",
+  adminExportCsv: "Export CSV",
+  adminMailAll: "Email all users",
+  adminRefresh: "Refresh",
+  adminFilterAll: "All",
+  adminFilterPro: "Pro",
+  adminFilterFree: "Free",
   adminNoAccess: "You don't have permission to view this page.",
   adminEmpty: "No users registered yet.",
+  adminEmailsCopied: "Emails copied to clipboard",
   paypalTitle: "Upgrade with PayPal",
   paypalDesc: "Secure payment — unlock Pro instantly",
   paypalPay: "Pay $14.90/month with PayPal",
@@ -738,8 +758,18 @@ const he: Translations = {
   adminProvider: "שיטת התחברות",
   adminRegistered: "תאריך הרשמה",
   adminLastLogin: "כניסה אחרונה",
+  adminPlan: "חבילה",
+  adminProCount: "מנויי Pro",
+  adminCopyEmails: "העתק כל המיילים",
+  adminExportCsv: "ייצוא CSV",
+  adminMailAll: "שלח מייל לכולם",
+  adminRefresh: "רענון",
+  adminFilterAll: "הכל",
+  adminFilterPro: "Pro",
+  adminFilterFree: "חינם",
   adminNoAccess: "אין לך הרשאה לצפות בדף זה.",
   adminEmpty: "עדיין אין משתמשים רשומים.",
+  adminEmailsCopied: "המיילים הועתקו ללוח",
   paypalTitle: "שדרוג עם PayPal",
   paypalDesc: "תשלום מאובטח — Pro מופעל מיד",
   paypalPay: "שלם $14.90/חודש עם PayPal",
