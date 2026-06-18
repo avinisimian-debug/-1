@@ -17,7 +17,18 @@ export interface Translations {
   authEmailOr: string;
   authEmailSubmit: string;
   authCardTitle: string;
+  authCardSubtitle: string;
   authFreeBadge: string;
+  authBenefit1: string;
+  authBenefit2: string;
+  authBenefit3: string;
+  authHowTitle: string;
+  authHowStep1Title: string;
+  authHowStep1Desc: string;
+  authHowStep2Title: string;
+  authHowStep2Desc: string;
+  authHowStep3Title: string;
+  authHowStep3Desc: string;
   authUpdates: string;
   authSocialProof: string;
   authFeature1: string;
@@ -279,7 +290,18 @@ const en: Translations = {
   authEmailOr: "or",
   authEmailSubmit: "Continue with email",
   authCardTitle: "Get started free",
+  authCardSubtitle: "Create your free account in 30 seconds — name and email only.",
   authFreeBadge: "No credit card required",
+  authBenefit1: "3 free transcriptions every month",
+  authBenefit2: "PDF reports & action items included",
+  authBenefit3: "Hebrew, English & 5+ languages",
+  authHowTitle: "How it works",
+  authHowStep1Title: "Upload",
+  authHowStep1Desc: "Drop a meeting recording or interview",
+  authHowStep2Title: "AI analyzes",
+  authHowStep2Desc: "Transcript, summary & tasks in minutes",
+  authHowStep3Title: "Share & act",
+  authHowStep3Desc: "Export PDF or copy the executive summary",
   authUpdates: "We'll send product updates & tips only. Unsubscribe anytime.",
   authSocialProof: "Trusted by creators, teams & studios worldwide",
   authFeature1: "AI transcription in seconds",
@@ -529,7 +551,18 @@ const he: Translations = {
   authEmailOr: "או",
   authEmailSubmit: "המשיכו עם אימייל",
   authCardTitle: "התחילו בחינם",
-  authFreeBadge: "ללא כרטיס אשראי",
+  authCardSubtitle: "צרו חשבון חינמי תוך שניות — רק שם ואימייל.",
+  authFreeBadge: "ללא צורך בכרטיס אשראי",
+  authBenefit1: "3 תמלולים חינם בכל חודש",
+  authBenefit2: "דוחות PDF ומשימות כלולים",
+  authBenefit3: "עברית, אנגלית ועוד שפות",
+  authHowTitle: "איך זה עובד",
+  authHowStep1Title: "העלאה",
+  authHowStep1Desc: "גררו הקלטת פגישה או ראיון",
+  authHowStep2Title: "עיבוד AI",
+  authHowStep2Desc: "תמלול, סיכום ומשימות תוך דקות",
+  authHowStep3Title: "שיתוף ופעולה",
+  authHowStep3Desc: "ייצוא PDF או העתקת סיכום מנהלים",
   authUpdates: "נשלח עדכונים וטיפים בלבד. אפשר לבטל בכל עת.",
   authSocialProof: "נבחר על ידי יוצרים, צוותים ואולפנים ברחבי העולם",
   authFeature1: "תמלול AI תוך שניות",
