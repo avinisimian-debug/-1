@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { FileCheck, Sparkles, UserPlus, Zap } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { LIVE_ACTIVITY_EVENTS, type LiveActivityEvent } from "@/lib/trust-data";
@@ -36,6 +37,7 @@ function formatTimeAgo(minutes: number, t: ReturnType<typeof useLocale>["t"]): s
 
 export function LiveActivityToast() {
   const { t } = useLocale();
+  const { status } = useSession();
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -62,7 +64,7 @@ export function LiveActivityToast() {
     return () => clearInterval(cycle);
   }, [dismissed]);
 
-  if (dismissed) return null;
+  if (dismissed || status !== "authenticated") return null;
 
   return (
     <div

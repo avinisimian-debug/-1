@@ -16,6 +16,8 @@ export interface Translations {
   authGoogleHint: string;
   authEmailOr: string;
   authEmailSubmit: string;
+  authCardTitle: string;
+  authFreeBadge: string;
   authUpdates: string;
   authSocialProof: string;
   authFeature1: string;
@@ -266,21 +268,23 @@ export interface Translations {
 
 const en: Translations = {
   authTagline: "Studio-Grade AI",
-  authTitle: "Turn every meeting into action",
+  authTitle: "Turn every meeting into results",
   authSubtitle:
-    "Professional transcription, summaries & action items — built for your daily workflow.",
+    "Accurate AI transcription, executive summaries, and action items — all in one place. Start free in seconds.",
   authName: "Your name",
-  authEmail: "Email for updates",
+  authEmail: "Email address",
   authSubmit: "Get started free",
   authGoogle: "Continue with Google",
-  authGoogleHint: "Sign in with your Google account — fast and secure.",
+  authGoogleHint: "Quick sign-in with your Google account",
   authEmailOr: "or",
   authEmailSubmit: "Continue with email",
-  authUpdates: "We'll send product updates & tips. Unsubscribe anytime.",
+  authCardTitle: "Get started free",
+  authFreeBadge: "No credit card required",
+  authUpdates: "We'll send product updates & tips only. Unsubscribe anytime.",
   authSocialProof: "Trusted by creators, teams & studios worldwide",
   authFeature1: "AI transcription in seconds",
   authFeature2: "Executive summaries & action items",
-  authFeature3: "Long videos up to 3+ hours (Pro)",
+  authFeature3: "Long files up to 3+ hours",
   authStat1: "50K+ sessions",
   authStat2: "98% accuracy",
   authStat3: "4.9★ rating",
@@ -514,21 +518,23 @@ const en: Translations = {
 
 const he: Translations = {
   authTagline: "בינה מלאכותית ברמת אולפן",
-  authTitle: "הפוך כל פגישה לפעולה",
+  authTitle: "הפכו כל פגישה לתוצאות",
   authSubtitle:
-    "תמלול מקצועי, סיכומים ומשימות — נבנה לעבודה היומיומית שלך.",
+    "תמלול מדויק, סיכומי מנהלים ומשימות — הכל במקום אחד. התחילו בחינם תוך שניות.",
   authName: "השם שלך",
-  authEmail: "אימייל לעדכונים",
+  authEmail: "כתובת אימייל",
   authSubmit: "התחל בחינם",
   authGoogle: "המשך עם Google",
-  authGoogleHint: "התחבר עם חשבון Google שלך — מהיר ומאובטח.",
+  authGoogleHint: "התחברות מהירה עם חשבון Google שלך",
   authEmailOr: "או",
   authEmailSubmit: "המשך עם אימייל",
-  authUpdates: "נשלח עדכונים וטיפים. אפשר לבטל בכל עת.",
+  authCardTitle: "התחילו בחינם",
+  authFreeBadge: "ללא כרטיס אשראי",
+  authUpdates: "נשלח עדכונים וטיפים בלבד. אפשר לבטל בכל עת.",
   authSocialProof: "בשימוש יוצרים, צוותים ואולפנים ברחבי העולם",
   authFeature1: "תמלול AI תוך שניות",
   authFeature2: "סיכומים מנהלים ומשימות",
-  authFeature3: "סרטונים ארוכים עד 3+ שעות (Pro)",
+  authFeature3: "קבצים ארוכים עד 3+ שעות",
   authStat1: "50K+ סשנים",
   authStat2: "98% דיוק",
   authStat3: "דירוג 4.9★",

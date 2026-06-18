@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showTagline?: boolean;
+  tagline?: string;
   className?: string;
 }
 
@@ -36,9 +37,10 @@ export function LogoMark({
   );
 }
 
-export function Logo({ size = "md", showTagline = false, className }: LogoProps) {
+export function Logo({ size = "md", showTagline = false, className, tagline }: LogoProps) {
   const s = sizes[size];
   const width = Math.round(s.height * 3.6);
+  const displayTagline = tagline ?? (showTagline ? BRAND_TAGLINE : undefined);
 
   return (
     <div className={cn("flex flex-col items-start gap-1", className)}>
@@ -52,8 +54,8 @@ export function Logo({ size = "md", showTagline = false, className }: LogoProps)
         priority={size === "lg"}
         draggable={false}
       />
-      {showTagline && (
-        <p className={cn("font-medium text-zinc-500", s.tag)}>{BRAND_TAGLINE}</p>
+      {showTagline && displayTagline && (
+        <p className={cn("font-medium text-zinc-500", s.tag)}>{displayTagline}</p>
       )}
     </div>
   );
