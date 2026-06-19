@@ -138,7 +138,7 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         {!isPro && (
           <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-accent">
             <Lock className="h-3 w-3" />
-            <Link href="/settings" className="underline-offset-2 hover:underline">
+            <Link href="/settings#upgrade" className="underline-offset-2 hover:underline">
               {t.uploadUpgradeLink}
             </Link>
             {t.uploadUpgrade}

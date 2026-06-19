@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
   Crown,
@@ -20,6 +20,10 @@ import { usePlan } from "@/context/PlanContext";
 import { useUsage } from "@/hooks/useUsage";
 import { NAV_ITEMS } from "@/lib/constants";
 import type { Translations } from "@/lib/i18n/translations";
+import {
+  SETTINGS_UPGRADE_PATH,
+  scrollToUpgradeWithRetry,
+} from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
 
 const iconMap = {
@@ -35,6 +39,7 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate, className }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { limits, isPro } = usePlan();
   const { count, limit, percent } = useUsage();
   const { t } = useLocale();
@@ -50,10 +55,22 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
   const navLinkClass = (isActive: boolean) =>
     cn("nav-item", isActive && "nav-item-active");
 
+  const handleUpgrade = () => {
+    onNavigate?.();
+
+    if (pathname === "/settings") {
+      window.history.pushState(null, "", SETTINGS_UPGRADE_PATH);
+      scrollToUpgradeWithRetry();
+      return;
+    }
+
+    router.push(SETTINGS_UPGRADE_PATH);
+  };
+
   return (
     <aside
       className={cn(
-        "relative z-10 flex h-full w-[var(--sidebar-width)] flex-col border-r border-border bg-card/95 backdrop-blur-sm",
+        "relative z-10 flex h-full w-[var(--sidebar-width)] min-h-0 flex-col overflow-y-auto border-r border-border bg-card/95 backdrop-blur-sm",
         className,
       )}
     >
@@ -135,13 +152,13 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
             {count} / {limit} {t.planUsed}
           </p>
           {!isPro && (
-            <Link
-              href="/settings"
-              onClick={onNavigate}
-              className="btn-cinema mt-3 flex w-full items-center justify-center rounded-md px-3 py-2 text-xs font-medium"
+            <button
+              type="button"
+              onClick={handleUpgrade}
+              className="btn-cinema relative z-10 mt-3 flex w-full cursor-pointer items-center justify-center rounded-md px-3 py-2 text-xs font-medium"
             >
               {t.planUpgrade}
-            </Link>
+            </button>
           )}
         </div>
 

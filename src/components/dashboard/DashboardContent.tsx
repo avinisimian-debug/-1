@@ -186,7 +186,7 @@ export function DashboardContent() {
               {!canTranscribe && (
                 <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {t.dashUsageLimit}{" "}
-                  <Link href="/settings" className="font-medium underline">
+                  <Link href="/settings#upgrade" className="font-medium underline">
                     {t.planUpgrade}
                   </Link>
                 </div>

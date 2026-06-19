@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bell, CheckCircle2, CreditCard, Crown, Shield } from "lucide-react";
 import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
@@ -18,9 +19,11 @@ import {
   PRO_PLAN_REGULAR_PRICE_LABEL,
 } from "@/lib/constants";
 import { markStepComplete } from "@/lib/onboarding-store";
+import { scrollToUpgradeWithRetry } from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
+  const pathname = usePathname();
   const { t } = useLocale();
   const { plan, isPro, syncPlan } = usePlan();
   const { data: session } = useSession();
@@ -35,10 +38,21 @@ export default function SettingsPage() {
   }, [session?.user?.email]);
 
   useEffect(() => {
-    if (window.location.hash === "#upgrade") {
-      document.getElementById("upgrade")?.scrollIntoView({ behavior: "smooth" });
-    }
+    if (window.location.hash !== "#upgrade") return;
+    scrollToUpgradeWithRetry();
+  }, [pathname, isPro]);
 
+  useEffect(() => {
+    const onHashChange = () => {
+      if (window.location.hash === "#upgrade") {
+        scrollToUpgradeWithRetry();
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("subscription") === "cancel") {
@@ -73,9 +87,10 @@ export default function SettingsPage() {
     }
   }, [syncPlan, t.paypalCancelled, t.paypalError, t.paypalSuccess]);
 
-  const scrollToCheckout = () => {
-    document.getElementById("upgrade")?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToCheckout = useCallback(() => {
+    window.history.pushState(null, "", "/settings#upgrade");
+    scrollToUpgradeWithRetry();
+  }, []);
 
   return (
     <DashboardShell title={t.settingsTitle} description={t.settingsDesc}>
@@ -132,7 +147,7 @@ export default function SettingsPage() {
               </p>
             </div>
           ) : (
-            <div className="mt-8 space-y-4" id="upgrade" data-paypal-section>
+            <div className="mt-8 scroll-mt-24 space-y-4" id="upgrade" data-paypal-section>
               {isLaunchWeekActive() && (
                 <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-4">
                   <p className="text-sm font-semibold text-emerald-900">
