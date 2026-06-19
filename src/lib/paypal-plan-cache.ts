@@ -10,6 +10,8 @@ export interface CachedPayPalPlans {
   productId?: string;
   launchPlanId?: string;
   launchPlanTrialDays?: number;
+  /** Bumped when billing_cycles shape changes — forces a fresh PayPal plan. */
+  launchPlanSchemaVersion?: number;
   regularPlanId?: string;
 }
 

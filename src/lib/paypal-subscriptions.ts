@@ -16,6 +16,9 @@ import {
   PRO_PLAN_CURRENCY,
 } from "@/lib/paypal";
 
+/** PayPal allows at most 2 TRIAL cycles and 1 REGULAR cycle per plan. */
+const LAUNCH_PLAN_SCHEMA_VERSION = 2;
+
 class PayPalApiError extends Error {
   constructor(
     message: string,
@@ -115,11 +118,14 @@ async function createLaunchPlan(
         },
         {
           frequency: { interval_unit: "MONTH", interval_count: 1 },
-          tenure_type: "REGULAR",
+          tenure_type: "TRIAL",
           sequence: 2,
           total_cycles: 1,
           pricing_scheme: {
-            fixed_price: { value: PRO_PLAN_INTRO_PRICE, currency_code: PRO_PLAN_CURRENCY },
+            fixed_price: {
+              value: PRO_PLAN_INTRO_PRICE,
+              currency_code: PRO_PLAN_CURRENCY,
+            },
           },
         },
         {
@@ -128,7 +134,10 @@ async function createLaunchPlan(
           sequence: 3,
           total_cycles: 0,
           pricing_scheme: {
-            fixed_price: { value: PRO_PLAN_REGULAR_PRICE, currency_code: PRO_PLAN_CURRENCY },
+            fixed_price: {
+              value: PRO_PLAN_REGULAR_PRICE,
+              currency_code: PRO_PLAN_CURRENCY,
+            },
           },
         },
       ],
@@ -185,37 +194,44 @@ export async function getSubscriptionPlanId(): Promise<string> {
   }
 
   const launch = isLaunchWeekActive();
-
-  if (launch && process.env.PAYPAL_LAUNCH_PLAN_ID) {
-    return resolveActivePlanId(process.env.PAYPAL_LAUNCH_PLAN_ID);
-  }
-
-  if (!launch && process.env.PAYPAL_REGULAR_PLAN_ID) {
-    return resolveActivePlanId(process.env.PAYPAL_REGULAR_PLAN_ID);
-  }
-
   const cached = await readPayPalPlanCache();
   const productId = await ensureProductId(cached);
 
   if (launch) {
     const trialDays = getLaunchTrialDays();
     const needsNewPlan =
-      !cached.launchPlanId || cached.launchPlanTrialDays !== trialDays;
+      !cached.launchPlanId ||
+      cached.launchPlanTrialDays !== trialDays ||
+      cached.launchPlanSchemaVersion !== LAUNCH_PLAN_SCHEMA_VERSION;
 
     if (needsNewPlan) {
       cached.launchPlanId = await createLaunchPlan(productId, trialDays);
       cached.launchPlanTrialDays = trialDays;
+      cached.launchPlanSchemaVersion = LAUNCH_PLAN_SCHEMA_VERSION;
       await writePayPalPlanCache(cached);
     } else if (cached.launchPlanId) {
       await activateBillingPlan(cached.launchPlanId);
     }
 
-    return cached.launchPlanId!;
+    if (cached.launchPlanId) {
+      return cached.launchPlanId;
+    }
+
+    if (process.env.PAYPAL_LAUNCH_PLAN_ID) {
+      return resolveActivePlanId(process.env.PAYPAL_LAUNCH_PLAN_ID);
+    }
+
+    throw new Error("Failed to resolve launch subscription plan.");
   }
 
   if (!cached.regularPlanId) {
-    cached.regularPlanId = await createRegularPlan(productId);
-    await writePayPalPlanCache(cached);
+    if (process.env.PAYPAL_REGULAR_PLAN_ID) {
+      cached.regularPlanId = process.env.PAYPAL_REGULAR_PLAN_ID;
+      await writePayPalPlanCache(cached);
+    } else {
+      cached.regularPlanId = await createRegularPlan(productId);
+      await writePayPalPlanCache(cached);
+    }
   } else {
     await activateBillingPlan(cached.regularPlanId);
   }
