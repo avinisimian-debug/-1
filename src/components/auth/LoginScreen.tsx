@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useRef, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import {
@@ -16,11 +17,29 @@ import { Logo } from "@/components/brand/Logo";
 import { LoginLiveStats } from "@/components/auth/LoginLiveStats";
 import { LoginProductPreview } from "@/components/auth/LoginProductPreview";
 import { SaleCountdown } from "@/components/billing/SaleCountdown";
-import { PricingTable } from "@/components/billing/PricingTable";
-import { TrustSection } from "@/components/trust/TrustSection";
 import { useLocale } from "@/context/LocaleContext";
 import type { Locale } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils";
+
+const PricingTable = dynamic(
+  () =>
+    import("@/components/billing/PricingTable").then((m) => ({
+      default: m.PricingTable,
+    })),
+  {
+    loading: () => (
+      <div className="skeleton-shimmer h-96 rounded-2xl border border-border" />
+    ),
+  },
+);
+
+const TrustSection = dynamic(
+  () =>
+    import("@/components/trust/TrustSection").then((m) => ({
+      default: m.TrustSection,
+    })),
+  { loading: () => <div className="skeleton-shimmer h-32 rounded-xl" /> },
+);
 
 export function LoginScreen() {
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
@@ -108,17 +127,12 @@ export function LoginScreen() {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-zinc-50">
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute -start-24 top-0 h-96 w-96 rounded-full bg-indigo-200/40 blur-3xl" />
-        <div className="absolute -end-16 top-1/3 h-80 w-80 rounded-full bg-sky-200/35 blur-3xl" />
-        <div className="absolute bottom-0 start-1/3 h-72 w-72 rounded-full bg-violet-100/50 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.04)_1px,transparent_0)] [background-size:24px_24px]" />
-      </div>
+    <div className="mesh-bg relative min-h-screen overflow-hidden">
+      <div className="dot-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden />
 
       <div className="absolute end-4 top-4 z-20 sm:end-8 sm:top-8">
-        <label className="flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/90 px-3 py-1.5 text-sm text-zinc-600 shadow-sm backdrop-blur-sm">
-          <Globe className="h-4 w-4 text-zinc-400" aria-hidden />
+        <label className="flex items-center gap-2 rounded-full border border-border/80 bg-card/90 px-3 py-1.5 text-sm text-muted-foreground shadow-sm backdrop-blur-sm">
+          <Globe className="h-4 w-4 text-muted-foreground" aria-hidden />
           <select
             value={locale}
             onChange={(e) => setLocale(e.target.value as Locale)}
@@ -135,43 +149,48 @@ export function LoginScreen() {
       </div>
 
       <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16 lg:px-8">
-        <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <div className="animate-fade-in-up mb-8 grid gap-4 lg:grid-cols-2">
           <SaleCountdown />
-          <div className="flex items-center rounded-2xl border border-zinc-200/80 bg-white/90 px-5 py-4 shadow-sm">
+          <div className="glass-card flex items-center rounded-2xl px-5 py-4">
             <LoginLiveStats />
           </div>
         </div>
 
         <div className="flex min-h-[calc(100vh-6rem)] flex-col items-center justify-center gap-12 lg:flex-row lg:items-start lg:gap-14 xl:gap-20">
           <div className="w-full max-w-xl text-center lg:max-w-none lg:flex-1 lg:pt-4 lg:text-start">
-            <div className="mb-8 flex justify-center lg:hidden">
+            <div className="animate-fade-in-up mb-8 flex justify-center lg:hidden">
               <Logo size="lg" />
             </div>
 
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-white/80 px-4 py-1.5 text-xs font-medium text-indigo-700 shadow-sm backdrop-blur-sm">
+            <div className="animate-fade-in-up animate-fade-in-up-delay-1 badge-accent mb-6">
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
               {t.authTagline}
             </div>
 
-            <h1 className="text-4xl font-semibold leading-[1.15] tracking-tight text-zinc-900 sm:text-5xl lg:text-[3.25rem]">
+            <h1 className="animate-fade-in-up animate-fade-in-up-delay-2 text-balance text-4xl font-semibold leading-[1.12] tracking-tight text-foreground sm:text-5xl lg:text-[3.35rem]">
               {t.authTitle}
             </h1>
 
-            <p className="mt-5 text-lg leading-relaxed text-zinc-600 sm:text-xl">
+            <p className="animate-fade-in-up animate-fade-in-up-delay-3 mt-5 text-pretty text-lg leading-relaxed text-muted-foreground sm:text-xl">
               {t.authSubtitle}
             </p>
 
-            <div className="mt-8 hidden lg:block">
+            <div className="animate-fade-in-up animate-fade-in-up-delay-4 mt-8 hidden lg:block">
               <LoginProductPreview />
             </div>
 
             <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4 lg:mt-10">
-              {stats.map((stat) => (
+              {stats.map((stat, i) => (
                 <div
                   key={stat}
-                  className="rounded-xl border border-zinc-200/80 bg-white/70 px-3 py-3 text-center shadow-sm backdrop-blur-sm sm:px-4 sm:py-4"
+                  className={cn(
+                    "stat-pill px-3 py-3 text-center sm:px-4 sm:py-4",
+                    "animate-fade-in-up",
+                    i === 1 && "animate-fade-in-up-delay-1",
+                    i === 2 && "animate-fade-in-up-delay-2",
+                  )}
                 >
-                  <p className="text-sm font-semibold text-zinc-900 sm:text-base">
+                  <p className="text-sm font-semibold text-foreground sm:text-base">
                     {stat}
                   </p>
                 </div>
@@ -182,15 +201,15 @@ export function LoginScreen() {
               {features.map(({ icon: Icon, text }) => (
                 <div
                   key={text}
-                  className="flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/80 px-3.5 py-2 text-xs font-medium text-zinc-700 shadow-sm backdrop-blur-sm sm:text-sm"
+                  className="flex items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3.5 py-2 text-xs font-medium text-foreground shadow-xs backdrop-blur-sm sm:text-sm"
                 >
-                  <Icon className="h-3.5 w-3.5 shrink-0 text-indigo-600" aria-hidden />
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
                   {text}
                 </div>
               ))}
             </div>
 
-            <p className="mt-8 hidden text-sm text-zinc-500 lg:block">
+            <p className="mt-8 hidden text-sm text-muted-foreground lg:block">
               {t.authSocialProof}
             </p>
           </div>
@@ -198,15 +217,15 @@ export function LoginScreen() {
           <div
             ref={signupRef}
             id="signup-form"
-            className="w-full max-w-md shrink-0 scroll-mt-24 lg:max-w-[26rem] lg:sticky lg:top-8"
+            className="animate-fade-in-up animate-fade-in-up-delay-2 w-full max-w-md shrink-0 scroll-mt-24 lg:sticky lg:top-8 lg:max-w-[26rem]"
           >
-            <div className="rounded-2xl border border-zinc-200/80 bg-white p-8 shadow-xl shadow-zinc-900/8 sm:p-9">
-              <div className="mb-8 hidden lg:block">
+            <div className="premium-signup-card p-8 sm:p-9">
+              <div className="relative mb-8 hidden lg:block">
                 <Logo size="md" showTagline tagline={t.authTagline} />
               </div>
 
-              <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                <h2 className="text-xl font-semibold text-zinc-900">
+              <div className="relative mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <h2 className="text-xl font-semibold text-foreground">
                   {t.authCardTitle}
                 </h2>
                 <span className="inline-flex w-fit shrink-0 whitespace-nowrap rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200/80">
@@ -214,15 +233,15 @@ export function LoginScreen() {
                 </span>
               </div>
 
-              <p className="mb-5 text-sm leading-relaxed text-zinc-500">
+              <p className="relative mb-5 text-sm leading-relaxed text-muted-foreground">
                 {t.authCardSubtitle}
               </p>
 
-              <ul className="mb-6 space-y-2.5">
+              <ul className="relative mb-6 space-y-2.5">
                 {benefits.map((benefit) => (
                   <li
                     key={benefit}
-                    className="flex items-start gap-2 text-sm text-zinc-700"
+                    className="flex items-start gap-2 text-sm text-foreground/90"
                   >
                     <CheckCircle2
                       className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600"
@@ -233,11 +252,11 @@ export function LoginScreen() {
                 ))}
               </ul>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="relative space-y-4">
                 <div>
                   <label
                     htmlFor="login-name"
-                    className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600"
+                    className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
                   >
                     <User className="h-3 w-3" aria-hidden />
                     {t.authName}
@@ -256,7 +275,7 @@ export function LoginScreen() {
                 <div>
                   <label
                     htmlFor="login-email"
-                    className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-zinc-600"
+                    className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
                   >
                     <Mail className="h-3 w-3" aria-hidden />
                     {t.authEmail}
@@ -300,7 +319,7 @@ export function LoginScreen() {
                   )}
                 </button>
 
-                <p className="text-center text-[11px] leading-relaxed text-zinc-400">
+                <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
                   {t.authUpdates}
                 </p>
               </form>
@@ -309,29 +328,31 @@ export function LoginScreen() {
         </div>
 
         <section className="mt-20">
-          <h2 className="mb-8 text-center text-2xl font-semibold text-zinc-900">
+          <h2 className="mb-8 text-center text-2xl font-semibold tracking-tight text-foreground">
             {t.authHowTitle}
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
             {howSteps.map(({ icon: Icon, title, desc }, index) => (
               <div
                 key={title}
-                className="relative rounded-2xl border border-zinc-200/80 bg-white/90 p-6 shadow-sm"
+                className="glass-card glass-card-hover rounded-2xl p-6"
               >
-                <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-700">
+                <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-accent-muted text-sm font-bold text-accent">
                   {index + 1}
                 </span>
                 <div className="mb-2 flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-indigo-600" aria-hidden />
-                  <h3 className="font-semibold text-zinc-900">{title}</h3>
+                  <Icon className="h-4 w-4 text-accent" aria-hidden />
+                  <h3 className="font-semibold text-foreground">{title}</h3>
                 </div>
-                <p className="text-sm leading-relaxed text-zinc-500">{desc}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {desc}
+                </p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mt-20 rounded-2xl border border-zinc-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-sm sm:p-10">
+        <section className="mt-20 glass-card rounded-2xl p-6 sm:p-10">
           <PricingTable
             currentPlan="free"
             landing
@@ -339,7 +360,7 @@ export function LoginScreen() {
           />
         </section>
 
-        <div className="mt-16 border-t border-zinc-200/80 pt-12">
+        <div className="mt-16 border-t border-border/80 pt-12">
           <TrustSection variant="landing" />
         </div>
       </div>

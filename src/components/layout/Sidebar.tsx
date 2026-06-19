@@ -47,14 +47,17 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
     .slice(0, 2)
     .toUpperCase() ?? "SA";
 
+  const navLinkClass = (isActive: boolean) =>
+    cn("nav-item", isActive && "nav-item-active");
+
   return (
     <aside
       className={cn(
-        "relative z-10 flex h-full w-64 flex-col border-r border-zinc-200 bg-white",
+        "relative z-10 flex h-full w-[var(--sidebar-width)] flex-col border-r border-border bg-card/95 backdrop-blur-sm",
         className,
       )}
     >
-      <div className="border-b border-zinc-200 px-5 py-5">
+      <div className="border-b border-border px-5 py-5">
         <Logo size="md" showTagline />
       </div>
 
@@ -72,17 +75,12 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={cn(
-                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
-              )}
+              className={navLinkClass(isActive)}
             >
               <Icon
                 className={cn(
-                  "h-4 w-4",
-                  isActive ? "text-zinc-900" : "text-zinc-400 group-hover:text-zinc-600",
+                  "h-4 w-4 shrink-0",
+                  isActive ? "text-accent" : "text-muted-foreground",
                 )}
               />
               {label}
@@ -95,27 +93,17 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
             <Link
               href="/admin/users"
               onClick={onNavigate}
-              className={cn(
-                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                pathname === "/admin/users"
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
-              )}
+              className={navLinkClass(pathname === "/admin/users")}
             >
-              <Users className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600" />
+              <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
               {t.navUsers}
             </Link>
             <Link
               href="/admin/auth-setup"
               onClick={onNavigate}
-              className={cn(
-                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                pathname === "/admin/auth-setup"
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
-              )}
+              className={navLinkClass(pathname === "/admin/auth-setup")}
             >
-              <KeyRound className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600" />
+              <KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" />
               Google Setup
             </Link>
           </>
@@ -126,24 +114,24 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
         <TrustSection variant="sidebar" />
       </div>
 
-      <div className="space-y-3 border-t border-zinc-200 p-4">
-        <div className="rounded-md border border-zinc-200 bg-zinc-50 p-4">
+      <div className="space-y-3 border-t border-border p-4">
+        <div className="premium-card rounded-lg p-4">
           <div className="flex items-center gap-2">
-            {isPro && <Crown className="h-3.5 w-3.5 text-indigo-600" />}
-            <p className="text-xs font-semibold text-zinc-800">
+            {isPro && <Crown className="h-3.5 w-3.5 text-accent" />}
+            <p className="text-xs font-semibold text-foreground">
               {isPro ? t.planPro : t.planFree}
             </p>
           </div>
-          <p className="mt-1.5 text-[11px] text-zinc-500">
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
             {limits.maxFileSizeLabel} · {limits.maxDurationLabel}
           </p>
-          <div className="mt-3 h-1 overflow-hidden rounded-full bg-zinc-200">
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-zinc-900 transition-all"
+              className="usage-bar-fill h-full"
               style={{ width: `${percent}%` }}
             />
           </div>
-          <p className="mt-1.5 text-[10px] text-zinc-500">
+          <p className="mt-1.5 text-[10px] text-muted-foreground">
             {count} / {limit} {t.planUsed}
           </p>
           {!isPro && (
@@ -158,15 +146,15 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
         </div>
 
         {session?.user && (
-          <div className="flex items-center gap-3 rounded-md border border-zinc-200 bg-white px-3 py-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-semibold text-white">
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2.5 shadow-xs">
+            <div className="avatar-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-zinc-800">
+              <p className="truncate text-xs font-medium text-foreground">
                 {session.user.name}
               </p>
-              <p className="truncate text-[10px] text-zinc-500">
+              <p className="truncate text-[10px] text-muted-foreground">
                 {session.user.email}
               </p>
             </div>
@@ -174,7 +162,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
               type="button"
               onClick={() => signOut()}
               aria-label={t.navSignOut}
-              className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <LogOut className="h-3.5 w-3.5" />
             </button>
@@ -198,15 +186,15 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
       <button
         type="button"
         aria-label="Close menu"
-        className="absolute inset-0 bg-zinc-900/20 backdrop-blur-sm"
+        className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="absolute inset-y-0 start-0 w-64 bg-white shadow-xl">
+      <div className="absolute inset-y-0 start-0 w-[var(--sidebar-width)] bg-card shadow-xl">
         <button
           type="button"
           aria-label="Close menu"
           onClick={onClose}
-          className="absolute end-3 top-4 z-10 rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100"
+          className="absolute end-3 top-4 z-10 rounded-md p-1.5 text-muted-foreground hover:bg-muted"
         >
           <X className="h-5 w-5" />
         </button>

@@ -86,11 +86,9 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         }}
         onClick={() => !disabled && inputRef.current?.click()}
         className={cn(
-          "group relative cursor-pointer overflow-hidden rounded-lg border-2 border-dashed p-10 text-center transition-all sm:p-14",
-          isDragging
-            ? "border-indigo-400 bg-indigo-50"
-            : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-white",
-          disabled && "pointer-events-none opacity-50",
+          "upload-zone group relative cursor-pointer overflow-hidden p-10 text-center sm:p-14",
+          isDragging && "upload-zone-dragging",
+          disabled && "upload-zone-disabled pointer-events-none opacity-50",
         )}
       >
         <input
@@ -106,14 +104,16 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
           }}
         />
 
-        <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-lg border border-zinc-200 bg-white shadow-sm transition-transform group-hover:scale-105">
-          <Upload className="h-7 w-7 text-zinc-400" />
+        <div className="upload-icon-wrap relative mx-auto mb-6 flex h-16 w-16 items-center justify-center">
+          <Upload className="h-7 w-7 text-accent" />
         </div>
 
-        <h2 className="relative text-xl font-semibold text-zinc-900">
+        <h2 className="relative text-xl font-semibold text-foreground">
           {t.uploadDrop}
         </h2>
-        <p className="relative mt-2 text-sm text-zinc-500">{t.uploadBrowse}</p>
+        <p className="relative mt-2 text-sm text-muted-foreground">
+          {t.uploadBrowse}
+        </p>
 
         <div className="relative mt-6 flex flex-wrap items-center justify-center gap-2">
           {[
@@ -122,21 +122,21 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
           ].map(({ icon: Icon, label }) => (
             <span
               key={label}
-              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-500"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-xs"
             >
-              <Icon className="h-3.5 w-3.5 text-zinc-400" />
+              <Icon className="h-3.5 w-3.5 text-accent/70" />
               {label}
             </span>
           ))}
         </div>
 
-        <p className="relative mt-5 text-xs text-zinc-400">
+        <p className="relative mt-5 text-xs text-muted-foreground">
           {t.uploadMax} {limits.maxFileSizeLabel}
           {isPro ? " · Pro" : " · Free"} · {limits.maxDurationLabel}
         </p>
 
         {!isPro && (
-          <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-indigo-600">
+          <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-accent">
             <Lock className="h-3 w-3" />
             <Link href="/settings" className="underline-offset-2 hover:underline">
               {t.uploadUpgradeLink}
@@ -158,11 +158,11 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
 
 export function SelectedFileBadge({ name, size }: { name: string; size: number }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-700 shadow-sm">
-      <FileAudio className="h-4 w-4 text-indigo-600" />
+    <div className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm text-foreground shadow-xs">
+      <FileAudio className="h-4 w-4 text-accent" />
       <span className="max-w-[200px] truncate">{name}</span>
-      <span className="text-zinc-300">·</span>
-      <span className="text-zinc-500">{formatFileSize(size)}</span>
+      <span className="text-border">·</span>
+      <span className="text-muted-foreground">{formatFileSize(size)}</span>
     </div>
   );
 }

@@ -92,7 +92,7 @@ export function DashboardContent() {
       )}
 
       {displayStatus === "idle" && (
-        <div className="mx-auto max-w-3xl space-y-6">
+        <div className="mx-auto max-w-4xl space-y-6">
           {onboarding.showOnboarding && onboarding.dismissed && (
             <OnboardingChecklist
               variant="card"
@@ -106,15 +106,15 @@ export function DashboardContent() {
             />
           )}
 
-          <section className="glass-card overflow-hidden rounded-lg">
-            <div className="border-b border-zinc-200 bg-white px-6 py-8 sm:px-10">
+          <section className="glass-card overflow-hidden rounded-xl">
+            <div className="border-b border-border bg-gradient-to-b from-card to-muted/30 px-6 py-8 sm:px-10">
               <div className="flex items-start gap-4">
                 <Logo size="md" />
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-2xl font-semibold leading-tight text-zinc-900 sm:text-3xl">
+                  <h2 className="text-balance text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl">
                     {t.dashHero}
                   </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-zinc-500 sm:text-base">
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
                     {t.dashHeroDesc}
                   </p>
                 </div>
@@ -123,9 +123,9 @@ export function DashboardContent() {
                 {features.map(({ icon: Icon, label }) => (
                   <span
                     key={label}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium text-zinc-600"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs"
                   >
-                    <Icon className="h-3.5 w-3.5 text-indigo-600" />
+                    <Icon className="h-3.5 w-3.5 text-accent" />
                     {label}
                   </span>
                 ))}
@@ -135,19 +135,19 @@ export function DashboardContent() {
             <div id="onboarding-upload-zone" className="px-4 py-6 sm:px-8 sm:py-8">
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-zinc-900">
+                  <h3 className="text-base font-semibold text-foreground">
                     {t.dashNewTranscription}
                   </h3>
-                  <p className="mt-0.5 text-xs text-zinc-500">{t.uploadBrowse}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t.uploadBrowse}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {hasFeature(plan, "languageSelect") ? (
                     <label className="flex items-center gap-2">
-                      <Globe className="h-3.5 w-3.5 text-zinc-400" />
+                      <Globe className="h-3.5 w-3.5 text-muted-foreground" />
                       <select
                         value={language}
                         onChange={(e) => setLanguage(e.target.value)}
-                        className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"
+                        className="rounded-md border border-border bg-card px-2 py-1.5 text-xs text-muted-foreground shadow-xs focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
                       >
                         {LANGUAGES.map((l) => (
                           <option key={l.code} value={l.code}>
@@ -160,11 +160,11 @@ export function DashboardContent() {
                     <button
                       type="button"
                       onClick={() => promptUpgrade("languageSelect")}
-                      className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-500 transition-colors hover:border-indigo-200 hover:bg-indigo-50/50"
+                      className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5 text-xs text-muted-foreground shadow-xs transition-colors hover:border-accent/30 hover:bg-accent-muted/50"
                     >
-                      <Globe className="h-3.5 w-3.5 text-zinc-400" />
+                      <Globe className="h-3.5 w-3.5 text-muted-foreground" />
                       {t.langAuto}
-                      <span className="rounded bg-zinc-100 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-zinc-500">
+                      <span className="rounded bg-muted px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">
                         Pro
                       </span>
                     </button>
@@ -172,8 +172,8 @@ export function DashboardContent() {
                   <span
                     className={
                       isPro
-                        ? "rounded-md border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-medium text-indigo-700"
-                        : "rounded-md border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-medium text-zinc-600"
+                        ? "rounded-md border border-accent/25 bg-accent-muted px-3 py-1 text-[11px] font-medium text-accent"
+                        : "rounded-md border border-border bg-muted px-3 py-1 text-[11px] font-medium text-muted-foreground"
                     }
                   >
                     {isPro
@@ -192,7 +192,7 @@ export function DashboardContent() {
                 </div>
               )}
 
-              <p className="mb-4 text-center text-[11px] text-zinc-400">
+              <p className="mb-4 text-center text-[11px] text-muted-foreground">
                 {t.dashUsageRemaining}: {limit - count} / {limit}
               </p>
 
@@ -203,15 +203,15 @@ export function DashboardContent() {
             </div>
           </section>
 
-          <div className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white px-5 py-4 shadow-sm">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-50">
-              <Upload className="h-3.5 w-3.5 text-indigo-600" />
+          <div className="glass-card flex items-start gap-3 rounded-xl px-5 py-4">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent-muted">
+              <Upload className="h-3.5 w-3.5 text-accent" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {t.dashProTip}
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+              <p className="mt-1 text-sm leading-relaxed text-foreground/80">
                 {t.dashProTipDesc}
               </p>
             </div>
