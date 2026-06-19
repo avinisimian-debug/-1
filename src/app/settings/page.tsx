@@ -8,7 +8,6 @@ import { PlanFeatureComparison } from "@/components/billing/PlanFeatureCompariso
 import { PricingTable } from "@/components/billing/PricingTable";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
 import { SaleCountdown } from "@/components/billing/SaleCountdown";
-import { StartProTrialButton } from "@/components/billing/StartProTrialButton";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
@@ -83,38 +82,43 @@ export default function SettingsPage() {
               {t.settingsProActive}
             </p>
           ) : (
-            <div className="mt-8 space-y-6" id="upgrade" data-paypal-section>
+            <div className="mt-8 space-y-4" id="upgrade" data-paypal-section>
               {isLaunchWeekActive() && (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-5">
-                  <h3 className="mb-2 text-sm font-semibold text-emerald-900">
+                <div className="mb-2 rounded-lg border border-emerald-200 bg-emerald-50/60 p-4">
+                  <p className="text-sm font-semibold text-emerald-900">
                     {t.trialTitle}
-                  </h3>
-                  <p className="mb-4 text-xs leading-relaxed text-emerald-800/80">
-                    {t.trialDesc}
                   </p>
-                  <StartProTrialButton onSuccess={syncPlan} />
+                  <p className="mt-1 text-xs leading-relaxed text-emerald-800/90">
+                    {t.trialDesc
+                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                  </p>
                 </div>
               )}
 
-              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-5">
+              <div className="rounded-lg border border-border bg-muted/30 p-5">
                 <div className="mb-4 flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-zinc-500" />
-                  <h3 className="text-sm font-semibold text-zinc-900">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="text-sm font-semibold text-foreground">
                     {isLaunchWeekActive() ? t.paypalSubscribeTitle : t.paypalTitle}
                   </h3>
                 </div>
-                <p className="mb-4 text-xs text-zinc-500">
+                <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
                   {(isLaunchWeekActive() ? t.paypalSubscribeDesc : t.paypalDesc)
                     .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
                     .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
                 </p>
                 <div className="mb-4">
                   <ProPlanPrice size="sm" showBadge />
-                  <p className="mt-1 text-xs text-zinc-500">PayPal</p>
+                  <p className="mt-1 text-xs text-muted-foreground">PayPal</p>
                 </div>
                 <PayPalCheckout onSuccess={syncPlan} />
-                <p className="mt-4 text-center text-[10px] text-zinc-400">
-                  {t.paypalSandboxNote}
+                <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">
+                  {isLaunchWeekActive()
+                    ? t.paypalAutoBillingNote
+                        .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                        .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)
+                    : t.paypalSandboxNote}
                 </p>
               </div>
             </div>

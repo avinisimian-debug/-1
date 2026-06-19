@@ -8,7 +8,7 @@ import {
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import { isLaunchWeekActive } from "@/lib/constants";
+import { isLaunchWeekActive, PRO_PLAN_INTRO_PRICE_LABEL, PRO_PLAN_REGULAR_PRICE_LABEL } from "@/lib/constants";
 
 interface PayPalCheckoutProps {
   onSuccess?: () => void;
@@ -114,8 +114,10 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
       />
 
       {launchWeek && (
-        <p className="mt-3 text-center text-[11px] leading-relaxed text-zinc-500">
-          {t.paypalAutoBillingNote}
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-muted-foreground">
+          {t.paypalAutoBillingNote
+            .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+            .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
         </p>
       )}
     </div>

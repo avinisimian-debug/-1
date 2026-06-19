@@ -208,14 +208,9 @@ export interface Translations {
   paypalSubscribeTitle: string;
   paypalSubscribeDesc: string;
   paypalAutoBillingNote: string;
-  // Trial
+  // Trial / launch Pro
   trialTitle: string;
   trialDesc: string;
-  trialStartCta: string;
-  trialSuccess: string;
-  trialError: string;
-  trialProcessing: string;
-  trialNote: string;
   // Sale / launch week
   saleBadge: string;
   saleTitle: string;
@@ -507,24 +502,19 @@ const en: Translations = {
   paypalError: "Payment failed. Please try again.",
   paypalNotConfigured: "PayPal is not configured yet. Add keys to .env.local",
   paypalSandboxNote: "Secure payment via PayPal",
-  paypalSubscribeTitle: "Auto-billing after free week",
+  paypalSubscribeTitle: "Start Pro free — auto-billing after launch week",
   paypalSubscribeDesc:
-    "Connect PayPal now — $0 today, then {intro} after 7 days, {regular}/mo from month 2.",
+    "Subscribe with PayPal — $0 until launch week ends, then {intro}/mo charged automatically, then {regular}/mo from month 2.",
   paypalAutoBillingNote:
-    "By subscribing you agree to automatic billing: free for 7 days, then $14.90, then $29.90/month.",
-  trialTitle: "Start Pro free for 7 days",
+    "You authorize PayPal to charge {intro} when launch week ends, then {regular}/month. Cancel anytime in PayPal.",
+  trialTitle: "Pro is free during launch week",
   trialDesc:
-    "No payment now. Full Pro access during launch week. Add PayPal below to continue automatically after the trial.",
-  trialStartCta: "Start Pro free — 7 days",
-  trialSuccess: "Pro trial started! Enjoy full access for 7 days.",
-  trialError: "Could not start trial. You may have already used it.",
-  trialProcessing: "Starting trial...",
-  trialNote: "No credit card required for the instant trial.",
+    "Use PayPal below — full Pro access now at $0. When launch week ends, {intro}/mo is charged automatically; from month 2, {regular}/mo.",
   saleBadge: "Launch Week",
-  saleTitle: "Join Pro free this week — attract early adopters with full access at no cost.",
-  saleFirstMonth: "Free for 7 days — then {intro}, then {regular}/mo",
-  saleFreeWeek: "7 days free",
-  salePricingNote: "After the free week: {intro}/mo, then {regular}/mo from month 2.",
+  saleTitle: "Join Pro free this week via PayPal — then automatic billing at the intro price.",
+  saleFirstMonth: "Free until launch week ends — then {intro}, then {regular}/mo",
+  saleFreeWeek: "Free this week",
+  salePricingNote: "After launch week: {intro}/mo auto-charged, then {regular}/mo from month 2.",
   saleEndsIn: "Free signup ends in",
   saleDays: "Days",
   saleHours: "Hours",
@@ -579,7 +569,7 @@ const en: Translations = {
   onboardStep3Cta: "View summary",
   onboardStep3Waiting: "Complete your upload — your summary appears here automatically.",
   gateEyebrow: "Upgrade to unlock",
-  gateStartTrial: "Start free trial",
+  gateStartTrial: "Start Pro free",
   gateNotNow: "Not now",
   gatePriceHint: "Pro from {price}/mo · cancel anytime",
   gateLanguageTitle: "Transcribe in any language",
@@ -806,24 +796,19 @@ const he: Translations = {
   paypalError: "התשלום נכשל. נסו שוב.",
   paypalNotConfigured: "PayPal לא מוגדר. הוסף מפתחות ל-.env.local",
   paypalSandboxNote: "תשלום מאובטח דרך PayPal",
-  paypalSubscribeTitle: "חיוב אוטומטי אחרי השבוע החינמי",
+  paypalSubscribeTitle: "התחילו Pro בחינם — חיוב אוטומטי אחרי שבוע ההשקה",
   paypalSubscribeDesc:
-    "חברו PayPal עכשיו — $0 היום, אחרי 7 ימים {intro}, ומחודש שני {regular}/חודש.",
+    "הירשמו עם PayPal — $0 עד סוף שבוע ההשקה, אחר כך {intro}/חודש בחיוב אוטומטי, ומחודש שני {regular}/חודש.",
   paypalAutoBillingNote:
-    "בהרשמה למנוי אתם מאשרים חיוב אוטומטי: 7 ימים חינם, אחר כך $14.90, ואז $29.90/חודש.",
-  trialTitle: "התחילו Pro בחינם ל-7 ימים",
+    "באישור המנוי PayPal יחייב {intro} בסוף שבוע ההשקה, ואז {regular}/חודש. ניתן לבטל בכל עת ב-PayPal.",
+  trialTitle: "Pro בחינם בשבוע ההשקה",
   trialDesc:
-    "בלי תשלום עכשיו. גישה מלאה ל-Pro בשבוע ההשקה. הוסיפו PayPal למטה כדי להמשיך אוטומטית אחרי הניסיון.",
-  trialStartCta: "התחילו Pro בחינם — 7 ימים",
-  trialSuccess: "ניסיון Pro התחיל! גישה מלאה ל-7 ימים.",
-  trialError: "לא ניתן להתחיל ניסיון. ייתכן שכבר השתמשתם בו.",
-  trialProcessing: "מתחיל ניסיון...",
-  trialNote: "לא נדרש כרטיס אשראי לניסיון המיידי.",
+    "השתמשו ב-PayPal למטה — גישה מלאה ל-Pro ב-$0. בסוף שבוע ההשקה יחויבו אוטומטית {intro}/חודש; מחודש שני {regular}/חודש.",
   saleBadge: "שבוע השקה",
-  saleTitle: "הצטרפו ל-Pro בחינם השבוע — גישה מלאה ללא עלות.",
-  saleFirstMonth: "7 ימים חינם — אחר כך {intro}, ומחודש שני {regular}/חודש",
-  saleFreeWeek: "7 ימים חינם",
-  salePricingNote: "אחרי השבוע החינמי: {intro}/חודש, ומחודש שני {regular}/חודש.",
+  saleTitle: "הצטרפו ל-Pro בחינם השבוע דרך PayPal — ואז חיוב אוטומטי במחיר ההשקה.",
+  saleFirstMonth: "חינם עד סוף שבוע ההשקה — אחר כך {intro}, ומחודש שני {regular}/חודש",
+  saleFreeWeek: "חינם השבוע",
+  salePricingNote: "אחרי שבוע ההשקה: חיוב אוטומטי {intro}/חודש, ומחודש שני {regular}/חודש.",
   saleEndsIn: "ההרשמה החינמית מסתיימת בעוד",
   saleDays: "ימים",
   saleHours: "שעות",
@@ -878,7 +863,7 @@ const he: Translations = {
   onboardStep3Cta: "צפה בסיכום",
   onboardStep3Waiting: "השלימו העלאה — הסיכום יופיע כאן אוטומטית.",
   gateEyebrow: "שדרגו כדי לפתוח",
-  gateStartTrial: "התחילו ניסיון חינם",
+  gateStartTrial: "התחילו Pro בחינם",
   gateNotNow: "לא עכשיו",
   gatePriceHint: "Pro מ-{price}/חודש · ביטול בכל עת",
   gateLanguageTitle: "תמלול בכל שפה",

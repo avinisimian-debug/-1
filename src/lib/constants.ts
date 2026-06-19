@@ -19,6 +19,13 @@ export function isLaunchWeekActive(now = Date.now()): boolean {
   return now < PRO_LAUNCH_WEEK_END.getTime();
 }
 
+/** Days remaining in launch week (min 1 while active). Used for PayPal trial length. */
+export function getLaunchTrialDays(now = Date.now()): number {
+  const diff = PRO_LAUNCH_WEEK_END.getTime() - now;
+  if (diff <= 0) return 0;
+  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
 /** @deprecated Use isLaunchWeekActive */
 export function isProSaleActive(now = Date.now()): boolean {
   return isLaunchWeekActive(now);

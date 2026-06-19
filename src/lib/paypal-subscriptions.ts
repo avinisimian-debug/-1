@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { join } from "path";
-import { isLaunchWeekActive } from "@/lib/constants";
+import { getLaunchTrialDays, isLaunchWeekActive } from "@/lib/constants";
 import {
   getPayPalAccessToken,
   getPayPalBaseUrl,
@@ -12,6 +12,8 @@ import {
 interface CachedPlans {
   productId?: string;
   launchPlanId?: string;
+  /** Trial days baked into launchPlanId — invalidate when launch week countdown changes. */
+  launchPlanTrialDays?: number;
   regularPlanId?: string;
 }
 
@@ -74,17 +76,19 @@ async function ensureProductId(cached: CachedPlans): Promise<string> {
   return product.id;
 }
 
-async function createLaunchPlan(productId: string): Promise<string> {
+async function createLaunchPlan(
+  productId: string,
+  trialDays: number,
+): Promise<string> {
   const plan = await paypalFetch<{ id: string }>("/v1/billing/plans", {
     method: "POST",
     body: JSON.stringify({
       product_id: productId,
       name: "Staz AI Pro — Launch Week",
-      description:
-        "7 days free, then $14.90 for the first month, then $29.90/month",
+      description: `Free for ${trialDays} days, then $14.90 for the first month, then $29.90/month`,
       billing_cycles: [
         {
-          frequency: { interval_unit: "DAY", interval_count: 7 },
+          frequency: { interval_unit: "DAY", interval_count: trialDays },
           tenure_type: "TRIAL",
           sequence: 1,
           total_cycles: 1,
@@ -170,11 +174,16 @@ export async function getSubscriptionPlanId(): Promise<string> {
   const productId = await ensureProductId(cached);
 
   if (launch) {
-    if (!cached.launchPlanId) {
-      cached.launchPlanId = await createLaunchPlan(productId);
+    const trialDays = getLaunchTrialDays();
+    const needsNewPlan =
+      !cached.launchPlanId || cached.launchPlanTrialDays !== trialDays;
+
+    if (needsNewPlan) {
+      cached.launchPlanId = await createLaunchPlan(productId, trialDays);
+      cached.launchPlanTrialDays = trialDays;
       await writeCachedPlans(cached);
     }
-    return cached.launchPlanId;
+    return cached.launchPlanId!;
   }
 
   if (!cached.regularPlanId) {

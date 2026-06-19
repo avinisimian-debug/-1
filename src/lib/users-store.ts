@@ -195,38 +195,6 @@ export async function getUserPlan(email: string): Promise<"free" | "pro"> {
   return details.plan;
 }
 
-export async function startProTrial(email: string): Promise<UserPlanDetails> {
-  if (!isLaunchWeekActive()) {
-    throw new Error("Launch week trial is no longer available.");
-  }
-
-  const users = await readUsers();
-  const normalized = email.toLowerCase();
-  const user = users.find((u) => u.email === normalized);
-
-  if (!user) {
-    throw new Error("User not found.");
-  }
-
-  if (user.proTrialUsed || user.proTrialEndsAt || hasActiveSubscription(user) || isPaidPro(user)) {
-    throw new Error("Trial already used or subscription active.");
-  }
-
-  const endsAt = new Date();
-  endsAt.setDate(endsAt.getDate() + 7);
-
-  user.proTrialUsed = true;
-  user.proTrialEndsAt = endsAt.toISOString();
-  user.plan = "pro";
-
-  await writeUsers(users);
-
-  return {
-    plan: "pro",
-    trialEndsAt: user.proTrialEndsAt,
-  };
-}
-
 export async function setUserSubscription(
   email: string,
   subscriptionId: string,
@@ -240,6 +208,8 @@ export async function setUserSubscription(
   user.paypalSubscriptionId = subscriptionId;
   user.proSubscriptionStatus = status;
   user.plan = status === "cancelled" ? "free" : "pro";
+  user.proTrialEndsAt = undefined;
+  user.proTrialUsed = undefined;
   if (status !== "cancelled" && !user.paidAt) {
     user.paidAt = new Date().toISOString();
   }
