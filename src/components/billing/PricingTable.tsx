@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import {
-  PRO_PLAN_SALE_PRICE,
-  isProSaleActive,
+  PRO_PLAN_INTRO_PRICE_LABEL,
+  PRO_PLAN_REGULAR_PRICE,
+  PRO_PLAN_REGULAR_PRICE_LABEL,
+  isLaunchWeekActive,
 } from "@/lib/constants";
 import {
   type BillingInterval,
@@ -181,7 +183,7 @@ export function PricingTable({
   const { t } = useLocale();
   const [interval, setInterval] = useState<BillingInterval>("monthly");
   const activeTier = landing ? null : appPlanToPricingTier(currentPlan);
-  const proOnSale = isProSaleActive();
+  const launchWeek = isLaunchWeekActive();
 
   const handleBasicCta = () => {
     if (landing) onLandingSignup?.();
@@ -210,8 +212,8 @@ export function PricingTable({
           const isPopular = tier.popular;
           const isCurrent = !landing && tier.id === activeTier;
           const saleMonthly =
-            tier.id === "pro" && proOnSale && interval === "monthly"
-              ? parseFloat(PRO_PLAN_SALE_PRICE)
+            tier.id === "pro" && launchWeek && interval === "monthly"
+              ? 0
               : undefined;
 
           const { amount, perMonth, savingsPercent } = getDisplayPrice(
@@ -222,7 +224,7 @@ export function PricingTable({
 
           const showStrike =
             tier.id === "pro" &&
-            proOnSale &&
+            launchWeek &&
             interval === "monthly" &&
             saleMonthly != null;
 
@@ -264,7 +266,7 @@ export function PricingTable({
               <div className="mb-1 min-h-[3.5rem]">
                 {showStrike && (
                   <p className="text-sm text-zinc-400 line-through">
-                    {formatPrice(TIER_PRICING.pro.monthly)}/mo
+                    {formatPrice(parseFloat(PRO_PLAN_REGULAR_PRICE))}/mo
                   </p>
                 )}
                 <p className="text-3xl font-semibold text-zinc-900">
@@ -281,9 +283,11 @@ export function PricingTable({
                     )}
                   </p>
                 )}
-                {tier.id === "pro" && proOnSale && interval === "monthly" && (
+                {tier.id === "pro" && launchWeek && interval === "monthly" && (
                   <p className="mt-1 text-xs font-medium text-indigo-600">
-                    {t.saleFirstMonth}
+                    {t.saleFirstMonth
+                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
                   </p>
                 )}
               </div>

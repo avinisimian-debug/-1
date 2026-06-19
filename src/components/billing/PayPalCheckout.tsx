@@ -8,6 +8,7 @@ import {
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
+import { isLaunchWeekActive } from "@/lib/constants";
 
 interface PayPalCheckoutProps {
   onSuccess?: () => void;
@@ -18,12 +19,13 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
   const { upgradeToPro } = usePlan();
   const [status, setStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const launchWeek = isLaunchWeekActive();
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
   if (!clientId) {
     return (
-      <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-300">
+      <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-700">
         {t.paypalNotConfigured}
       </p>
     );
@@ -32,8 +34,8 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
   if (status === "success") {
     return (
       <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-4">
-        <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-        <p className="text-sm font-medium text-emerald-300">{t.paypalSuccess}</p>
+        <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+        <p className="text-sm font-medium text-emerald-700">{t.paypalSuccess}</p>
       </div>
     );
   }
@@ -41,14 +43,14 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
   return (
     <div>
       {status === "processing" && (
-        <div className="mb-4 flex items-center gap-2 text-sm text-zinc-400">
+        <div className="mb-4 flex items-center gap-2 text-sm text-zinc-500">
           <Loader2 className="h-4 w-4 animate-spin" />
           {t.paypalProcessing}
         </div>
       )}
 
       {errorMsg && (
-        <p className="mb-4 text-sm text-red-400">{errorMsg}</p>
+        <p className="mb-4 text-sm text-red-500">{errorMsg}</p>
       )}
 
       <PayPalButtons
@@ -56,15 +58,15 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
           layout: "vertical",
           color: "gold",
           shape: "rect",
-          label: "paypal",
+          label: "subscribe",
           height: 45,
         }}
         disabled={status === "processing"}
-        createOrder={async () => {
+        createSubscription={async () => {
           setStatus("processing");
           setErrorMsg(null);
 
-          const res = await fetch("/api/paypal/create-order", {
+          const res = await fetch("/api/paypal/create-subscription", {
             method: "POST",
           });
 
@@ -76,14 +78,14 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
             throw new Error(data.error);
           }
 
-          return data.orderId;
+          return data.subscriptionId;
         }}
         onApprove={async (data) => {
           try {
-            const res = await fetch("/api/paypal/capture-order", {
+            const res = await fetch("/api/paypal/activate-subscription", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ orderId: data.orderID }),
+              body: JSON.stringify({ subscriptionId: data.subscriptionID }),
             });
 
             const result = await res.json();
@@ -110,6 +112,12 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
           setStatus("idle");
         }}
       />
+
+      {launchWeek && (
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-zinc-500">
+          {t.paypalAutoBillingNote}
+        </p>
+      )}
     </div>
   );
 }
@@ -126,7 +134,8 @@ export function PayPalCheckout(props: PayPalCheckoutProps) {
       options={{
         clientId,
         currency: "USD",
-        intent: "capture",
+        intent: "subscription",
+        vault: true,
       }}
     >
       <PayPalButtonInner {...props} />

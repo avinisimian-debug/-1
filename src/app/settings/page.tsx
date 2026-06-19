@@ -8,10 +8,11 @@ import { PlanFeatureComparison } from "@/components/billing/PlanFeatureCompariso
 import { PricingTable } from "@/components/billing/PricingTable";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
 import { SaleCountdown } from "@/components/billing/SaleCountdown";
+import { StartProTrialButton } from "@/components/billing/StartProTrialButton";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import { getProPlanPriceLabel, isProSaleActive } from "@/lib/constants";
+import { getProPlanPriceLabel, isLaunchWeekActive, PRO_PLAN_INTRO_PRICE_LABEL, PRO_PLAN_REGULAR_PRICE_LABEL } from "@/lib/constants";
 import { markStepComplete } from "@/lib/onboarding-store";
 
 export default function SettingsPage() {
@@ -28,7 +29,23 @@ export default function SettingsPage() {
     if (window.location.hash === "#upgrade") {
       document.getElementById("upgrade")?.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+
+    const params = new URLSearchParams(window.location.search);
+    const subscriptionId = params.get("subscription_id");
+    if (params.get("subscription") === "success" && subscriptionId) {
+      fetch("/api/paypal/activate-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscriptionId }),
+      })
+        .then(async (res) => {
+          if (res.ok) await syncPlan();
+        })
+        .finally(() => {
+          window.history.replaceState({}, "", "/settings#upgrade");
+        });
+    }
+  }, [syncPlan]);
 
   const scrollToCheckout = () => {
     document.querySelector("[data-paypal-section]")?.scrollIntoView({ behavior: "smooth" });
@@ -45,7 +62,7 @@ export default function SettingsPage() {
             <h2 className="text-base font-semibold text-zinc-900">{t.settingsPlan}</h2>
           </div>
 
-          {!isPro && isProSaleActive() && (
+          {!isPro && isLaunchWeekActive() && (
             <div className="mb-8">
               <SaleCountdown />
             </div>
@@ -66,20 +83,40 @@ export default function SettingsPage() {
               {t.settingsProActive}
             </p>
           ) : (
-            <div className="mt-8 rounded-lg border border-zinc-200 bg-zinc-50 p-5" id="upgrade" data-paypal-section>
-              <div className="mb-4 flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-zinc-500" />
-                <h3 className="text-sm font-semibold text-zinc-900">{t.paypalTitle}</h3>
+            <div className="mt-8 space-y-6" id="upgrade" data-paypal-section>
+              {isLaunchWeekActive() && (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-5">
+                  <h3 className="mb-2 text-sm font-semibold text-emerald-900">
+                    {t.trialTitle}
+                  </h3>
+                  <p className="mb-4 text-xs leading-relaxed text-emerald-800/80">
+                    {t.trialDesc}
+                  </p>
+                  <StartProTrialButton onSuccess={syncPlan} />
+                </div>
+              )}
+
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-zinc-500" />
+                  <h3 className="text-sm font-semibold text-zinc-900">
+                    {isLaunchWeekActive() ? t.paypalSubscribeTitle : t.paypalTitle}
+                  </h3>
+                </div>
+                <p className="mb-4 text-xs text-zinc-500">
+                  {(isLaunchWeekActive() ? t.paypalSubscribeDesc : t.paypalDesc)
+                    .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                    .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                </p>
+                <div className="mb-4">
+                  <ProPlanPrice size="sm" showBadge />
+                  <p className="mt-1 text-xs text-zinc-500">PayPal</p>
+                </div>
+                <PayPalCheckout onSuccess={syncPlan} />
+                <p className="mt-4 text-center text-[10px] text-zinc-400">
+                  {t.paypalSandboxNote}
+                </p>
               </div>
-              <p className="mb-4 text-xs text-zinc-500">{t.paypalDesc}</p>
-              <div className="mb-4">
-                <ProPlanPrice size="sm" showBadge />
-                <p className="mt-1 text-xs text-zinc-500">PayPal</p>
-              </div>
-              <PayPalCheckout onSuccess={syncPlan} />
-              <p className="mt-4 text-center text-[10px] text-zinc-400">
-                {t.paypalSandboxNote}
-              </p>
             </div>
           )}
         </section>

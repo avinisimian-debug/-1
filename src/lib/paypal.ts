@@ -2,13 +2,13 @@ import { getProPlanPrice } from "@/lib/constants";
 
 export const PRO_PLAN_CURRENCY = "USD";
 
-function getPayPalBaseUrl(): string {
+export function getPayPalBaseUrl(): string {
   return process.env.PAYPAL_MODE === "live"
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
 }
 
-async function getAccessToken(): Promise<string> {
+export async function getPayPalAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
@@ -42,7 +42,7 @@ async function getAccessToken(): Promise<string> {
 }
 
 export async function createPayPalOrder(): Promise<string> {
-  const token = await getAccessToken();
+  const token = await getPayPalAccessToken();
 
   const response = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders`, {
     method: "POST",
@@ -78,7 +78,7 @@ export async function capturePayPalOrder(orderId: string): Promise<{
   success: boolean;
   transactionId?: string;
 }> {
-  const token = await getAccessToken();
+  const token = await getPayPalAccessToken();
 
   const response = await fetch(
     `${getPayPalBaseUrl()}/v2/checkout/orders/${orderId}/capture`,

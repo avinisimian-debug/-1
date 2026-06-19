@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import {
-  PRO_PLAN_DISCOUNT_PERCENT,
-  PRO_PLAN_SALE_END,
-  isProSaleActive,
+  PRO_LAUNCH_WEEK_END,
+  PRO_PLAN_INTRO_PRICE_LABEL,
+  PRO_PLAN_REGULAR_PRICE_LABEL,
+  isLaunchWeekActive,
 } from "@/lib/constants";
 
 interface TimeLeft {
@@ -17,7 +18,7 @@ interface TimeLeft {
 }
 
 function calcTimeLeft(): TimeLeft {
-  const diff = Math.max(0, PRO_PLAN_SALE_END.getTime() - Date.now());
+  const diff = Math.max(0, PRO_LAUNCH_WEEK_END.getTime() - Date.now());
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
     hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
@@ -54,12 +55,12 @@ function CountdownUnit({
 
 export function SaleCountdown({ compact = false }: { compact?: boolean }) {
   const { t } = useLocale();
-  const [active, setActive] = useState(isProSaleActive);
+  const [active, setActive] = useState(isLaunchWeekActive);
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calcTimeLeft);
 
   useEffect(() => {
     const tick = () => {
-      const stillActive = isProSaleActive();
+      const stillActive = isLaunchWeekActive();
       setActive(stillActive);
       if (stillActive) setTimeLeft(calcTimeLeft());
     };
@@ -85,16 +86,22 @@ export function SaleCountdown({ compact = false }: { compact?: boolean }) {
             <Sparkles className="h-3.5 w-3.5" />
             {t.saleBadge}
           </span>
-          <span className="rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-700">
-            -{PRO_PLAN_DISCOUNT_PERCENT}%
+          <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+            {t.saleFreeWeek}
           </span>
         </div>
 
         {!compact && (
-          <p className="mb-4 text-center text-sm text-zinc-600 sm:text-start">
+          <p className="mb-2 text-center text-sm text-zinc-600 sm:text-start">
             {t.saleTitle}
           </p>
         )}
+
+        <p className="mb-4 text-center text-xs text-zinc-500 sm:text-start">
+          {t.salePricingNote
+            .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+            .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+        </p>
 
         <p className="mb-3 text-center text-xs font-medium uppercase tracking-widest text-zinc-500 sm:text-start">
           {t.saleEndsIn}

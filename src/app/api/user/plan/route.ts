@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getUserPlan } from "@/lib/users-store";
+import { isLaunchWeekActive } from "@/lib/constants";
+import { getUserPlanDetails } from "@/lib/users-store";
 
 export async function GET() {
   const session = await auth();
@@ -9,7 +10,13 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const plan = await getUserPlan(session.user.email);
+  const details = await getUserPlanDetails(session.user.email);
 
-  return NextResponse.json({ plan });
+  return NextResponse.json({
+    plan: details.plan,
+    launchWeekActive: isLaunchWeekActive(),
+    trialEndsAt: details.trialEndsAt,
+    subscriptionStatus: details.subscriptionStatus,
+    onIntroPricing: details.onIntroPricing,
+  });
 }

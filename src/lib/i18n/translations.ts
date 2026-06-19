@@ -205,10 +205,23 @@ export interface Translations {
   paypalError: string;
   paypalNotConfigured: string;
   paypalSandboxNote: string;
-  // Sale
+  paypalSubscribeTitle: string;
+  paypalSubscribeDesc: string;
+  paypalAutoBillingNote: string;
+  // Trial
+  trialTitle: string;
+  trialDesc: string;
+  trialStartCta: string;
+  trialSuccess: string;
+  trialError: string;
+  trialProcessing: string;
+  trialNote: string;
+  // Sale / launch week
   saleBadge: string;
   saleTitle: string;
   saleFirstMonth: string;
+  saleFreeWeek: string;
+  salePricingNote: string;
   saleEndsIn: string;
   saleDays: string;
   saleHours: string;
@@ -488,16 +501,31 @@ const en: Translations = {
   adminEmailsCopied: "Emails copied to clipboard",
   paypalTitle: "Upgrade with PayPal",
   paypalDesc: "Secure payment — unlock Pro instantly",
-  paypalPay: "Pay $14.90/month with PayPal",
-  paypalSuccess: "Payment successful! Pro plan activated.",
-  paypalProcessing: "Processing payment...",
+  paypalPay: "Subscribe with PayPal",
+  paypalSuccess: "Pro activated! Your subscription is set up.",
+  paypalProcessing: "Processing...",
   paypalError: "Payment failed. Please try again.",
   paypalNotConfigured: "PayPal is not configured yet. Add keys to .env.local",
   paypalSandboxNote: "Secure payment via PayPal",
-  saleBadge: "50% OFF — First Month",
-  saleTitle: "Launch week special — lock in your discounted first month before the offer ends.",
-  saleFirstMonth: "50% off your first month",
-  saleEndsIn: "Offer ends in",
+  paypalSubscribeTitle: "Auto-billing after free week",
+  paypalSubscribeDesc:
+    "Connect PayPal now — $0 today, then {intro} after 7 days, {regular}/mo from month 2.",
+  paypalAutoBillingNote:
+    "By subscribing you agree to automatic billing: free for 7 days, then $14.90, then $29.90/month.",
+  trialTitle: "Start Pro free for 7 days",
+  trialDesc:
+    "No payment now. Full Pro access during launch week. Add PayPal below to continue automatically after the trial.",
+  trialStartCta: "Start Pro free — 7 days",
+  trialSuccess: "Pro trial started! Enjoy full access for 7 days.",
+  trialError: "Could not start trial. You may have already used it.",
+  trialProcessing: "Starting trial...",
+  trialNote: "No credit card required for the instant trial.",
+  saleBadge: "Launch Week",
+  saleTitle: "Join Pro free this week — attract early adopters with full access at no cost.",
+  saleFirstMonth: "Free for 7 days — then {intro}, then {regular}/mo",
+  saleFreeWeek: "7 days free",
+  salePricingNote: "After the free week: {intro}/mo, then {regular}/mo from month 2.",
+  saleEndsIn: "Free signup ends in",
   saleDays: "Days",
   saleHours: "Hours",
   saleMinutes: "Min",
@@ -772,16 +800,31 @@ const he: Translations = {
   adminEmailsCopied: "המיילים הועתקו ללוח",
   paypalTitle: "שדרוג עם PayPal",
   paypalDesc: "תשלום מאובטח — Pro מופעל מיד",
-  paypalPay: "שלם $14.90/חודש עם PayPal",
-  paypalSuccess: "התשלום הצליח! חבילת Pro הופעלה.",
-  paypalProcessing: "מעבד תשלום...",
+  paypalPay: "הירשמו עם PayPal",
+  paypalSuccess: "Pro הופעל! המנוי שלכם מוגדר.",
+  paypalProcessing: "מעבד...",
   paypalError: "התשלום נכשל. נסו שוב.",
   paypalNotConfigured: "PayPal לא מוגדר. הוסף מפתחות ל-.env.local",
   paypalSandboxNote: "תשלום מאובטח דרך PayPal",
-  saleBadge: "50% הנחה — חודש ראשון",
-  saleTitle: "מבצע השקה לשבוע — נעל את מחיר החודש הראשון לפני שהמבצע נגמר.",
-  saleFirstMonth: "50% הנחה על החודש הראשון",
-  saleEndsIn: "המבצע מסתיים בעוד",
+  paypalSubscribeTitle: "חיוב אוטומטי אחרי השבוע החינמי",
+  paypalSubscribeDesc:
+    "חברו PayPal עכשיו — $0 היום, אחרי 7 ימים {intro}, ומחודש שני {regular}/חודש.",
+  paypalAutoBillingNote:
+    "בהרשמה למנוי אתם מאשרים חיוב אוטומטי: 7 ימים חינם, אחר כך $14.90, ואז $29.90/חודש.",
+  trialTitle: "התחילו Pro בחינם ל-7 ימים",
+  trialDesc:
+    "בלי תשלום עכשיו. גישה מלאה ל-Pro בשבוע ההשקה. הוסיפו PayPal למטה כדי להמשיך אוטומטית אחרי הניסיון.",
+  trialStartCta: "התחילו Pro בחינם — 7 ימים",
+  trialSuccess: "ניסיון Pro התחיל! גישה מלאה ל-7 ימים.",
+  trialError: "לא ניתן להתחיל ניסיון. ייתכן שכבר השתמשתם בו.",
+  trialProcessing: "מתחיל ניסיון...",
+  trialNote: "לא נדרש כרטיס אשראי לניסיון המיידי.",
+  saleBadge: "שבוע השקה",
+  saleTitle: "הצטרפו ל-Pro בחינם השבוע — גישה מלאה ללא עלות.",
+  saleFirstMonth: "7 ימים חינם — אחר כך {intro}, ומחודש שני {regular}/חודש",
+  saleFreeWeek: "7 ימים חינם",
+  salePricingNote: "אחרי השבוע החינמי: {intro}/חודש, ומחודש שני {regular}/חודש.",
+  saleEndsIn: "ההרשמה החינמית מסתיימת בעוד",
   saleDays: "ימים",
   saleHours: "שעות",
   saleMinutes: "דקות",

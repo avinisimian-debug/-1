@@ -1,5 +1,12 @@
+import { isLaunchWeekActive } from "@/lib/constants";
 import { isProGranted } from "@/lib/pro-grants";
 import { readPersistedJson, writePersistedJson } from "@/lib/user-persistence";
+
+export type ProSubscriptionStatus =
+  | "trialing"
+  | "active"
+  | "cancelled"
+  | "past_due";
 
 export interface StoredUser {
   id: string;
@@ -11,6 +18,18 @@ export interface StoredUser {
   lastLoginAt: string;
   paidAt?: string;
   paypalTransactionId?: string;
+  /** Instant launch-week trial (no PayPal). */
+  proTrialEndsAt?: string;
+  proTrialUsed?: boolean;
+  paypalSubscriptionId?: string;
+  proSubscriptionStatus?: ProSubscriptionStatus;
+}
+
+export interface UserPlanDetails {
+  plan: "free" | "pro";
+  trialEndsAt?: string;
+  subscriptionStatus?: ProSubscriptionStatus;
+  onIntroPricing?: boolean;
 }
 
 async function readUsers(): Promise<StoredUser[]> {
@@ -21,11 +40,63 @@ async function writeUsers(users: StoredUser[]) {
   await writePersistedJson(users);
 }
 
-async function withEffectivePlan(user: StoredUser): Promise<StoredUser> {
-  if (await isProGranted(user.email)) {
-    return { ...user, plan: "pro" };
-  }
+function isTrialActive(user: StoredUser, now = Date.now()): boolean {
+  if (!user.proTrialEndsAt) return false;
+  return new Date(user.proTrialEndsAt).getTime() > now;
+}
+
+function hasActiveSubscription(user: StoredUser): boolean {
+  return Boolean(
+    user.paypalSubscriptionId &&
+      user.proSubscriptionStatus &&
+      user.proSubscriptionStatus !== "cancelled",
+  );
+}
+
+function isPaidPro(user: StoredUser): boolean {
+  return user.plan === "pro" && Boolean(user.paidAt) && !user.proTrialEndsAt;
+}
+
+async function expireTrialIfNeeded(user: StoredUser): Promise<StoredUser> {
+  if (!user.proTrialEndsAt || isTrialActive(user)) return user;
+  if (hasActiveSubscription(user) || isPaidPro(user)) return user;
+  if (await isProGranted(user.email)) return user;
+
+  user.plan = "free";
   return user;
+}
+
+async function resolvePlanForUser(user: StoredUser): Promise<UserPlanDetails> {
+  const expired = await expireTrialIfNeeded(user);
+
+  if (await isProGranted(expired.email)) {
+    return { plan: "pro" };
+  }
+
+  if (hasActiveSubscription(expired)) {
+    return {
+      plan: "pro",
+      subscriptionStatus: expired.proSubscriptionStatus,
+      onIntroPricing:
+        expired.proSubscriptionStatus === "trialing" ||
+        (isLaunchWeekActive() && expired.proSubscriptionStatus === "active"),
+    };
+  }
+
+  if (isPaidPro(expired)) {
+    return { plan: "pro" };
+  }
+
+  if (isTrialActive(expired)) {
+    return { plan: "pro", trialEndsAt: expired.proTrialEndsAt };
+  }
+
+  return { plan: expired.plan === "pro" ? "free" : (expired.plan ?? "free") };
+}
+
+async function withEffectivePlan(user: StoredUser): Promise<StoredUser> {
+  const details = await resolvePlanForUser(user);
+  return { ...user, plan: details.plan };
 }
 
 export async function registerOrUpdateUser(input: {
@@ -46,8 +117,9 @@ export async function registerOrUpdateUser(input: {
       existing.plan = "pro";
       existing.paidAt = existing.paidAt ?? now;
     }
+    const resolved = await expireTrialIfNeeded(existing);
     await writeUsers(users);
-    return withEffectivePlan(existing);
+    return withEffectivePlan(resolved);
   }
 
   const grantedPro = await isProGranted(email);
@@ -70,6 +142,19 @@ export async function registerOrUpdateUser(input: {
 
 export async function getAllUsers(): Promise<StoredUser[]> {
   const users = await readUsers();
+  let changed = false;
+
+  for (let i = 0; i < users.length; i++) {
+    const before = users[i].plan;
+    const expired = await expireTrialIfNeeded(users[i]);
+    users[i] = expired;
+    const details = await resolvePlanForUser(expired);
+    if (details.plan !== before) changed = true;
+    users[i].plan = details.plan;
+  }
+
+  if (changed) await writeUsers(users);
+
   const enriched = await Promise.all(users.map(withEffectivePlan));
   return enriched.sort(
     (a, b) =>
@@ -82,15 +167,84 @@ export async function getUserCount(): Promise<number> {
   return users.length;
 }
 
-export async function getUserPlan(email: string): Promise<"free" | "pro"> {
+export async function getUserPlanDetails(email: string): Promise<UserPlanDetails> {
   const normalized = email.toLowerCase();
+
   if (await isProGranted(normalized)) {
-    return "pro";
+    return { plan: "pro" };
   }
 
   const users = await readUsers();
+  const index = users.findIndex((u) => u.email === normalized);
+  if (index === -1) return { plan: "free" };
+
+  const expired = await expireTrialIfNeeded(users[index]);
+  users[index] = expired;
+  const details = await resolvePlanForUser(expired);
+
+  if (details.plan !== users[index].plan) {
+    users[index].plan = details.plan;
+    await writeUsers(users);
+  }
+
+  return details;
+}
+
+export async function getUserPlan(email: string): Promise<"free" | "pro"> {
+  const details = await getUserPlanDetails(email);
+  return details.plan;
+}
+
+export async function startProTrial(email: string): Promise<UserPlanDetails> {
+  if (!isLaunchWeekActive()) {
+    throw new Error("Launch week trial is no longer available.");
+  }
+
+  const users = await readUsers();
+  const normalized = email.toLowerCase();
   const user = users.find((u) => u.email === normalized);
-  return user?.plan ?? "free";
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  if (user.proTrialUsed || user.proTrialEndsAt || hasActiveSubscription(user) || isPaidPro(user)) {
+    throw new Error("Trial already used or subscription active.");
+  }
+
+  const endsAt = new Date();
+  endsAt.setDate(endsAt.getDate() + 7);
+
+  user.proTrialUsed = true;
+  user.proTrialEndsAt = endsAt.toISOString();
+  user.plan = "pro";
+
+  await writeUsers(users);
+
+  return {
+    plan: "pro",
+    trialEndsAt: user.proTrialEndsAt,
+  };
+}
+
+export async function setUserSubscription(
+  email: string,
+  subscriptionId: string,
+  status: ProSubscriptionStatus,
+): Promise<void> {
+  const users = await readUsers();
+  const user = users.find((u) => u.email === email.toLowerCase());
+
+  if (!user) return;
+
+  user.paypalSubscriptionId = subscriptionId;
+  user.proSubscriptionStatus = status;
+  user.plan = status === "cancelled" ? "free" : "pro";
+  if (status !== "cancelled" && !user.paidAt) {
+    user.paidAt = new Date().toISOString();
+  }
+
+  await writeUsers(users);
 }
 
 export async function upgradeUserToPro(
@@ -104,6 +258,7 @@ export async function upgradeUserToPro(
 
   user.plan = "pro";
   user.paidAt = new Date().toISOString();
+  user.proTrialEndsAt = undefined;
   if (transactionId) user.paypalTransactionId = transactionId;
 
   await writeUsers(users);
