@@ -160,6 +160,14 @@ export interface Translations {
   settingsBilling: string;
   settingsSecurity: string;
   settingsProActive: string;
+  settingsNameLabel: string;
+  settingsEmailLabel: string;
+  settingsNotificationsBody: string;
+  settingsBasicPlan: string;
+  settingsProPlanLine: string;
+  settingsManagePayPal: string;
+  paypalCancelled: string;
+  pricingProLaunchNote: string;
   // History
   historyTitle: string;
   historyDesc: string;
@@ -461,6 +469,14 @@ const en: Translations = {
   settingsBilling: "Billing",
   settingsSecurity: "Security",
   settingsProActive: "Pro active — upload videos up to 500 MB",
+  settingsNameLabel: "Name",
+  settingsEmailLabel: "Email",
+  settingsNotificationsBody: "Product updates enabled for {email}",
+  settingsBasicPlan: "Basic Plan — $0/month",
+  settingsProPlanLine: "Pro Plan — {price}/month",
+  settingsManagePayPal: "Manage or cancel your subscription in your PayPal account.",
+  paypalCancelled: "PayPal subscription was cancelled.",
+  pricingProLaunchNote: "Subscribe via PayPal — $0 during launch week, then auto-billing.",
   historyTitle: "History",
   historyDesc: "Browse your past transcriptions and summaries",
   historySearch: "Search history...",
@@ -755,6 +771,14 @@ const he: Translations = {
   settingsBilling: "חיוב",
   settingsSecurity: "אבטחה",
   settingsProActive: "Pro פעיל — העלאה עד 500 MB",
+  settingsNameLabel: "שם",
+  settingsEmailLabel: "אימייל",
+  settingsNotificationsBody: "עדכוני מוצר פעילים עבור {email}",
+  settingsBasicPlan: "חבילת Basic — $0/חודש",
+  settingsProPlanLine: "חבילת Pro — {price}/חודש",
+  settingsManagePayPal: "ניהול או ביטול המנוי דרך חשבון PayPal שלכם.",
+  paypalCancelled: "הרשמת המנוי ב-PayPal בוטלה.",
+  pricingProLaunchNote: "הירשמו עם PayPal — $0 בשבוע ההשקה, ואז חיוב אוטומטי.",
   historyTitle: "היסטוריה",
   historyDesc: "עיין בתמלולים וסיכומים קודמים",
   historySearch: "חיפוש בהיסטוריה...",

@@ -17,7 +17,7 @@ export function CompanyLogos({ label, compact, className }: CompanyLogosProps) {
       {label && (
         <p
           className={cn(
-            "mb-3 font-semibold uppercase tracking-[0.2em] text-zinc-400",
+            "mb-3 font-semibold uppercase tracking-[0.2em] text-muted-foreground",
             compact ? "text-center text-[9px]" : "text-center text-[10px]",
           )}
         >
@@ -34,7 +34,7 @@ export function CompanyLogos({ label, compact, className }: CompanyLogosProps) {
           <span
             key={company.id}
             className={cn(
-              "select-none font-semibold tracking-tight text-zinc-400 grayscale transition-opacity hover:opacity-80",
+              "select-none font-semibold tracking-tight text-muted-foreground grayscale transition-opacity hover:opacity-80",
               compact ? "text-[11px] opacity-50" : "text-sm opacity-60",
             )}
           >

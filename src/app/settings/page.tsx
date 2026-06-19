@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Bell, CreditCard, Crown, Shield } from "lucide-react";
+import { Bell, CheckCircle2, CreditCard, Crown, Shield } from "lucide-react";
 import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { PricingTable } from "@/components/billing/PricingTable";
@@ -11,13 +11,23 @@ import { SaleCountdown } from "@/components/billing/SaleCountdown";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import { getProPlanPriceLabel, isLaunchWeekActive, PRO_PLAN_INTRO_PRICE_LABEL, PRO_PLAN_REGULAR_PRICE_LABEL } from "@/lib/constants";
+import {
+  getProPlanPriceLabel,
+  isLaunchWeekActive,
+  PRO_PLAN_INTRO_PRICE_LABEL,
+  PRO_PLAN_REGULAR_PRICE_LABEL,
+} from "@/lib/constants";
 import { markStepComplete } from "@/lib/onboarding-store";
+import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const { t } = useLocale();
-  const { plan, isPro, downgradeToFree, syncPlan } = usePlan();
+  const { plan, isPro, syncPlan } = usePlan();
   const { data: session } = useSession();
+  const [subMessage, setSubMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     const email = session?.user?.email;
@@ -30,6 +40,13 @@ export default function SettingsPage() {
     }
 
     const params = new URLSearchParams(window.location.search);
+
+    if (params.get("subscription") === "cancel") {
+      setSubMessage({ type: "error", text: t.paypalCancelled });
+      window.history.replaceState({}, "", "/settings#upgrade");
+      return;
+    }
+
     const subscriptionId = params.get("subscription_id");
     if (params.get("subscription") === "success" && subscriptionId) {
       fetch("/api/paypal/activate-subscription", {
@@ -38,27 +55,39 @@ export default function SettingsPage() {
         body: JSON.stringify({ subscriptionId }),
       })
         .then(async (res) => {
-          if (res.ok) await syncPlan();
+          const data = await res.json();
+          if (res.ok) {
+            await syncPlan();
+            setSubMessage({ type: "success", text: t.paypalSuccess });
+          } else {
+            setSubMessage({
+              type: "error",
+              text: (data.error as string) ?? t.paypalError,
+            });
+          }
         })
+        .catch(() => setSubMessage({ type: "error", text: t.paypalError }))
         .finally(() => {
           window.history.replaceState({}, "", "/settings#upgrade");
         });
     }
-  }, [syncPlan]);
+  }, [syncPlan, t.paypalCancelled, t.paypalError, t.paypalSuccess]);
 
   const scrollToCheckout = () => {
-    document.querySelector("[data-paypal-section]")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("upgrade")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <DashboardShell title={t.settingsTitle} description={t.settingsDesc}>
       <div className="mx-auto w-full max-w-5xl space-y-6">
-        <section className="glass-card rounded-lg p-6 sm:p-8">
+        <section className="glass-card rounded-xl p-6 sm:p-8">
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-indigo-50">
-              <Crown className="h-4 w-4 text-indigo-600" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent-muted">
+              <Crown className="h-4 w-4 text-accent" />
             </div>
-            <h2 className="text-base font-semibold text-zinc-900">{t.settingsPlan}</h2>
+            <h2 className="text-base font-semibold text-foreground">
+              {t.settingsPlan}
+            </h2>
           </div>
 
           {!isPro && isLaunchWeekActive() && (
@@ -70,21 +99,42 @@ export default function SettingsPage() {
           <PricingTable
             currentPlan={plan}
             onSelectPro={scrollToCheckout}
-            onSelectBasic={isPro ? downgradeToFree : undefined}
+            landing={false}
           />
 
           <div className="mt-8">
             <PlanFeatureComparison />
           </div>
 
+          {subMessage && (
+            <div
+              className={cn(
+                "mt-6 flex items-center gap-2 rounded-lg px-4 py-3 text-sm",
+                subMessage.type === "success"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                  : "border border-red-200 bg-red-50 text-red-800",
+              )}
+            >
+              {subMessage.type === "success" && (
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+              )}
+              {subMessage.text}
+            </div>
+          )}
+
           {isPro ? (
-            <p className="mt-6 text-center text-xs text-emerald-600">
-              {t.settingsProActive}
-            </p>
+            <div className="mt-6 space-y-2 text-center">
+              <p className="text-xs font-medium text-emerald-700">
+                {t.settingsProActive}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {t.settingsManagePayPal}
+              </p>
+            </div>
           ) : (
             <div className="mt-8 space-y-4" id="upgrade" data-paypal-section>
               {isLaunchWeekActive() && (
-                <div className="mb-2 rounded-lg border border-emerald-200 bg-emerald-50/60 p-4">
+                <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-4">
                   <p className="text-sm font-semibold text-emerald-900">
                     {t.trialTitle}
                   </p>
@@ -96,39 +146,42 @@ export default function SettingsPage() {
                 </div>
               )}
 
-              <div className="rounded-lg border border-border bg-muted/30 p-5">
+              <div className="premium-card rounded-xl p-5 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <CreditCard className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
-                    {isLaunchWeekActive() ? t.paypalSubscribeTitle : t.paypalTitle}
+                    {isLaunchWeekActive()
+                      ? t.paypalSubscribeTitle
+                      : t.paypalTitle}
                   </h3>
                 </div>
                 <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
-                  {(isLaunchWeekActive() ? t.paypalSubscribeDesc : t.paypalDesc)
+                  {(isLaunchWeekActive()
+                    ? t.paypalSubscribeDesc
+                    : t.paypalDesc
+                  )
                     .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
                     .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
                 </p>
                 <div className="mb-4">
                   <ProPlanPrice size="sm" showBadge />
-                  <p className="mt-1 text-xs text-muted-foreground">PayPal</p>
                 </div>
                 <PayPalCheckout onSuccess={syncPlan} />
-                {!isLaunchWeekActive() && (
-                  <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">
-                    {t.paypalSandboxNote}
-                  </p>
-                )}
               </div>
             </div>
           )}
         </section>
 
         <div className="mx-auto max-w-2xl space-y-6">
-          <section className="glass-card rounded-lg p-6">
-            <h2 className="mb-4 text-base font-semibold text-zinc-900">{t.settingsProfile}</h2>
+          <section className="glass-card rounded-xl p-6">
+            <h2 className="mb-4 text-base font-semibold text-foreground">
+              {t.settingsProfile}
+            </h2>
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-500">Name</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  {t.settingsNameLabel}
+                </label>
                 <input
                   readOnly
                   defaultValue={session?.user?.name ?? ""}
@@ -136,7 +189,9 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-zinc-500">Email</label>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  {t.settingsEmailLabel}
+                </label>
                 <input
                   readOnly
                   defaultValue={session?.user?.email ?? ""}
@@ -146,32 +201,46 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section className="glass-card rounded-lg p-6">
+          <section className="glass-card rounded-xl p-6">
             <div className="mb-4 flex items-center gap-3">
-              <Bell className="h-4 w-4 text-zinc-400" />
-              <h2 className="text-base font-semibold text-zinc-900">{t.settingsNotifications}</h2>
+              <Bell className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-base font-semibold text-foreground">
+                {t.settingsNotifications}
+              </h2>
             </div>
-            <p className="text-sm text-zinc-500">
-              Email updates enabled for {session?.user?.email}
+            <p className="text-sm text-muted-foreground">
+              {t.settingsNotificationsBody.replace(
+                "{email}",
+                session?.user?.email ?? "",
+              )}
             </p>
           </section>
 
-          <section className="glass-card rounded-lg p-6">
+          <section className="glass-card rounded-xl p-6">
             <div className="mb-4 flex items-center gap-3">
-              <CreditCard className="h-4 w-4 text-zinc-400" />
-              <h2 className="text-base font-semibold text-zinc-900">{t.settingsBilling}</h2>
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-base font-semibold text-foreground">
+                {t.settingsBilling}
+              </h2>
             </div>
-            <div className="rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3">
-              <p className="text-sm font-medium text-indigo-900">
-                {isPro ? `Pro Plan — ${getProPlanPriceLabel()}/month` : "Basic Plan — $0/month"}
+            <div className="rounded-lg border border-accent/20 bg-accent-muted/50 px-4 py-3">
+              <p className="text-sm font-medium text-foreground">
+                {isPro
+                  ? t.settingsProPlanLine.replace(
+                      "{price}",
+                      getProPlanPriceLabel(),
+                    )
+                  : t.settingsBasicPlan}
               </p>
             </div>
           </section>
 
-          <section className="glass-card rounded-lg p-6">
+          <section className="glass-card rounded-xl p-6">
             <div className="flex items-center gap-3">
-              <Shield className="h-4 w-4 text-zinc-400" />
-              <h2 className="text-base font-semibold text-zinc-900">{t.settingsSecurity}</h2>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-base font-semibold text-foreground">
+                {t.settingsSecurity}
+              </h2>
             </div>
           </section>
         </div>

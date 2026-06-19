@@ -24,7 +24,7 @@ export function TrustSection({ variant = "landing", className }: TrustSectionPro
 
   return (
     <section className={cn("w-full space-y-8", className)}>
-      <div className="rounded-lg border border-zinc-200 bg-white px-6 py-8 shadow-sm sm:px-10">
+      <div className="glass-card rounded-2xl px-6 py-8 sm:px-10">
         <CompanyLogos label={t.trustUsedBy} />
       </div>
       <TestimonialsCarousel variant="premium" />

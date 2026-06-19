@@ -195,15 +195,22 @@ export async function getUserPlan(email: string): Promise<"free" | "pro"> {
   return details.plan;
 }
 
+export async function findUserBySubscriptionId(
+  subscriptionId: string,
+): Promise<StoredUser | undefined> {
+  const users = await readUsers();
+  return users.find((u) => u.paypalSubscriptionId === subscriptionId);
+}
+
 export async function setUserSubscription(
   email: string,
   subscriptionId: string,
   status: ProSubscriptionStatus,
-): Promise<void> {
+): Promise<boolean> {
   const users = await readUsers();
   const user = users.find((u) => u.email === email.toLowerCase());
 
-  if (!user) return;
+  if (!user) return false;
 
   user.paypalSubscriptionId = subscriptionId;
   user.proSubscriptionStatus = status;
@@ -215,6 +222,21 @@ export async function setUserSubscription(
   }
 
   await writeUsers(users);
+  return true;
+}
+
+export async function updateSubscriptionByPayPalId(
+  subscriptionId: string,
+  status: ProSubscriptionStatus,
+): Promise<boolean> {
+  const users = await readUsers();
+  const user = users.find((u) => u.paypalSubscriptionId === subscriptionId);
+  if (!user) return false;
+
+  user.proSubscriptionStatus = status;
+  user.plan = status === "cancelled" ? "free" : "pro";
+  await writeUsers(users);
+  return true;
 }
 
 export async function upgradeUserToPro(

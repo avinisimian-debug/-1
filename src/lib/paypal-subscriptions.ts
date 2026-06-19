@@ -1,4 +1,9 @@
-import { getLaunchTrialDays, isLaunchWeekActive } from "@/lib/constants";
+import {
+  getLaunchTrialDays,
+  isLaunchWeekActive,
+  PRO_PLAN_INTRO_PRICE,
+  PRO_PLAN_REGULAR_PRICE,
+} from "@/lib/constants";
 import {
   readPayPalPlanCache,
   writePayPalPlanCache,
@@ -114,7 +119,7 @@ async function createLaunchPlan(
           sequence: 2,
           total_cycles: 1,
           pricing_scheme: {
-            fixed_price: { value: "14.90", currency_code: PRO_PLAN_CURRENCY },
+            fixed_price: { value: PRO_PLAN_INTRO_PRICE, currency_code: PRO_PLAN_CURRENCY },
           },
         },
         {
@@ -123,7 +128,7 @@ async function createLaunchPlan(
           sequence: 3,
           total_cycles: 0,
           pricing_scheme: {
-            fixed_price: { value: "29.90", currency_code: PRO_PLAN_CURRENCY },
+            fixed_price: { value: PRO_PLAN_REGULAR_PRICE, currency_code: PRO_PLAN_CURRENCY },
           },
         },
       ],
@@ -153,7 +158,7 @@ async function createRegularPlan(productId: string): Promise<string> {
           sequence: 1,
           total_cycles: 0,
           pricing_scheme: {
-            fixed_price: { value: "29.90", currency_code: PRO_PLAN_CURRENCY },
+            fixed_price: { value: PRO_PLAN_REGULAR_PRICE, currency_code: PRO_PLAN_CURRENCY },
           },
         },
       ],
@@ -268,17 +273,47 @@ export async function createPayPalSubscription(
 export async function getPayPalSubscription(subscriptionId: string): Promise<{
   status: string;
   id: string;
+  subscriber?: { email_address?: string };
 }> {
-  return paypalFetch<{ status: string; id: string }>(
-    `/v1/billing/subscriptions/${subscriptionId}`,
-  );
+  return paypalFetch<{
+    status: string;
+    id: string;
+    subscriber?: { email_address?: string };
+  }>(`/v1/billing/subscriptions/${subscriptionId}`);
+}
+
+export async function verifySubscriptionForUser(
+  subscriptionId: string,
+  userEmail: string,
+): Promise<{ status: string }> {
+  const subscription = await getPayPalSubscription(subscriptionId);
+  const subEmail = subscription.subscriber?.email_address?.toLowerCase();
+  const normalized = userEmail.toLowerCase();
+
+  if (subEmail && subEmail !== normalized) {
+    throw new PayPalApiError("Subscription does not belong to this account.");
+  }
+
+  const allowed = new Set([
+    "APPROVAL_PENDING",
+    "APPROVED",
+    "ACTIVE",
+  ]);
+
+  if (!allowed.has(subscription.status)) {
+    throw new PayPalApiError(
+      `Subscription is not active (status: ${subscription.status}).`,
+    );
+  }
+
+  return { status: subscription.status };
 }
 
 export async function activatePayPalSubscription(
   subscriptionId: string,
+  userEmail: string,
 ): Promise<{ status: string }> {
-  const subscription = await getPayPalSubscription(subscriptionId);
-  return { status: subscription.status };
+  return verifySubscriptionForUser(subscriptionId, userEmail);
 }
 
 export function mapPayPalSubscriptionStatus(
@@ -296,7 +331,7 @@ export function mapPayPalSubscriptionStatus(
     case "EXPIRED":
       return "cancelled";
     default:
-      return "active";
+      return "cancelled";
   }
 }
 

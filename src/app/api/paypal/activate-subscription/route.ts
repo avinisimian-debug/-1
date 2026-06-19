@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import {
   activatePayPalSubscription,
+  formatPayPalError,
   isPayPalConfigured,
   mapPayPalSubscriptionStatus,
 } from "@/lib/paypal-subscriptions";
-import { setUserSubscription } from "@/lib/users-store";
+import {
+  findUserBySubscriptionId,
+  setUserSubscription,
+} from "@/lib/users-store";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +37,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await activatePayPalSubscription(subscriptionId);
+    const existingOwner = await findUserBySubscriptionId(subscriptionId);
+    if (existingOwner && existingOwner.email !== session.user.email.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Subscription already linked to another account." },
+        { status: 403 },
+      );
+    }
+
+    const result = await activatePayPalSubscription(
+      subscriptionId,
+      session.user.email,
+    );
     const status = mapPayPalSubscriptionStatus(result.status);
 
     if (status === "cancelled") {
@@ -43,7 +58,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await setUserSubscription(session.user.email, subscriptionId, status);
+    const saved = await setUserSubscription(
+      session.user.email,
+      subscriptionId,
+      status,
+    );
+
+    if (!saved) {
+      return NextResponse.json(
+        { error: "User account not found." },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -54,7 +80,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Activate subscription error:", error);
     return NextResponse.json(
-      { error: "Failed to activate subscription." },
+      { error: formatPayPalError(error) },
       { status: 500 },
     );
   }

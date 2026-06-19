@@ -13,6 +13,7 @@ import {
   User,
   Zap,
 } from "lucide-react";
+import { CompanyLogos } from "@/components/trust/CompanyLogos";
 import { Logo } from "@/components/brand/Logo";
 import { LoginLiveStats } from "@/components/auth/LoginLiveStats";
 import { LoginProductPreview } from "@/components/auth/LoginProductPreview";
@@ -148,7 +149,7 @@ export function LoginScreen() {
         </label>
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16 lg:px-8">
+      <div className="relative mx-auto max-w-6xl px-4 py-12 pb-24 sm:py-16 lg:px-8 lg:pb-16">
         <div className="animate-fade-in-up mb-8 grid gap-4 lg:grid-cols-2">
           <SaleCountdown />
           <div className="glass-card flex items-center rounded-2xl px-5 py-4">
@@ -212,6 +213,9 @@ export function LoginScreen() {
             <p className="mt-8 hidden text-sm text-muted-foreground lg:block">
               {t.authSocialProof}
             </p>
+            <div className="mt-6 hidden lg:block">
+              <CompanyLogos label={t.trustUsedBy} compact />
+            </div>
           </div>
 
           <div
@@ -221,7 +225,7 @@ export function LoginScreen() {
           >
             <div className="premium-signup-card p-8 sm:p-9">
               <div className="relative mb-8 hidden lg:block">
-                <Logo size="md" showTagline tagline={t.authTagline} />
+                <Logo size="md" />
               </div>
 
               <div className="relative mb-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -363,6 +367,17 @@ export function LoginScreen() {
         <div className="mt-16 border-t border-border/80 pt-12">
           <TrustSection variant="landing" />
         </div>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-card/95 p-3 backdrop-blur-md lg:hidden">
+        <button
+          type="button"
+          onClick={scrollToSignup}
+          className="btn-cinema flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-medium"
+        >
+          {t.authSubmit}
+          <ArrowRight className="h-4 w-4 shrink-0 rtl:rotate-180" aria-hidden />
+        </button>
       </div>
     </div>
   );

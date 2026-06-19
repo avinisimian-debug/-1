@@ -110,10 +110,10 @@ function AnimatedPrice({
     >
       {formatPrice(display)}
       {interval === "yearly" && display > 0 && (
-        <span className="text-sm font-normal text-zinc-500">/yr</span>
+        <span className="text-sm font-normal text-muted-foreground">/yr</span>
       )}
       {interval === "monthly" && (
-        <span className="text-sm font-normal text-zinc-500">/mo</span>
+        <span className="text-sm font-normal text-muted-foreground">/mo</span>
       )}
     </span>
   );
@@ -132,15 +132,15 @@ function BillingToggle({
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="inline-flex items-center rounded-md border border-zinc-200 bg-zinc-100 p-1">
+      <div className="inline-flex items-center rounded-md border border-border bg-muted/60 p-1">
         <button
           type="button"
           onClick={() => onChange("monthly")}
           className={cn(
             "rounded px-4 py-1.5 text-sm font-medium transition-all",
             !yearly
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-700",
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {t.pricingMonthly}
@@ -151,8 +151,8 @@ function BillingToggle({
           className={cn(
             "rounded px-4 py-1.5 text-sm font-medium transition-all",
             yearly
-              ? "bg-white text-zinc-900 shadow-sm"
-              : "text-zinc-500 hover:text-zinc-700",
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {t.pricingYearly}
@@ -198,13 +198,20 @@ export function PricingTable({
   return (
     <div className={cn("w-full", className)}>
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           {t.pricingTitle}
         </h2>
-        <p className="mt-2 text-sm text-zinc-500">{t.pricingSubtitle}</p>
-        <div className="mt-6">
-          <BillingToggle interval={interval} onChange={setInterval} t={t} />
-        </div>
+        <p className="mt-2 text-sm text-muted-foreground">{t.pricingSubtitle}</p>
+        {!landing && (
+          <div className="mt-6">
+            <BillingToggle interval={interval} onChange={setInterval} t={t} />
+          </div>
+        )}
+        {landing && launchWeek && (
+          <p className="mt-4 text-sm font-medium text-accent">
+            {t.pricingProLaunchNote}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -232,16 +239,16 @@ export function PricingTable({
             <div
               key={tier.id}
               className={cn(
-                "relative flex flex-col rounded-lg border bg-white p-6 transition-shadow",
+                "relative flex flex-col rounded-xl border bg-card p-6 transition-shadow",
                 isPopular
-                  ? "pricing-glow border-indigo-200 shadow-md lg:scale-[1.02] lg:-my-1"
-                  : "border-zinc-200 shadow-sm",
-                isCurrent && !isPopular && "ring-1 ring-zinc-300",
+                  ? "pricing-glow border-accent/30 shadow-md lg:scale-[1.02] lg:-my-1"
+                  : "border-border shadow-sm",
+                isCurrent && !isPopular && "ring-1 ring-border",
               )}
             >
               {isPopular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-foreground px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-background shadow-sm">
                     <Sparkles className="h-3 w-3" />
                     {t.pricingMostPopular}
                   </span>
@@ -255,25 +262,25 @@ export function PricingTable({
               )}
 
               <div className="mb-5">
-                <h3 className="text-base font-semibold text-zinc-900">
+                <h3 className="text-base font-semibold text-foreground">
                   {t[tier.nameKey] as string}
                 </h3>
-                <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   {t[tier.descKey] as string}
                 </p>
               </div>
 
               <div className="mb-1 min-h-[3.5rem]">
                 {showStrike && (
-                  <p className="text-sm text-zinc-400 line-through">
+                  <p className="text-sm text-muted-foreground line-through">
                     {formatPrice(parseFloat(PRO_PLAN_REGULAR_PRICE))}/mo
                   </p>
                 )}
-                <p className="text-3xl font-semibold text-zinc-900">
+                <p className="text-3xl font-semibold text-foreground">
                   <AnimatedPrice value={amount} interval={interval} />
                 </p>
                 {interval === "yearly" && amount > 0 && (
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {formatPrice(perMonth)}
                     {t.pricingPerMonthEquiv}
                     {savingsPercent > 0 && (
@@ -284,7 +291,7 @@ export function PricingTable({
                   </p>
                 )}
                 {tier.id === "pro" && launchWeek && interval === "monthly" && (
-                  <p className="mt-1 text-xs font-medium text-indigo-600">
+                  <p className="mt-1 text-xs font-medium text-accent">
                     {t.saleFirstMonth
                       .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
                       .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
@@ -292,13 +299,13 @@ export function PricingTable({
                 )}
               </div>
 
-              <ul className="mb-6 flex-1 space-y-3 border-t border-zinc-100 pt-5">
+              <ul className="mb-6 flex-1 space-y-3 border-t border-border/60 pt-5">
                 {tier.outcomeKeys.map((key) => (
-                  <li key={key} className="flex gap-2.5 text-sm leading-snug text-zinc-600">
+                  <li key={key} className="flex gap-2.5 text-sm leading-snug text-muted-foreground">
                     <Check
                       className={cn(
                         "mt-0.5 h-4 w-4 shrink-0",
-                        isPopular ? "text-indigo-600" : "text-zinc-400",
+                        isPopular ? "text-accent" : "text-muted-foreground/70",
                       )}
                     />
                     {t[key] as string}

@@ -35,13 +35,13 @@ export function PlanFeatureComparison() {
   const { t } = useLocale();
 
   return (
-    <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200">
-      <div className="grid grid-cols-[1fr_56px_56px] gap-0 border-b border-zinc-200 bg-zinc-50 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+    <div className="mt-6 overflow-hidden rounded-xl border border-border">
+      <div className="grid grid-cols-[1fr_56px_56px] gap-0 border-b border-border bg-muted/40 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         <span>{t.featColumnFeature}</span>
         <span className="text-center">Free</span>
-        <span className="text-center text-indigo-600">Pro</span>
+        <span className="text-center text-accent">Pro</span>
       </div>
-      <ul className="divide-y divide-zinc-100">
+      <ul className="divide-y divide-border/60">
         {FEATURE_ORDER.map((key) => {
           const access = PLAN_FEATURE_ACCESS[key];
           const freeHas = access === "both";
@@ -53,9 +53,9 @@ export function PlanFeatureComparison() {
               key={key}
               className="grid grid-cols-[1fr_56px_56px] items-center gap-0 px-4 py-2.5"
             >
-              <span className="flex items-center gap-2 text-xs text-zinc-600">
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
                 {access === "pro" && (
-                  <Lock className="h-3 w-3 shrink-0 text-zinc-400" />
+                  <Lock className="h-3 w-3 shrink-0 text-muted-foreground/60" />
                 )}
                 {label}
               </span>
@@ -75,17 +75,17 @@ export function PlanFeatureComparison() {
 
 function FeatureCell({ enabled, pro }: { enabled: boolean; pro?: boolean }) {
   if (!enabled) {
-    return <span className="text-zinc-300">—</span>;
+    return <span className="text-muted-foreground/40">—</span>;
   }
   return (
     <span
       className={cn(
         "flex h-5 w-5 items-center justify-center rounded-full",
-        pro ? "bg-indigo-50" : "bg-emerald-50",
+        pro ? "bg-accent-muted" : "bg-emerald-50",
       )}
     >
       {pro ? (
-        <Crown className="h-3 w-3 text-indigo-600" />
+        <Crown className="h-3 w-3 text-accent" />
       ) : (
         <Check className="h-3 w-3 text-emerald-600" />
       )}

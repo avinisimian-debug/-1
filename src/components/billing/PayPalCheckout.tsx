@@ -66,20 +66,35 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
           setStatus("processing");
           setErrorMsg(null);
 
-          const res = await fetch("/api/paypal/create-subscription", {
-            method: "POST",
-          });
+          try {
+            const res = await fetch("/api/paypal/create-subscription", {
+              method: "POST",
+            });
 
-          const data = await res.json();
+            let data: { subscriptionId?: string; error?: string } = {};
+            try {
+              data = await res.json();
+            } catch {
+              throw new Error(t.paypalError);
+            }
 
             if (!res.ok) {
-              const msg = (data.error as string) || t.paypalError;
+              const msg = data.error || t.paypalError;
               setStatus("error");
               setErrorMsg(msg);
               throw new Error(msg);
             }
 
-          return data.subscriptionId;
+            if (!data.subscriptionId) {
+              throw new Error(t.paypalError);
+            }
+
+            return data.subscriptionId;
+          } catch (err) {
+            setStatus("error");
+            setErrorMsg(err instanceof Error ? err.message : t.paypalError);
+            throw err;
+          }
         }}
         onApprove={async (data) => {
           try {
