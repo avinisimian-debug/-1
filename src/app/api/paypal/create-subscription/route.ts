@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import {
   createPayPalSubscription,
+  formatPayPalError,
+  getAppBaseUrl,
   isPayPalConfigured,
 } from "@/lib/paypal-subscriptions";
 
@@ -20,17 +22,18 @@ export async function POST() {
       );
     }
 
-    const baseUrl = process.env.AUTH_URL ?? "http://localhost:3000";
+    const baseUrl = getAppBaseUrl();
     const subscriptionId = await createPayPalSubscription(
       `${baseUrl}/settings?subscription=success`,
       `${baseUrl}/settings?subscription=cancel`,
+      session.user.email,
     );
 
     return NextResponse.json({ subscriptionId });
   } catch (error) {
     console.error("Create subscription error:", error);
     return NextResponse.json(
-      { error: "Failed to create subscription." },
+      { error: formatPayPalError(error) },
       { status: 500 },
     );
   }

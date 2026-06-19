@@ -113,13 +113,11 @@ export default function SettingsPage() {
                   <p className="mt-1 text-xs text-muted-foreground">PayPal</p>
                 </div>
                 <PayPalCheckout onSuccess={syncPlan} />
-                <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">
-                  {isLaunchWeekActive()
-                    ? t.paypalAutoBillingNote
-                        .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                        .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)
-                    : t.paypalSandboxNote}
-                </p>
+                {!isLaunchWeekActive() && (
+                  <p className="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">
+                    {t.paypalSandboxNote}
+                  </p>
+                )}
               </div>
             </div>
           )}

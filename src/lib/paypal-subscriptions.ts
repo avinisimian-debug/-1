@@ -1,7 +1,9 @@
-import { existsSync } from "fs";
-import { mkdir, readFile, writeFile } from "fs/promises";
-import { join } from "path";
 import { getLaunchTrialDays, isLaunchWeekActive } from "@/lib/constants";
+import {
+  readPayPalPlanCache,
+  writePayPalPlanCache,
+  type CachedPayPalPlans,
+} from "@/lib/paypal-plan-cache";
 import {
   getPayPalAccessToken,
   getPayPalBaseUrl,
@@ -9,29 +11,14 @@ import {
   PRO_PLAN_CURRENCY,
 } from "@/lib/paypal";
 
-interface CachedPlans {
-  productId?: string;
-  launchPlanId?: string;
-  /** Trial days baked into launchPlanId — invalidate when launch week countdown changes. */
-  launchPlanTrialDays?: number;
-  regularPlanId?: string;
-}
-
-const PLANS_CACHE_FILE = join(process.cwd(), "data", "paypal-plans.json");
-
-async function readCachedPlans(): Promise<CachedPlans> {
-  try {
-    if (!existsSync(PLANS_CACHE_FILE)) return {};
-    const raw = await readFile(PLANS_CACHE_FILE, "utf8");
-    return JSON.parse(raw) as CachedPlans;
-  } catch {
-    return {};
+class PayPalApiError extends Error {
+  constructor(
+    message: string,
+    readonly details?: string,
+  ) {
+    super(message);
+    this.name = "PayPalApiError";
   }
-}
-
-async function writeCachedPlans(plans: CachedPlans): Promise<void> {
-  await mkdir(join(process.cwd(), "data"), { recursive: true });
-  await writeFile(PLANS_CACHE_FILE, JSON.stringify(plans, null, 2), "utf8");
 }
 
 async function paypalFetch<T>(
@@ -51,13 +38,38 @@ async function paypalFetch<T>(
   if (!response.ok) {
     const details = await response.text();
     console.error(`PayPal ${path} error:`, details);
-    throw new Error(`PayPal API error: ${path}`);
+    throw new PayPalApiError(`PayPal request failed (${path})`, details);
+  }
+
+  if (response.status === 204) {
+    return {} as T;
   }
 
   return response.json() as Promise<T>;
 }
 
-async function ensureProductId(cached: CachedPlans): Promise<string> {
+async function getPlanStatus(planId: string): Promise<string> {
+  const plan = await paypalFetch<{ status: string }>(
+    `/v1/billing/plans/${planId}`,
+  );
+  return plan.status;
+}
+
+async function activateBillingPlan(planId: string): Promise<void> {
+  const status = await getPlanStatus(planId);
+  if (status === "ACTIVE") return;
+
+  if (status === "CREATED" || status === "INACTIVE") {
+    await paypalFetch(`/v1/billing/plans/${planId}/activate`, {
+      method: "POST",
+    });
+    return;
+  }
+
+  throw new PayPalApiError(`Billing plan is not usable (status: ${status})`);
+}
+
+async function ensureProductId(cached: CachedPayPalPlans): Promise<string> {
   if (process.env.PAYPAL_PRODUCT_ID) return process.env.PAYPAL_PRODUCT_ID;
   if (cached.productId) return cached.productId;
 
@@ -72,7 +84,7 @@ async function ensureProductId(cached: CachedPlans): Promise<string> {
   });
 
   cached.productId = product.id;
-  await writeCachedPlans(cached);
+  await writePayPalPlanCache(cached);
   return product.id;
 }
 
@@ -123,6 +135,7 @@ async function createLaunchPlan(
     }),
   });
 
+  await activateBillingPlan(plan.id);
   return plan.id;
 }
 
@@ -152,7 +165,13 @@ async function createRegularPlan(productId: string): Promise<string> {
     }),
   });
 
+  await activateBillingPlan(plan.id);
   return plan.id;
+}
+
+async function resolveActivePlanId(planId: string): Promise<string> {
+  await activateBillingPlan(planId);
+  return planId;
 }
 
 export async function getSubscriptionPlanId(): Promise<string> {
@@ -163,14 +182,14 @@ export async function getSubscriptionPlanId(): Promise<string> {
   const launch = isLaunchWeekActive();
 
   if (launch && process.env.PAYPAL_LAUNCH_PLAN_ID) {
-    return process.env.PAYPAL_LAUNCH_PLAN_ID;
+    return resolveActivePlanId(process.env.PAYPAL_LAUNCH_PLAN_ID);
   }
 
   if (!launch && process.env.PAYPAL_REGULAR_PLAN_ID) {
-    return process.env.PAYPAL_REGULAR_PLAN_ID;
+    return resolveActivePlanId(process.env.PAYPAL_REGULAR_PLAN_ID);
   }
 
-  const cached = await readCachedPlans();
+  const cached = await readPayPalPlanCache();
   const productId = await ensureProductId(cached);
 
   if (launch) {
@@ -181,39 +200,65 @@ export async function getSubscriptionPlanId(): Promise<string> {
     if (needsNewPlan) {
       cached.launchPlanId = await createLaunchPlan(productId, trialDays);
       cached.launchPlanTrialDays = trialDays;
-      await writeCachedPlans(cached);
+      await writePayPalPlanCache(cached);
+    } else if (cached.launchPlanId) {
+      await activateBillingPlan(cached.launchPlanId);
     }
+
     return cached.launchPlanId!;
   }
 
   if (!cached.regularPlanId) {
     cached.regularPlanId = await createRegularPlan(productId);
-    await writeCachedPlans(cached);
+    await writePayPalPlanCache(cached);
+  } else {
+    await activateBillingPlan(cached.regularPlanId);
   }
+
   return cached.regularPlanId;
+}
+
+export function getAppBaseUrl(): string {
+  if (process.env.AUTH_URL) {
+    return process.env.AUTH_URL.replace(/\/$/, "");
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
 }
 
 export async function createPayPalSubscription(
   returnUrl: string,
   cancelUrl: string,
+  subscriberEmail?: string,
 ): Promise<string> {
   const planId = await getSubscriptionPlanId();
+
+  const body: Record<string, unknown> = {
+    plan_id: planId,
+    application_context: {
+      brand_name: "Staz AI",
+      locale: "en-US",
+      shipping_preference: "NO_SHIPPING",
+      user_action: "SUBSCRIBE_NOW",
+      return_url: returnUrl,
+      cancel_url: cancelUrl,
+    },
+  };
+
+  if (subscriberEmail) {
+    body.subscriber = { email_address: subscriberEmail };
+  }
 
   const subscription = await paypalFetch<{ id: string }>(
     "/v1/billing/subscriptions",
     {
       method: "POST",
-      body: JSON.stringify({
-        plan_id: planId,
-        application_context: {
-          brand_name: "Staz AI",
-          locale: "en-US",
-          shipping_preference: "NO_SHIPPING",
-          user_action: "SUBSCRIBE_NOW",
-          return_url: returnUrl,
-          cancel_url: cancelUrl,
-        },
-      }),
+      body: JSON.stringify(body),
     },
   );
 
@@ -253,6 +298,25 @@ export function mapPayPalSubscriptionStatus(
     default:
       return "active";
   }
+}
+
+export function formatPayPalError(error: unknown): string {
+  if (error instanceof PayPalApiError) {
+    try {
+      const parsed = JSON.parse(error.details ?? "{}") as {
+        message?: string;
+        details?: Array<{ issue?: string; description?: string }>;
+      };
+      const issue = parsed.details?.[0];
+      if (issue?.description) return issue.description;
+      if (parsed.message) return parsed.message;
+    } catch {
+      // fall through
+    }
+    return error.message;
+  }
+  if (error instanceof Error) return error.message;
+  return "Failed to create subscription.";
 }
 
 export { isPayPalConfigured };

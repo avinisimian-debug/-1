@@ -72,11 +72,12 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
 
           const data = await res.json();
 
-          if (!res.ok) {
-            setStatus("error");
-            setErrorMsg(data.error ?? t.paypalError);
-            throw new Error(data.error);
-          }
+            if (!res.ok) {
+              const msg = (data.error as string) || t.paypalError;
+              setStatus("error");
+              setErrorMsg(msg);
+              throw new Error(msg);
+            }
 
           return data.subscriptionId;
         }}

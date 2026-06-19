@@ -793,7 +793,7 @@ const he: Translations = {
   paypalPay: "הירשמו עם PayPal",
   paypalSuccess: "Pro הופעל! המנוי שלכם מוגדר.",
   paypalProcessing: "מעבד...",
-  paypalError: "התשלום נכשל. נסו שוב.",
+  paypalError: "יצירת המנוי נכשלה. נסו שוב או פנו לתמיכה.",
   paypalNotConfigured: "PayPal לא מוגדר. הוסף מפתחות ל-.env.local",
   paypalSandboxNote: "תשלום מאובטח דרך PayPal",
   paypalSubscribeTitle: "התחילו Pro בחינם — חיוב אוטומטי אחרי שבוע ההשקה",
