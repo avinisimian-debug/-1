@@ -252,9 +252,18 @@ export interface Translations {
   paypalSubscribeTitle: string;
   paypalSubscribeDesc: string;
   paypalAutoBillingNote: string;
+  paypalPreapprovalError: string;
   // Trial / launch Pro
   trialTitle: string;
   trialDesc: string;
+  launchTrialCta: string;
+  launchTrialLoading: string;
+  launchTrialSuccess: string;
+  launchTrialError: string;
+  launchTrialUsed: string;
+  launchTrialEnded: string;
+  launchTrialOrPayPal: string;
+  paypalOptionalTitle: string;
   // Sale / launch week
   saleBadge: string;
   saleTitle: string;
@@ -608,9 +617,19 @@ const en: Translations = {
     "Subscribe with PayPal — $0 until launch week ends, then {intro}/mo charged automatically, then {regular}/mo from month 2.",
   paypalAutoBillingNote:
     "You authorize PayPal to charge {intro} when launch week ends, then {regular}/month. Cancel anytime in PayPal.",
+  paypalPreapprovalError:
+    "PayPal could not set up recurring billing. Try the free Pro button above, or contact PayPal to enable Reference Transactions on your merchant account.",
   trialTitle: "Pro is free during launch week",
   trialDesc:
-    "Use PayPal below — full Pro access now at $0. When launch week ends, {intro}/mo is charged automatically; from month 2, {regular}/mo.",
+    "Tap the button below for instant Pro — no PayPal needed. Optionally set up PayPal for automatic billing after launch week ({intro}/mo, then {regular}/mo).",
+  launchTrialCta: "Start Pro free now",
+  launchTrialLoading: "Activating Pro...",
+  launchTrialSuccess: "Pro is active until launch week ends!",
+  launchTrialError: "Could not activate Pro. Please try again.",
+  launchTrialUsed: "You already used the free launch trial.",
+  launchTrialEnded: "Launch week has ended.",
+  launchTrialOrPayPal: "Or set up automatic billing with PayPal",
+  paypalOptionalTitle: "PayPal auto-billing (optional)",
   saleBadge: "Launch Week",
   saleTitle: "Join Pro free this week via PayPal — then automatic billing at the intro price.",
   saleFirstMonth: "Free until launch week ends — then {intro}, then {regular}/mo",
@@ -959,9 +978,19 @@ const he: Translations = {
     "הירשמו עם PayPal — $0 עד סוף שבוע ההשקה, אחר כך {intro}/חודש בחיוב אוטומטי, ומחודש שני {regular}/חודש.",
   paypalAutoBillingNote:
     "באישור המנוי PayPal יחייב {intro} בסוף שבוע ההשקה, ואז {regular}/חודש. ניתן לבטל בכל עת ב-PayPal.",
+  paypalPreapprovalError:
+    "PayPal לא הצליח להגדיר חיוב חוזר. לחצו על כפתור Pro החינמי למעלה, או פנו ל-PayPal לאישור Reference Transactions בחשבון הסוחר.",
   trialTitle: "Pro בחינם בשבוע ההשקה",
   trialDesc:
-    "השתמשו ב-PayPal למטה — גישה מלאה ל-Pro ב-$0. בסוף שבוע ההשקה יחויבו אוטומטית {intro}/חודש; מחודש שני {regular}/חודש.",
+    "לחצו על הכפתור למטה לקבלת Pro מיידית — בלי PayPal. אפשר גם להגדיר חיוב אוטומטי ב-PayPal לסוף שבוע ההשקה ({intro}/חודש, ואז {regular}/חודש).",
+  launchTrialCta: "הפעילו Pro בחינם עכשיו",
+  launchTrialLoading: "מפעיל Pro...",
+  launchTrialSuccess: "Pro פעיל עד סוף שבוע ההשקה!",
+  launchTrialError: "לא הצלחנו להפעיל Pro. נסו שוב.",
+  launchTrialUsed: "כבר השתמשתם בניסיון החינמי של שבוע ההשקה.",
+  launchTrialEnded: "שבוע ההשקה הסתיים.",
+  launchTrialOrPayPal: "או הגדירו חיוב אוטומטי ב-PayPal",
+  paypalOptionalTitle: "חיוב אוטומטי ב-PayPal (אופציונלי)",
   saleBadge: "שבוע השקה",
   saleTitle: "הצטרפו ל-Pro בחינם השבוע דרך PayPal — ואז חיוב אוטומטי במחיר ההשקה.",
   saleFirstMonth: "חינם עד סוף שבוע ההשקה — אחר כך {intro}, ומחודש שני {regular}/חודש",

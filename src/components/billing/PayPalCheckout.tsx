@@ -122,7 +122,9 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
         }}
         onError={() => {
           setStatus("error");
-          setErrorMsg(t.paypalError);
+          setErrorMsg(
+            launchWeek ? t.paypalPreapprovalError : t.paypalError,
+          );
         }}
         onCancel={() => {
           setStatus("idle");

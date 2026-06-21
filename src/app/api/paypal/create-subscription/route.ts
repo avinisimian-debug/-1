@@ -26,7 +26,6 @@ export async function POST() {
     const subscriptionId = await createPayPalSubscription(
       `${baseUrl}/settings?subscription=success`,
       `${baseUrl}/settings?subscription=cancel`,
-      session.user.email,
     );
 
     return NextResponse.json({ subscriptionId });

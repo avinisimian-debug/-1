@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bell, CheckCircle2, CreditCard, Crown, Shield } from "lucide-react";
 import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
+import { LaunchTrialButton } from "@/components/billing/LaunchTrialButton";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { PricingTable } from "@/components/billing/PricingTable";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
@@ -158,6 +159,9 @@ export default function SettingsPage() {
                       .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
                       .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
                   </p>
+                  <div className="mt-4">
+                    <LaunchTrialButton onSuccess={syncPlan} />
+                  </div>
                 </div>
               )}
 
@@ -166,10 +170,15 @@ export default function SettingsPage() {
                   <CreditCard className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
                     {isLaunchWeekActive()
-                      ? t.paypalSubscribeTitle
+                      ? t.paypalOptionalTitle
                       : t.paypalTitle}
                   </h3>
                 </div>
+                {isLaunchWeekActive() && (
+                  <p className="mb-3 text-center text-xs font-medium text-muted-foreground">
+                    {t.launchTrialOrPayPal}
+                  </p>
+                )}
                 <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
                   {(isLaunchWeekActive()
                     ? t.paypalSubscribeDesc

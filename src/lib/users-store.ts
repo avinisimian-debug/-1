@@ -1,4 +1,4 @@
-import { isLaunchWeekActive } from "@/lib/constants";
+import { isLaunchWeekActive, PRO_LAUNCH_WEEK_END } from "@/lib/constants";
 import { isProGranted } from "@/lib/pro-grants";
 import { readPersistedJson, writePersistedJson } from "@/lib/user-persistence";
 
@@ -254,4 +254,38 @@ export async function upgradeUserToPro(
   if (transactionId) user.paypalTransactionId = transactionId;
 
   await writeUsers(users);
+}
+
+export async function startLaunchTrial(
+  email: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!isLaunchWeekActive()) {
+    return { ok: false, error: "launch_ended" };
+  }
+
+  const users = await readUsers();
+  const user = users.find((u) => u.email === email.toLowerCase());
+
+  if (!user) {
+    return { ok: false, error: "user_not_found" };
+  }
+
+  if (hasActiveSubscription(user) || isPaidPro(user)) {
+    return { ok: true };
+  }
+
+  if (isTrialActive(user)) {
+    return { ok: true };
+  }
+
+  if (user.proTrialUsed) {
+    return { ok: false, error: "trial_used" };
+  }
+
+  user.plan = "pro";
+  user.proTrialEndsAt = PRO_LAUNCH_WEEK_END.toISOString();
+  user.proTrialUsed = true;
+  await writeUsers(users);
+
+  return { ok: true };
 }

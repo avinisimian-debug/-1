@@ -1,6 +1,6 @@
 import {
-  getLaunchTrialDays,
   isLaunchWeekActive,
+  PRO_LAUNCH_WEEK_END,
   PRO_PLAN_INTRO_PRICE,
   PRO_PLAN_REGULAR_PRICE,
 } from "@/lib/constants";
@@ -16,8 +16,12 @@ import {
   PRO_PLAN_CURRENCY,
 } from "@/lib/paypal";
 
-/** PayPal allows at most 2 TRIAL cycles and 1 REGULAR cycle per plan. */
-const LAUNCH_PLAN_SCHEMA_VERSION = 2;
+/**
+ * PayPal allows at most 2 TRIAL cycles and 1 REGULAR cycle per plan.
+ * v3: no $0 billing cycle — free launch week uses delayed start_time instead
+ * (PayPal often fails preapproval on $0 trials).
+ */
+const LAUNCH_PLAN_SCHEMA_VERSION = 3;
 
 class PayPalApiError extends Error {
   constructor(
@@ -96,30 +100,30 @@ async function ensureProductId(cached: CachedPayPalPlans): Promise<string> {
   return product.id;
 }
 
-async function createLaunchPlan(
-  productId: string,
-  trialDays: number,
-): Promise<string> {
+/** First PayPal charge: 1h after launch week ends (free period handled in-app). */
+export function getLaunchSubscriptionStartTime(now = Date.now()): string {
+  const start = new Date(PRO_LAUNCH_WEEK_END);
+  start.setHours(start.getHours() + 1);
+  if (start.getTime() <= now + 60_000) {
+    const soon = new Date(now + 5 * 60_000);
+    return soon.toISOString();
+  }
+  return start.toISOString();
+}
+
+async function createLaunchPlan(productId: string): Promise<string> {
   const plan = await paypalFetch<{ id: string }>("/v1/billing/plans", {
     method: "POST",
     body: JSON.stringify({
       product_id: productId,
       name: "Staz AI Pro — Launch Week",
-      description: `Free for ${trialDays} days, then $14.90 for the first month, then $29.90/month`,
+      description:
+        "Free during launch week, then $14.90 for the first month, then $29.90/month",
       billing_cycles: [
-        {
-          frequency: { interval_unit: "DAY", interval_count: trialDays },
-          tenure_type: "TRIAL",
-          sequence: 1,
-          total_cycles: 1,
-          pricing_scheme: {
-            fixed_price: { value: "0", currency_code: PRO_PLAN_CURRENCY },
-          },
-        },
         {
           frequency: { interval_unit: "MONTH", interval_count: 1 },
           tenure_type: "TRIAL",
-          sequence: 2,
+          sequence: 1,
           total_cycles: 1,
           pricing_scheme: {
             fixed_price: {
@@ -131,7 +135,7 @@ async function createLaunchPlan(
         {
           frequency: { interval_unit: "MONTH", interval_count: 1 },
           tenure_type: "REGULAR",
-          sequence: 3,
+          sequence: 2,
           total_cycles: 0,
           pricing_scheme: {
             fixed_price: {
@@ -198,15 +202,12 @@ export async function getSubscriptionPlanId(): Promise<string> {
   const productId = await ensureProductId(cached);
 
   if (launch) {
-    const trialDays = getLaunchTrialDays();
     const needsNewPlan =
       !cached.launchPlanId ||
-      cached.launchPlanTrialDays !== trialDays ||
       cached.launchPlanSchemaVersion !== LAUNCH_PLAN_SCHEMA_VERSION;
 
     if (needsNewPlan) {
-      cached.launchPlanId = await createLaunchPlan(productId, trialDays);
-      cached.launchPlanTrialDays = trialDays;
+      cached.launchPlanId = await createLaunchPlan(productId);
       cached.launchPlanSchemaVersion = LAUNCH_PLAN_SCHEMA_VERSION;
       await writePayPalPlanCache(cached);
     } else if (cached.launchPlanId) {
@@ -255,9 +256,9 @@ export function getAppBaseUrl(): string {
 export async function createPayPalSubscription(
   returnUrl: string,
   cancelUrl: string,
-  subscriberEmail?: string,
 ): Promise<string> {
   const planId = await getSubscriptionPlanId();
+  const launch = isLaunchWeekActive();
 
   const body: Record<string, unknown> = {
     plan_id: planId,
@@ -271,8 +272,8 @@ export async function createPayPalSubscription(
     },
   };
 
-  if (subscriberEmail) {
-    body.subscriber = { email_address: subscriberEmail };
+  if (launch) {
+    body.start_time = getLaunchSubscriptionStartTime();
   }
 
   const subscription = await paypalFetch<{ id: string }>(
