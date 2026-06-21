@@ -120,14 +120,11 @@ export async function transcribeAudio({
 
     const openai = getOpenAIClient();
 
-    let audioFile = file;
-    if (file.size > WHISPER_MAX_BYTES) {
-      const prepared = await prepareAudioForWhisper(file);
-      if (isFailure(prepared)) {
-        return failure(new InternalServerError(prepared.error.message));
-      }
-      audioFile = prepared.data.file;
+    const prepared = await prepareAudioForWhisper(file);
+    if (isFailure(prepared)) {
+      return failure(new BadRequestError(prepared.error.message));
     }
+    const audioFile = prepared.data.file;
 
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,

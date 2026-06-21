@@ -63,7 +63,31 @@ export function normalizeApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error;
 
   if (error instanceof Error) {
-    return new InternalServerError(error.message);
+    const message = error.message;
+
+    if (message.includes("ENOENT") && message.includes("ffmpeg")) {
+      return new InternalServerError(
+        "Audio processing is temporarily unavailable. Try MP3/WAV or try again later.",
+      );
+    }
+
+    if (
+      message.includes("Invalid file format") ||
+      message.includes("corrupted") ||
+      message.includes("could not be decoded")
+    ) {
+      return new BadRequestError(
+        "Could not read this recording. Try exporting as MP3 or WAV.",
+      );
+    }
+
+    if (message.includes("rate limit") || message.includes("429")) {
+      return new InternalServerError(
+        "High demand right now. Please wait a moment and try again.",
+      );
+    }
+
+    return new InternalServerError(message);
   }
 
   return new InternalServerError("An unexpected error occurred.");

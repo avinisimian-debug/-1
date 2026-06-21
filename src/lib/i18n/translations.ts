@@ -184,6 +184,21 @@ export interface Translations {
   studioGrade: string;
   tryAgain: string;
   transcriptionFailed: string;
+  transcriptionFailedSubtitle: string;
+  transcriptionErrorGeneric: string;
+  transcriptionErrorNetwork: string;
+  transcriptionErrorTimeout: string;
+  transcriptionErrorEmpty: string;
+  transcriptionErrorVideo: string;
+  transcriptionErrorSize: string;
+  transcriptionErrorLimit: string;
+  transcriptionErrorAuth: string;
+  transcriptionErrorProTitle: string;
+  transcriptionErrorProDesc: string;
+  transcriptionErrorProCta: string;
+  transcriptionErrorTipsTitle: string;
+  transcriptionErrorTip1: string;
+  transcriptionErrorTip2: string;
   langLabel: string;
   // Admin
   adminTitle: string;
@@ -494,6 +509,29 @@ const en: Translations = {
   studioGrade: "Studio Grade",
   tryAgain: "Try Again",
   transcriptionFailed: "Transcription failed",
+  transcriptionFailedSubtitle: "Your file looks valid — this is usually temporary.",
+  transcriptionErrorGeneric:
+    "We couldn't finish processing this recording. Please try again in a moment.",
+  transcriptionErrorNetwork:
+    "Connection was interrupted during upload. Check your network and try again.",
+  transcriptionErrorTimeout:
+    "Processing took too long. Shorter clips work best on the free plan.",
+  transcriptionErrorEmpty:
+    "No speech was detected in this file. Try a recording with clearer audio.",
+  transcriptionErrorVideo:
+    "We had trouble reading the audio track in this video. Try MP3/WAV or upgrade to Pro for advanced video processing.",
+  transcriptionErrorSize:
+    "This file exceeds your plan limit. Pro supports uploads up to 500 MB and longer recordings.",
+  transcriptionErrorLimit:
+    "You've reached your monthly transcription limit. Upgrade to Pro for more.",
+  transcriptionErrorAuth: "Your session expired. Refresh the page and sign in again.",
+  transcriptionErrorProTitle: "Pro processes longer videos reliably",
+  transcriptionErrorProDesc:
+    "Priority processing, 500 MB uploads, 3+ hour recordings, and advanced AI insights.",
+  transcriptionErrorProCta: "Upgrade to Pro",
+  transcriptionErrorTipsTitle: "Quick tips",
+  transcriptionErrorTip1: "MP3 and WAV files transcribe fastest",
+  transcriptionErrorTip2: "Clear speech near the microphone improves accuracy",
   langLabel: "Language",
   adminTitle: "Registered Users",
   adminDesc: "Everyone who signed up to Staz AI",
@@ -799,6 +837,29 @@ const he: Translations = {
   studioGrade: "רמת אולפן",
   tryAgain: "נסו שוב",
   transcriptionFailed: "התמלול נכשל",
+  transcriptionFailedSubtitle: "הקובץ נראה תקין — לרוב זו תקלה זמנית.",
+  transcriptionErrorGeneric:
+    "לא הצלחנו לסיים את העיבוד. נסו שוב בעוד רגע.",
+  transcriptionErrorNetwork:
+    "החיבור נותק במהלך ההעלאה. בדקו את הרשת ונסו שוב.",
+  transcriptionErrorTimeout:
+    "העיבוד ארך יותר מדי. בחבילה החינמית קטעים קצרים עובדים הכי טוב.",
+  transcriptionErrorEmpty:
+    "לא זוהתה דיבור בקובץ. נסו הקלטה עם שמע ברור יותר.",
+  transcriptionErrorVideo:
+    "לא הצלחנו לקרוא את ערוץ השמע בסרטון. נסו MP3/WAV, או שדרגו ל-Pro לעיבוד וידאו מתקדם.",
+  transcriptionErrorSize:
+    "הקובץ חורג ממגבלת החבילה. ב-Pro אפשר להעלות עד 500 MB והקלטות ארוכות יותר.",
+  transcriptionErrorLimit:
+    "הגעתם למכסת התמלולים החודשית. שדרגו ל-Pro לעוד תמלולים.",
+  transcriptionErrorAuth: "פג תוקף ההתחברות. רעננו את הדף והתחברו מחדש.",
+  transcriptionErrorProTitle: "ב-Pro וידאו ארוך עובד בצורה אמינה",
+  transcriptionErrorProDesc:
+    "עיבוד בעדיפות, העלאה עד 500 MB, הקלטות של 3+ שעות ותובנות AI מתקדמות.",
+  transcriptionErrorProCta: "שדרגו ל-Pro",
+  transcriptionErrorTipsTitle: "טיפים מהירים",
+  transcriptionErrorTip1: "קבצי MP3 ו-WAV מתמללים הכי מהר",
+  transcriptionErrorTip2: "דיבור ברור ליד המיקרופון משפר את הדיוק",
   langLabel: "שפה",
   adminTitle: "משתמשים רשומים",
   adminDesc: "כל מי שנרשם ל-Staz AI",

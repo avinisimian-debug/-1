@@ -12,8 +12,11 @@ export interface UploadTranscriptionOptions {
   onHeadersReceived?: () => void;
 }
 
+const REQUEST_TIMEOUT_MS = 290_000;
+
 function parseErrorMessage(
-  body: ApiResponse<TranscriptionResult> | { error?: string | { message?: string } },
+  body: ApiResponse<TranscriptionResult> | { error?: string | { message?: string; code?: string } },
+  status: number,
 ): string {
   if ("error" in body && body.error) {
     if (typeof body.error === "string") return body.error;
@@ -21,6 +24,13 @@ function parseErrorMessage(
       return body.error.message;
     }
   }
+
+  if (status === 401) return "Sign in required to transcribe.";
+  if (status === 413) return "File too large for upload.";
+  if (status === 504 || status === 408) {
+    return "Processing timed out. Try a shorter recording.";
+  }
+
   return "Transcription failed. Please try again.";
 }
 
@@ -35,23 +45,21 @@ export function uploadTranscription({
   return new Promise((resolve) => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("plan", plan);
     if (plan === "pro" && language !== "auto") {
       formData.append("language", language);
     }
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", TRANSCRIPTION_API_PATH);
+    xhr.withCredentials = true;
+    xhr.timeout = REQUEST_TIMEOUT_MS;
 
     xhr.upload.addEventListener("load", () => {
       onUploadComplete?.();
     });
 
     xhr.addEventListener("readystatechange", () => {
-      if (
-        xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED &&
-        xhr.status === 200
-      ) {
+      if (xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED && xhr.status === 200) {
         onHeadersReceived?.();
       }
     });
@@ -61,7 +69,7 @@ export function uploadTranscription({
         try {
           const body = JSON.parse(xhr.responseText) as ApiResponse<TranscriptionResult>;
           if (!body.data) {
-            resolve(failure(new Error(parseErrorMessage(body))));
+            resolve(failure(new Error(parseErrorMessage(body, xhr.status))));
             return;
           }
           resolve(success(body.data));
@@ -72,18 +80,26 @@ export function uploadTranscription({
       }
 
       try {
-        const body = JSON.parse(xhr.responseText) as
-          | ApiResponse<TranscriptionResult>
-          | { error?: string };
-        resolve(failure(new Error(parseErrorMessage(body))));
+        const body = JSON.parse(xhr.responseText) as ApiResponse<TranscriptionResult>;
+        resolve(failure(new Error(parseErrorMessage(body, xhr.status))));
       } catch {
-        resolve(failure(new Error("Transcription failed. Please try again.")));
+        resolve(
+          failure(new Error(parseErrorMessage({}, xhr.status))),
+        );
       }
     });
 
     xhr.addEventListener("error", () => {
       resolve(
         failure(new Error("Network error. Check your connection and try again.")),
+      );
+    });
+
+    xhr.addEventListener("timeout", () => {
+      resolve(
+        failure(
+          new Error("Processing timed out. Try a shorter recording or upgrade to Pro."),
+        ),
       );
     });
 

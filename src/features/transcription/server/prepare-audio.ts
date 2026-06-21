@@ -10,6 +10,8 @@ import { failure, success, type Result } from "@/shared/lib/result";
 
 const require = createRequire(import.meta.url);
 
+const VIDEO_EXTENSIONS = new Set([".mp4", ".m4a"]);
+
 function resolveFfmpegPath(): string | null {
   const envPath = process.env.FFMPEG_BIN;
   if (envPath && existsSync(envPath)) {
@@ -45,6 +47,17 @@ if (ffmpegPath) {
   ffmpeg.setFfmpegPath(ffmpegPath);
 }
 
+function getExtension(file: File): string {
+  return file.name.includes(".")
+    ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase()
+    : ".mp4";
+}
+
+export function isVideoUpload(file: File): boolean {
+  const ext = getExtension(file);
+  return VIDEO_EXTENSIONS.has(ext) || file.type.startsWith("video/");
+}
+
 async function convertToMp3(
   inputPath: string,
   outputPath: string,
@@ -65,22 +78,33 @@ async function convertToMp3(
 export async function prepareAudioForWhisper(
   file: File,
 ): Promise<Result<{ file: File; compressed: boolean }, Error>> {
-  if (file.size <= WHISPER_MAX_BYTES) {
+  const isVideo = isVideoUpload(file);
+  const isOversized = file.size > WHISPER_MAX_BYTES;
+
+  if (!isVideo && !isOversized) {
     return success({ file, compressed: false });
   }
 
   if (!ffmpegPath) {
-    return failure(
-      new Error(
-        "Large file processing is unavailable. ffmpeg was not found on the server.",
-      ),
-    );
+    if (isOversized) {
+      return failure(
+        new Error(
+          "Large file processing is unavailable. ffmpeg was not found on the server.",
+        ),
+      );
+    }
+
+    if (isVideo) {
+      return failure(
+        new Error(
+          "Video audio extraction is unavailable on the server. Try uploading MP3 or WAV, or contact support.",
+        ),
+      );
+    }
   }
 
   const id = randomUUID();
-  const ext = file.name.includes(".")
-    ? file.name.slice(file.name.lastIndexOf("."))
-    : ".mp4";
+  const ext = getExtension(file);
   const inputPath = join(tmpdir(), `${id}-input${ext}`);
   const outputPath = join(tmpdir(), `${id}-output.mp3`);
 
@@ -88,19 +112,27 @@ export async function prepareAudioForWhisper(
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(inputPath, buffer);
 
-    const bitrates = ["64k", "48k", "32k"];
+    const bitrates = isOversized ? ["64k", "48k", "32k"] : ["128k", "96k", "64k"];
     let outputBuffer: Buffer | null = null;
 
     for (const bitrate of bitrates) {
       await convertToMp3(inputPath, outputPath, bitrate);
       outputBuffer = await readFile(outputPath);
 
-      if (outputBuffer.length <= WHISPER_MAX_BYTES) {
+      if (!isOversized || outputBuffer.length <= WHISPER_MAX_BYTES) {
         break;
       }
     }
 
-    if (!outputBuffer || outputBuffer.length > WHISPER_MAX_BYTES) {
+    if (!outputBuffer || outputBuffer.length === 0) {
+      return failure(
+        new Error(
+          "Could not extract audio from this file. The recording may be empty or use an unsupported codec.",
+        ),
+      );
+    }
+
+    if (isOversized && outputBuffer.length > WHISPER_MAX_BYTES) {
       return failure(
         new Error(
           "File is too long even after compression. Try a shorter recording or split the file.",
@@ -110,13 +142,19 @@ export async function prepareAudioForWhisper(
 
     const prepared = new File(
       [new Uint8Array(outputBuffer)],
-      "audio-compressed.mp3",
+      file.name.replace(/\.[^.]+$/, "") + "-audio.mp3",
       { type: "audio/mpeg" },
     );
 
-    return success({ file: prepared, compressed: true });
+    return success({ file: prepared, compressed: isOversized || isVideo });
   } catch (error) {
-    return failure(error instanceof Error ? error : new Error(String(error)));
+    const detail =
+      error instanceof Error ? error.message : "Unknown conversion error";
+    return failure(
+      new Error(
+        `Could not process this recording (${detail}). Try MP3/WAV or a shorter clip.`,
+      ),
+    );
   } finally {
     await unlink(inputPath).catch(() => {});
     await unlink(outputPath).catch(() => {});
