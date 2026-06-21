@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "setup:google": "node scripts/setup-google-auth.mjs",
-    "generate:favicons": "node scripts/generate-favicons.mjs"
+    "generate:favicons": "node scripts/generate-favicons.mjs",
+    "verify:paypal": "node scripts/verify-paypal.mjs",
+    "verify:launch-trial": "npx tsx scripts/verify-launch-trial.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

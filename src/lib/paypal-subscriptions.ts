@@ -290,12 +290,16 @@ export async function createPayPalSubscription(
 export async function getPayPalSubscription(subscriptionId: string): Promise<{
   status: string;
   id: string;
+  start_time?: string;
   subscriber?: { email_address?: string };
+  links?: Array<{ rel: string; href: string }>;
 }> {
   return paypalFetch<{
     status: string;
     id: string;
+    start_time?: string;
     subscriber?: { email_address?: string };
+    links?: Array<{ rel: string; href: string }>;
   }>(`/v1/billing/subscriptions/${subscriptionId}`);
 }
 
