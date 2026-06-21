@@ -86,6 +86,8 @@ export interface Translations {
   uploadDrop: string;
   uploadBrowse: string;
   uploadMax: string;
+  uploadFileSizeNote: string;
+  uploadDurationNote: string;
   uploadUpgrade: string;
   uploadUpgradeLink: string;
   uploadErrorType: string;
@@ -265,6 +267,7 @@ export interface Translations {
   onboardProgress: string;
   onboardDismiss: string;
   onboardExpand: string;
+  onboardHide: string;
   onboardComplete: string;
   onboardCompleteDesc: string;
   onboardStep1Title: string;
@@ -396,8 +399,10 @@ const en: Translations = {
   langFr: "French",
   langRu: "Russian",
   uploadDrop: "Drop your recording here",
-  uploadBrowse: "Cinema-quality transcription · drag & drop or browse",
+  uploadBrowse: "Studio-quality transcription with maximum accuracy · drag & drop or browse",
   uploadMax: "Max",
+  uploadFileSizeNote: "Up to {size} per file",
+  uploadDurationNote: "Up to {duration} per recording · {plan}",
   uploadUpgrade: "for 500 MB & 3+ hour videos",
   uploadUpgradeLink: "Upgrade to Pro",
   uploadErrorType: "Please upload an MP3, WAV, MP4, or M4A file.",
@@ -564,11 +569,12 @@ const en: Translations = {
   pricingEnterpriseOutcome3: "Dedicated support with SLA guarantees",
   pricingEnterpriseCta: "Contact sales",
   onboardTag: "Quick start",
-  onboardTitle: "Get value in your first 5 minutes",
+  onboardTitle: "Let's start: your first transcript in 5 minutes",
   onboardSubtitle: "Complete these 3 steps to unlock the full power of Staz AI.",
   onboardProgress: "Setup progress",
   onboardDismiss: "I'll finish this later",
   onboardExpand: "Expand",
+  onboardHide: "Hide",
   onboardComplete: "You're all set!",
   onboardCompleteDesc: "Your workspace is ready. Start turning meetings into action.",
   onboardStep1Title: "Connect your profile",
@@ -605,7 +611,7 @@ const en: Translations = {
   gatePrioritiesLine2: "Turn meetings into a ranked to-do list — not a wall of notes.",
   gateSentimentTeaser: "Sentiment",
   gatePrioritiesTeaser: "Priorities",
-  trustUsedBy: "Used by teams at",
+  trustUsedBy: "Trusted by leading teams at",
   trustTeamsCount: "From 2,400+ teams worldwide",
   liveActivityLabel: "Live activity",
   liveActivityDismiss: "Dismiss",
@@ -698,8 +704,10 @@ const he: Translations = {
   langFr: "צרפתית",
   langRu: "רוסית",
   uploadDrop: "גרור את ההקלטה לכאן",
-  uploadBrowse: "תמלול ברמת קולנוע · גרירה או בחירת קובץ",
+  uploadBrowse: "תמלול באיכות אולפן ומקסימום דיוק · גרירה או בחירת קובץ",
   uploadMax: "מקסימום",
+  uploadFileSizeNote: "עד {size} לקובץ",
+  uploadDurationNote: "עד {duration} להקלטה · {plan}",
   uploadUpgrade: "ל-500 MB וסרטונים של 3+ שעות",
   uploadUpgradeLink: "שדרג ל-Pro",
   uploadErrorType: "נא להעלות MP3, WAV, MP4 או M4A.",
@@ -866,11 +874,12 @@ const he: Translations = {
   pricingEnterpriseOutcome3: "תמיכה ייעודית עם SLA מובטח",
   pricingEnterpriseCta: "צור קשר עם מכירות",
   onboardTag: "התחלה מהירה",
-  onboardTitle: "קבלו ערך תוך 5 דקות",
+  onboardTitle: "בואו נתחיל: תמלול ראשון בתוך 5 דקות",
   onboardSubtitle: "השלימו 3 שלבים כדי לפתוח את מלוא הכוח של Staz AI.",
   onboardProgress: "התקדמות הגדרה",
   onboardDismiss: "אסיים את זה אחר כך",
   onboardExpand: "הרחב",
+  onboardHide: "הסתר",
   onboardComplete: "הכל מוכן!",
   onboardCompleteDesc: "סביבת העבודה שלך מוכנה. התחילו להפוך פגישות לפעולה.",
   onboardStep1Title: "חברו את הפרופיל",
@@ -907,16 +916,16 @@ const he: Translations = {
   gatePrioritiesLine2: "הפכו פגישות לרשימת משימות מדורגת — לא קיר של הערות.",
   gateSentimentTeaser: "סנטימנט",
   gatePrioritiesTeaser: "עדיפויות",
-  trustUsedBy: "בשימוש צוותים ב-",
+  trustUsedBy: "נמצא בשימוש של צוותים מובילים ב:",
   trustTeamsCount: "מעל 2,400 צוותים ברחבי העולם",
   liveActivityLabel: "פעילות חיה",
   liveActivityDismiss: "סגור",
   liveActivityJustNow: "עכשיו",
   liveActivityMinutesAgo: "לפני {n} דק׳",
-  liveActivitySignup: "{name} מ־{location} הצטרף/ה עכשיו",
-  liveActivityTranscription: "{name} מ־{location} סיים/ה תמלול",
-  liveActivityUpgrade: "{name} מ־{location} שדרג/ה ל-Pro",
-  liveActivityExport: "{name} מ־{location} ייצא/ה דוח PDF",
+  liveActivitySignup: "{name} מ{location} הצטרף/ה עכשיו",
+  liveActivityTranscription: "{name} מ{location} סיים/ה תמלול",
+  liveActivityUpgrade: "{name} מ{location} שדרג/ה ל-Pro",
+  liveActivityExport: "{name} מ{location} ייצא/ה דוח PDF",
 };
 
 const ar: Translations = {

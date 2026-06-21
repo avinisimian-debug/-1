@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Check,
+  ChevronDown,
+  ChevronUp,
   Circle,
   FileAudio,
+  Maximize2,
   Sparkles,
   User,
   X,
@@ -62,9 +65,9 @@ const STEPS: {
 
 function ProgressBar({ progress }: { progress: number }) {
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
       <div
-        className="onboarding-progress-fill h-full rounded-full bg-zinc-900 transition-all duration-700 ease-out"
+        className="onboarding-progress-fill h-full rounded-full bg-foreground transition-all duration-700 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -84,82 +87,112 @@ function ChecklistBody({
   onGoToStep: (id: OnboardingStepId) => void;
   compact?: boolean;
 }) {
+  const activeStepId = STEPS.find(
+    (step, index) =>
+      !isStepComplete(step.id) &&
+      (index === 0 || isStepComplete(STEPS[index - 1].id)),
+  )?.id;
+
   return (
     <>
       <div className={cn("mb-5", compact && "mb-4")}>
         <div className="mb-2 flex items-center justify-between text-xs">
-          <span className="font-medium text-zinc-500">{t.onboardProgress}</span>
-          <span className="tabular-nums font-semibold text-zinc-900">{progress}%</span>
+          <span className="font-medium text-muted-foreground">{t.onboardProgress}</span>
+          <span className="tabular-nums font-semibold text-foreground">{progress}%</span>
         </div>
         <ProgressBar progress={progress} />
       </div>
 
-      <ul className="space-y-3">
+      <ul className={cn("space-y-2", compact && "space-y-1.5")}>
         {STEPS.map((step, index) => {
           const done = isStepComplete(step.id);
           const Icon = step.icon;
           const prevDone = index === 0 || isStepComplete(STEPS[index - 1].id);
           const actionable = !done && prevDone;
+          const isActive = step.id === activeStepId;
 
           return (
             <li
               key={step.id}
               className={cn(
-                "rounded-lg border p-4 transition-colors",
-                done
-                  ? "border-emerald-200 bg-emerald-50/50"
-                  : actionable
-                    ? "border-zinc-200 bg-white"
-                    : "border-zinc-100 bg-zinc-50/80",
+                "rounded-lg border transition-all duration-300",
+                done &&
+                  "border-emerald-200/50 bg-emerald-50/25 px-3 py-2 opacity-70",
+                isActive &&
+                  "border-accent/35 bg-card px-4 py-4 shadow-sm ring-1 ring-accent/15",
+                !done &&
+                  !isActive &&
+                  "border-border/60 bg-muted/30 px-3 py-3 opacity-80",
               )}
             >
-              <div className="flex gap-3">
+              <div className={cn("flex gap-3", done && "items-center gap-2.5")}>
                 <div
                   className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
-                    done ? "bg-emerald-100" : "bg-zinc-100",
+                    "flex shrink-0 items-center justify-center rounded-md",
+                    done ? "h-6 w-6 bg-emerald-100" : "h-8 w-8 bg-muted",
                   )}
                 >
                   {done ? (
-                    <Check className="h-4 w-4 text-emerald-600" />
+                    <Check className="h-3.5 w-3.5 text-emerald-600" />
                   ) : (
-                    <Icon className="h-4 w-4 text-zinc-400" />
+                    <Icon
+                      className={cn(
+                        "h-4 w-4",
+                        isActive ? "text-accent" : "text-muted-foreground",
+                      )}
+                    />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <p
                       className={cn(
-                        "text-sm font-medium",
-                        done ? "text-emerald-800" : "text-zinc-900",
+                        "font-medium",
+                        done
+                          ? "text-sm text-emerald-800/80"
+                          : isActive
+                            ? "text-sm text-foreground"
+                            : "text-sm text-muted-foreground",
                       )}
                     >
                       {t[step.titleKey] as string}
                     </p>
-                    {!done && (
-                      <Circle className="mt-0.5 h-3 w-3 shrink-0 text-zinc-300" />
+                    {!done && !isActive && (
+                      <Circle className="mt-0.5 h-3 w-3 shrink-0 text-border" />
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-zinc-500">
-                    {t[step.descKey] as string}
-                  </p>
-                  <p className="mt-1.5 text-[11px] font-medium text-indigo-600">
-                    {t[step.outcomeKey] as string}
-                  </p>
-                  {actionable && step.id !== "review_summary" && (
-                    <button
-                      type="button"
-                      onClick={() => onGoToStep(step.id)}
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
-                    >
-                      {t[step.ctaKey] as string}
-                      <ArrowRight className="h-3 w-3" />
-                    </button>
-                  )}
-                  {actionable && step.id === "review_summary" && (
-                    <p className="mt-2 text-[11px] text-zinc-400">
-                      {t.onboardStep3Waiting}
-                    </p>
+
+                  {!done && (
+                    <>
+                      <p
+                        className={cn(
+                          "mt-0.5 text-xs leading-relaxed",
+                          isActive ? "text-muted-foreground" : "text-muted-foreground/80",
+                        )}
+                      >
+                        {t[step.descKey] as string}
+                      </p>
+                      {isActive && (
+                        <p className="mt-1.5 text-[11px] font-medium text-accent">
+                          {t[step.outcomeKey] as string}
+                        </p>
+                      )}
+                      {actionable && step.id !== "review_summary" && (
+                        <button
+                          type="button"
+                          onClick={() => onGoToStep(step.id)}
+                          className="btn-cinema mt-3 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium"
+                        >
+                          {t[step.ctaKey] as string}
+                          <ArrowRight className="h-3 w-3 rtl:rotate-180" />
+                        </button>
+                      )}
+                      {actionable && step.id === "review_summary" && (
+                        <p className="mt-2 text-[11px] text-muted-foreground">
+                          {t.onboardStep3Waiting}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -182,6 +215,7 @@ export function OnboardingChecklist({
 }: OnboardingChecklistProps) {
   const { t } = useLocale();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [bodyCollapsed, setBodyCollapsed] = useState(false);
 
   useEffect(() => {
     if (progress === 100) {
@@ -194,34 +228,55 @@ export function OnboardingChecklist({
 
   if (variant === "card") {
     return (
-      <section className="glass-card rounded-lg p-5 sm:p-6">
+      <section className="glass-card rounded-xl p-5 sm:p-6">
         <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">
+          <div className="min-w-0 text-start">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-accent">
               {t.onboardTag}
             </p>
-            <h3 className="mt-1 text-base font-semibold text-zinc-900">
+            <h3 className="mt-1 text-base font-semibold text-foreground">
               {t.onboardTitle}
             </h3>
-            <p className="mt-1 text-xs text-zinc-500">{t.onboardSubtitle}</p>
+            {!bodyCollapsed && (
+              <p className="mt-1 text-xs text-muted-foreground">{t.onboardSubtitle}</p>
+            )}
           </div>
-          {onOpenModal && (
+          <div className="flex shrink-0 items-center gap-1">
+            {onOpenModal && (
+              <button
+                type="button"
+                onClick={onOpenModal}
+                aria-label={t.onboardExpand}
+                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
+            )}
             <button
               type="button"
-              onClick={onOpenModal}
-              className="shrink-0 text-xs font-medium text-indigo-600 hover:text-indigo-800"
+              onClick={() => setBodyCollapsed((v) => !v)}
+              aria-expanded={!bodyCollapsed}
+              aria-label={bodyCollapsed ? t.onboardExpand : t.onboardHide}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              {t.onboardExpand}
+              {!bodyCollapsed && <span>{t.onboardHide}</span>}
+              {bodyCollapsed ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
             </button>
-          )}
+          </div>
         </div>
-        <ChecklistBody
-          t={t}
-          progress={progress}
-          isStepComplete={isStepComplete}
-          onGoToStep={onGoToStep}
-          compact
-        />
+        {!bodyCollapsed && (
+          <ChecklistBody
+            t={t}
+            progress={progress}
+            isStepComplete={isStepComplete}
+            onGoToStep={onGoToStep}
+            compact
+          />
+        )}
       </section>
     );
   }
@@ -233,20 +288,20 @@ export function OnboardingChecklist({
       <button
         type="button"
         aria-label={t.onboardDismiss}
-        className="absolute inset-0 bg-zinc-900/20 backdrop-blur-sm"
+        className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
         onClick={onDismiss}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="onboarding-title"
-        className="relative z-10 w-full max-w-lg rounded-lg border border-zinc-200 bg-white p-6 shadow-xl sm:p-8"
+        className="relative z-10 w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-xl sm:p-8"
       >
         <button
           type="button"
           aria-label={t.onboardDismiss}
           onClick={onDismiss}
-          className="absolute end-4 top-4 rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+          className="absolute end-4 top-4 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4" />
         </button>
@@ -256,19 +311,19 @@ export function OnboardingChecklist({
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
               <Sparkles className="h-7 w-7 text-emerald-600" />
             </div>
-            <h2 className="text-xl font-semibold text-zinc-900">{t.onboardComplete}</h2>
-            <p className="mt-2 text-sm text-zinc-500">{t.onboardCompleteDesc}</p>
+            <h2 className="text-xl font-semibold text-foreground">{t.onboardComplete}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{t.onboardCompleteDesc}</p>
           </div>
         ) : (
           <>
-            <div className="mb-6 pe-8">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">
+            <div className="mb-6 pe-8 text-start">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-accent">
                 {t.onboardTag}
               </p>
-              <h2 id="onboarding-title" className="mt-1 text-xl font-semibold text-zinc-900">
+              <h2 id="onboarding-title" className="mt-1 text-xl font-semibold text-foreground">
                 {t.onboardTitle}
               </h2>
-              <p className="mt-2 text-sm text-zinc-500">{t.onboardSubtitle}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{t.onboardSubtitle}</p>
             </div>
 
             <ChecklistBody
@@ -281,7 +336,7 @@ export function OnboardingChecklist({
             <button
               type="button"
               onClick={onDismiss}
-              className="mt-5 w-full text-center text-xs text-zinc-400 hover:text-zinc-600"
+              className="mt-5 w-full text-center text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               {t.onboardDismiss}
             </button>

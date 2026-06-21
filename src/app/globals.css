@@ -758,7 +758,7 @@
   }
 
   .upload-zone {
-    border: 2px dashed var(--border);
+    border: 2px dashed color-mix(in srgb, var(--border) 85%, transparent);
     background: var(--surface-sunken);
     border-radius: var(--radius-lg);
     transition:
@@ -769,29 +769,30 @@
   }
 
   .upload-zone:hover:not(.upload-zone-disabled) {
-    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
-    background: color-mix(in srgb, var(--accent-muted) 60%, var(--card));
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+    background: color-mix(in srgb, var(--accent-muted) 50%, var(--card));
     box-shadow: var(--shadow-md);
   }
 
   .upload-zone-dragging {
     border-color: var(--accent);
+    border-style: dashed;
     background: var(--accent-muted);
     box-shadow: var(--shadow-focus);
     transform: scale(1.005);
   }
 
   .upload-icon-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: transparent;
+    border: none;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--duration-slow) var(--ease-default);
+    box-shadow: none;
+    transition: none;
   }
 
   .upload-zone:hover .upload-icon-wrap {
-    transform: scale(1.06);
-    border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+    transform: none;
+    border-color: transparent;
   }
 
   .badge-accent {

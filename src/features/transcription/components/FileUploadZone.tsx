@@ -104,14 +104,17 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
           }}
         />
 
-        <div className="upload-icon-wrap relative mx-auto mb-6 flex h-16 w-16 items-center justify-center">
-          <Upload className="h-7 w-7 text-accent" />
+        <div
+          aria-hidden
+          className="pointer-events-none mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-muted/40"
+        >
+          <Upload className="h-7 w-7 text-accent" strokeWidth={1.75} />
         </div>
 
         <h2 className="relative text-xl font-semibold text-foreground">
           {t.uploadDrop}
         </h2>
-        <p className="relative mt-2 text-sm text-muted-foreground">
+        <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
           {t.uploadBrowse}
         </p>
 
@@ -130,10 +133,17 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
           ))}
         </div>
 
-        <p className="relative mt-5 text-xs text-muted-foreground">
-          {t.uploadMax} {limits.maxFileSizeLabel}
-          {isPro ? " · Pro" : " · Free"} · {limits.maxDurationLabel}
-        </p>
+        <div className="relative mt-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-4">
+          <span className="inline-flex items-center rounded-md border border-border/80 bg-card/80 px-3 py-1.5 text-xs text-muted-foreground">
+            {t.uploadFileSizeNote.replace("{size}", limits.maxFileSizeLabel)}
+          </span>
+          <span className="hidden h-3 w-px bg-border sm:block" aria-hidden />
+          <span className="inline-flex items-center rounded-md border border-border/80 bg-card/80 px-3 py-1.5 text-xs text-muted-foreground">
+            {t.uploadDurationNote
+              .replace("{duration}", limits.maxDurationLabel)
+              .replace("{plan}", isPro ? "Pro" : t.planFree)}
+          </span>
+        </div>
 
         {!isPro && (
           <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-accent">

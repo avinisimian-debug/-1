@@ -133,21 +133,23 @@ export function DashboardContent() {
             </div>
 
             <div id="onboarding-upload-zone" className="px-4 py-6 sm:px-8 sm:py-8">
-              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
+              <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+                <div className="min-w-0 text-start">
                   <h3 className="text-base font-semibold text-foreground">
                     {t.dashNewTranscription}
                   </h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{t.uploadBrowse}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {t.uploadBrowse}
+                  </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   {hasFeature(plan, "languageSelect") ? (
-                    <label className="flex items-center gap-2">
-                      <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                    <label className="flex min-w-0 items-center gap-2">
+                      <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                       <select
                         value={language}
                         onChange={(e) => setLanguage(e.target.value)}
-                        className="rounded-md border border-border bg-card px-2 py-1.5 text-xs text-muted-foreground shadow-xs focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
+                        className="max-w-full rounded-md border border-border bg-card px-2.5 py-2 text-xs text-foreground shadow-xs focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
                       >
                         {LANGUAGES.map((l) => (
                           <option key={l.code} value={l.code}>
@@ -192,7 +194,7 @@ export function DashboardContent() {
                 </div>
               )}
 
-              <p className="mb-4 text-center text-[11px] text-muted-foreground">
+              <p className="mb-5 text-center text-[11px] text-muted-foreground">
                 {t.dashUsageRemaining}: {limit - count} / {limit}
               </p>
 
