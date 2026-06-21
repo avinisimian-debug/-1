@@ -8,6 +8,7 @@ export interface Translations {
   // Auth
   authTagline: string;
   authTitle: string;
+  authTitleAccent: string;
   authSubtitle: string;
   authName: string;
   authEmail: string;
@@ -49,6 +50,24 @@ export interface Translations {
   authStat1: string;
   authStat2: string;
   authStat3: string;
+  landingHeroUpload: string;
+  landingHeroUploadHint: string;
+  landingWhyTitle: string;
+  landingBenefit1Title: string;
+  landingBenefit1Desc: string;
+  landingBenefit2Title: string;
+  landingBenefit2Desc: string;
+  landingBenefit3Title: string;
+  landingBenefit3Desc: string;
+  landingPricingTitle: string;
+  landingPricingFreeTitle: string;
+  landingPricingProTitle: string;
+  landingPricingFree1: string;
+  landingPricingFree2: string;
+  landingPricingPro1: string;
+  landingPricingPro2: string;
+  landingPricingPro3: string;
+  landingPricingEnterprise: string;
   authErrorName: string;
   authErrorEmail: string;
   authErrorSignIn: string;
@@ -335,9 +354,10 @@ export interface Translations {
 
 const en: Translations = {
   authTagline: "Studio-Grade AI",
-  authTitle: "Turn every meeting into results",
+  authTitle: "Turn meetings into assets.",
+  authTitleAccent: "Accurate AI transcription & summary in 5 minutes.",
   authSubtitle:
-    "Accurate AI transcription, executive summaries, and action items — all in one place. Start free in seconds.",
+    "Stop manual note-taking and endless follow-ups. Let AI extract action items, decisions, and key insights from every conversation — automatically.",
   authName: "Your name",
   authEmail: "Email address",
   authSubmit: "Get started free",
@@ -379,6 +399,28 @@ const en: Translations = {
   authStat1: "50K+ sessions",
   authStat2: "98% accuracy",
   authStat3: "4.9★ rating",
+  landingHeroUpload: "Drag a meeting recording here (or click to choose)",
+  landingHeroUploadHint: "Works with Zoom, Teams, Google Meet, and more.",
+  landingWhyTitle: "Why teams switch to us",
+  landingBenefit1Title: "Save hours",
+  landingBenefit1Desc:
+    "Process an hour-long meeting in under 5 minutes. Spend time on work, not typing.",
+  landingBenefit2Title: "Precision",
+  landingBenefit2Desc:
+    "Our AI understands context, slang, and professional terms in Hebrew and English.",
+  landingBenefit3Title: "Smart automation",
+  landingBenefit3Desc:
+    "Export action items and executive summaries as PDF — ready to share instantly.",
+  landingPricingTitle: "Simple plans, no surprises",
+  landingPricingFreeTitle: "Free (to try)",
+  landingPricingProTitle: "Pro (for teams)",
+  landingPricingFree1: "10 transcriptions per month",
+  landingPricingFree2: "Studio-quality transcription & summary",
+  landingPricingPro1: "Files up to 500 MB · 3+ hours",
+  landingPricingPro2: "PDF reports & advanced AI insights",
+  landingPricingPro3: "Priority processing & language control",
+  landingPricingEnterprise:
+    "Need very large files or a custom rollout? Talk to us about Enterprise.",
   authErrorName: "Please enter your name",
   authErrorEmail: "Please enter a valid email",
   authErrorSignIn: "Sign-in failed. Please try again.",
@@ -663,9 +705,10 @@ const en: Translations = {
 
 const he: Translations = {
   authTagline: "בינה מלאכותית ברמת אולפן",
-  authTitle: "הפכו כל פגישה לתוצאות",
+  authTitle: "הופכים פגישות לנכס.",
+  authTitleAccent: "תמלול וסיכום AI מדויק ב-5 דקות.",
   authSubtitle:
-    "תמלול מדויק, סיכומי מנהלים ומשימות — הכל במקום אחד. התחילו בחינם תוך שניות.",
+    "די לסיכומים ידניים ולפגישות אינסופיות. תנו ל-AI להפיק עבורכם רשימות משימות, החלטות עסקיות ותובנות מפתח מכל שיחה — אוטומטית.",
   authName: "השם שלך",
   authEmail: "כתובת אימייל",
   authSubmit: "התחילו בחינם",
@@ -707,6 +750,28 @@ const he: Translations = {
   authStat1: "50K+ סשנים",
   authStat2: "98% דיוק",
   authStat3: "דירוג 4.9★",
+  landingHeroUpload: "גררו לכאן הקלטת פגישה (או לחצו לבחירה)",
+  landingHeroUploadHint: "נתמך ב-Zoom, Teams, Google Meet ועוד.",
+  landingWhyTitle: "למה צוותים עוברים אלינו?",
+  landingBenefit1Title: "חיסכון בזמן",
+  landingBenefit1Desc:
+    "סיימו לעבד שעה של פגישה תוך פחות מ-5 דקות. הקדישו זמן לעשייה, לא לכתיבה.",
+  landingBenefit2Title: "דיוק מוחלט",
+  landingBenefit2Desc:
+    "מנוע ה-AI שלנו מבין הקשר, סלנג ומונחים מקצועיים בעברית ובאנגלית.",
+  landingBenefit3Title: "אוטומציה חכמה",
+  landingBenefit3Desc:
+    "ייצאו סיכומי מנהלים ורשימות משימות כ-PDF — מוכנים לשיתוף מיידי.",
+  landingPricingTitle: "תוכניות פשוטות, ללא הפתעות",
+  landingPricingFreeTitle: "חינמי (לניסיון)",
+  landingPricingProTitle: "Pro (לצוותים)",
+  landingPricingFree1: "10 תמלולים בחודש",
+  landingPricingFree2: "תמלול וסיכום באיכות אולפן",
+  landingPricingPro1: "קבצים עד 500 MB · 3+ שעות",
+  landingPricingPro2: "דוחות PDF ותובנות AI מתקדמות",
+  landingPricingPro3: "עיבוד בעדיפות ובחירת שפה",
+  landingPricingEnterprise:
+    "צריכים קבצים גדולים במיוחד? דברו איתנו על תוכנית Enterprise.",
   authErrorName: "נא להזין שם",
   authErrorEmail: "נא להזין אימייל תקין",
   authErrorSignIn: "ההתחברות נכשלה. נסו שוב.",
