@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppProviders } from "@/components/providers/AppProviders";
-import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/brand";
+import { buildSiteMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,23 +17,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://1stazai.com"),
-  applicationName: BRAND_NAME,
-  title: {
-    default: BRAND_NAME,
-    template: `%s · ${BRAND_NAME}`,
-  },
-  description: BRAND_DESCRIPTION,
-  icons: {
-    icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-    ],
-    apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
-  },
-};
+export const metadata: Metadata = buildSiteMetadata();
 
 export const viewport: Viewport = {
   themeColor: "#ffffff",
@@ -46,7 +30,8 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="he"
+      dir="rtl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground">
