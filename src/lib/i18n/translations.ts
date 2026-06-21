@@ -187,6 +187,9 @@ export interface Translations {
   settingsBasicPlan: string;
   settingsProPlanLine: string;
   settingsManagePayPal: string;
+  settingsProBillingScheduled: string;
+  billingSetupRequiredTitle: string;
+  billingSetupRequiredDesc: string;
   paypalCancelled: string;
   pricingProLaunchNote: string;
   // History
@@ -253,17 +256,9 @@ export interface Translations {
   paypalSubscribeDesc: string;
   paypalAutoBillingNote: string;
   paypalPreapprovalError: string;
-  // Trial / launch Pro
+  // Trial / launch Pro (PayPal subscription required)
   trialTitle: string;
   trialDesc: string;
-  launchTrialCta: string;
-  launchTrialLoading: string;
-  launchTrialSuccess: string;
-  launchTrialError: string;
-  launchTrialUsed: string;
-  launchTrialEnded: string;
-  launchTrialOrPayPal: string;
-  paypalOptionalTitle: string;
   // Sale / launch week
   saleBadge: string;
   saleTitle: string;
@@ -546,6 +541,11 @@ const en: Translations = {
   settingsBasicPlan: "Basic Plan — $0/month",
   settingsProPlanLine: "Pro Plan — {price}/month",
   settingsManagePayPal: "Manage or cancel your subscription in your PayPal account.",
+  settingsProBillingScheduled:
+    "Auto-billing is set up — first charge after launch week, then monthly.",
+  billingSetupRequiredTitle: "Add PayPal to keep Pro after launch week",
+  billingSetupRequiredDesc:
+    "Subscribe with PayPal below. After launch week ends, {intro}/month is charged automatically, then {regular}/month.",
   paypalCancelled: "PayPal subscription was cancelled.",
   pricingProLaunchNote: "Subscribe via PayPal — $0 during launch week, then auto-billing.",
   historyTitle: "History",
@@ -612,24 +612,16 @@ const en: Translations = {
   paypalError: "Payment failed. Please try again.",
   paypalNotConfigured: "PayPal is not configured yet. Add keys to .env.local",
   paypalSandboxNote: "Secure payment via PayPal",
-  paypalSubscribeTitle: "Start Pro free — auto-billing after launch week",
+  paypalSubscribeTitle: "Start Pro free — monthly auto-billing after launch",
   paypalSubscribeDesc:
-    "Subscribe with PayPal — $0 until launch week ends, then {intro}/mo charged automatically, then {regular}/mo from month 2.",
+    "Subscribe with PayPal for instant Pro access. $0 until launch week ends, then {intro}/month auto-charged, then {regular}/month every month.",
   paypalAutoBillingNote:
-    "You authorize PayPal to charge {intro} when launch week ends, then {regular}/month. Cancel anytime in PayPal.",
+    "By subscribing you authorize PayPal to charge {intro} when launch week ends, then {regular}/month. Cancel anytime in PayPal.",
   paypalPreapprovalError:
-    "PayPal could not set up recurring billing. Try the free Pro button above, or contact PayPal to enable Reference Transactions on your merchant account.",
+    "PayPal could not set up recurring billing. Contact PayPal to enable Reference Transactions on your merchant account.",
   trialTitle: "Pro is free during launch week",
   trialDesc:
-    "Tap the button below for instant Pro — no PayPal needed. Optionally set up PayPal for automatic billing after launch week ({intro}/mo, then {regular}/mo).",
-  launchTrialCta: "Start Pro free now",
-  launchTrialLoading: "Activating Pro...",
-  launchTrialSuccess: "Pro is active until launch week ends!",
-  launchTrialError: "Could not activate Pro. Please try again.",
-  launchTrialUsed: "You already used the free launch trial.",
-  launchTrialEnded: "Launch week has ended.",
-  launchTrialOrPayPal: "Or set up automatic billing with PayPal",
-  paypalOptionalTitle: "PayPal auto-billing (optional)",
+    "Subscribe with PayPal below — full Pro now at $0. When launch week ends, {intro}/month is charged automatically, then {regular}/month every month.",
   saleBadge: "Launch Week",
   saleTitle: "Join Pro free this week via PayPal — then automatic billing at the intro price.",
   saleFirstMonth: "Free until launch week ends — then {intro}, then {regular}/mo",
@@ -907,6 +899,11 @@ const he: Translations = {
   settingsBasicPlan: "חבילת Basic — $0/חודש",
   settingsProPlanLine: "חבילת Pro — {price}/חודש",
   settingsManagePayPal: "ניהול או ביטול המנוי דרך חשבון PayPal שלכם.",
+  settingsProBillingScheduled:
+    "חיוב אוטומטי מוגדר — חיוב ראשון אחרי שבוע ההשקה, ואז כל חודש.",
+  billingSetupRequiredTitle: "הוסיפו PayPal כדי לשמור על Pro אחרי שבוע ההשקה",
+  billingSetupRequiredDesc:
+    "הירשמו עם PayPal למטה. בסוף שבוע ההשקה יחויבו אוטומטית {intro}/חודש, ואז {regular}/חודש.",
   paypalCancelled: "הרשמת המנוי ב-PayPal בוטלה.",
   pricingProLaunchNote: "הירשמו עם PayPal — $0 בשבוע ההשקה, ואז חיוב אוטומטי.",
   historyTitle: "היסטוריה",
@@ -973,24 +970,16 @@ const he: Translations = {
   paypalError: "יצירת המנוי נכשלה. נסו שוב או פנו לתמיכה.",
   paypalNotConfigured: "PayPal לא מוגדר. הוסף מפתחות ל-.env.local",
   paypalSandboxNote: "תשלום מאובטח דרך PayPal",
-  paypalSubscribeTitle: "התחילו Pro בחינם — חיוב אוטומטי אחרי שבוע ההשקה",
+  paypalSubscribeTitle: "התחילו Pro בחינם — חיוב חודשי אוטומטי אחרי ההשקה",
   paypalSubscribeDesc:
-    "הירשמו עם PayPal — $0 עד סוף שבוע ההשקה, אחר כך {intro}/חודש בחיוב אוטומטי, ומחודש שני {regular}/חודש.",
+    "הירשמו עם PayPal לגישה מיידית ל-Pro. $0 עד סוף שבוע ההשקה, אחר כך {intro}/חודש בחיוב אוטומטי, ואז {regular}/חודש כל חודש.",
   paypalAutoBillingNote:
     "באישור המנוי PayPal יחייב {intro} בסוף שבוע ההשקה, ואז {regular}/חודש. ניתן לבטל בכל עת ב-PayPal.",
   paypalPreapprovalError:
-    "PayPal לא הצליח להגדיר חיוב חוזר. לחצו על כפתור Pro החינמי למעלה, או פנו ל-PayPal לאישור Reference Transactions בחשבון הסוחר.",
+    "PayPal לא הצליח להגדיר חיוב חוזר. פנו ל-PayPal לאישור Reference Transactions בחשבון הסוחר.",
   trialTitle: "Pro בחינם בשבוע ההשקה",
   trialDesc:
-    "לחצו על הכפתור למטה לקבלת Pro מיידית — בלי PayPal. אפשר גם להגדיר חיוב אוטומטי ב-PayPal לסוף שבוע ההשקה ({intro}/חודש, ואז {regular}/חודש).",
-  launchTrialCta: "הפעילו Pro בחינם עכשיו",
-  launchTrialLoading: "מפעיל Pro...",
-  launchTrialSuccess: "Pro פעיל עד סוף שבוע ההשקה!",
-  launchTrialError: "לא הצלחנו להפעיל Pro. נסו שוב.",
-  launchTrialUsed: "כבר השתמשתם בניסיון החינמי של שבוע ההשקה.",
-  launchTrialEnded: "שבוע ההשקה הסתיים.",
-  launchTrialOrPayPal: "או הגדירו חיוב אוטומטי ב-PayPal",
-  paypalOptionalTitle: "חיוב אוטומטי ב-PayPal (אופציונלי)",
+    "הירשמו עם PayPal למטה — גישה מלאה ל-Pro ב-$0. בסוף שבוע ההשקה יחויבו אוטומטית {intro}/חודש, ואז {regular}/חודש כל חודש.",
   saleBadge: "שבוע השקה",
   saleTitle: "הצטרפו ל-Pro בחינם השבוע דרך PayPal — ואז חיוב אוטומטי במחיר ההשקה.",
   saleFirstMonth: "חינם עד סוף שבוע ההשקה — אחר כך {intro}, ומחודש שני {regular}/חודש",

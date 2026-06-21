@@ -13,13 +13,25 @@ const SUBSCRIPTION_EVENTS = new Set([
   "BILLING.SUBSCRIPTION.SUSPENDED",
   "BILLING.SUBSCRIPTION.EXPIRED",
   "BILLING.SUBSCRIPTION.PAYMENT.FAILED",
+  "PAYMENT.SALE.COMPLETED",
 ]);
+
+function subscriptionIdFromEvent(body: PayPalWebhookEvent): string | undefined {
+  const resource = body.resource as {
+    id?: string;
+    billing_agreement_id?: string;
+  };
+  if (body.event_type === "PAYMENT.SALE.COMPLETED") {
+    return resource.billing_agreement_id ?? resource.id;
+  }
+  return resource.id;
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as PayPalWebhookEvent;
     const eventType = body.event_type ?? "";
-    const subscriptionId = body.resource?.id;
+    const subscriptionId = subscriptionIdFromEvent(body);
 
     if (!subscriptionId || !SUBSCRIPTION_EVENTS.has(eventType)) {
       return NextResponse.json({ received: true });
@@ -37,7 +49,10 @@ export async function POST(request: NextRequest) {
       eventType === "BILLING.SUBSCRIPTION.PAYMENT.FAILED"
     ) {
       status = "past_due";
-    } else if (eventType === "BILLING.SUBSCRIPTION.ACTIVATED") {
+    } else if (
+      eventType === "BILLING.SUBSCRIPTION.ACTIVATED" ||
+      eventType === "PAYMENT.SALE.COMPLETED"
+    ) {
       status = mapPayPalSubscriptionStatus("ACTIVE");
     }
 

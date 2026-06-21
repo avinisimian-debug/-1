@@ -1,4 +1,4 @@
-import { isLaunchWeekActive, PRO_LAUNCH_WEEK_END } from "@/lib/constants";
+import { isLaunchWeekActive } from "@/lib/constants";
 import { isProGranted } from "@/lib/pro-grants";
 import { readPersistedJson, writePersistedJson } from "@/lib/user-persistence";
 
@@ -30,6 +30,10 @@ export interface UserPlanDetails {
   trialEndsAt?: string;
   subscriptionStatus?: ProSubscriptionStatus;
   onIntroPricing?: boolean;
+  /** Active PayPal subscription linked to the account. */
+  hasSubscription: boolean;
+  /** Pro via launch trial only — must add PayPal before trial ends. */
+  needsPayPalSetup: boolean;
 }
 
 async function readUsers(): Promise<StoredUser[]> {
@@ -70,7 +74,7 @@ async function resolvePlanForUser(user: StoredUser): Promise<UserPlanDetails> {
   const expired = await expireTrialIfNeeded(user);
 
   if (await isProGranted(expired.email)) {
-    return { plan: "pro" };
+    return { plan: "pro", hasSubscription: false, needsPayPalSetup: false };
   }
 
   if (hasActiveSubscription(expired)) {
@@ -80,18 +84,33 @@ async function resolvePlanForUser(user: StoredUser): Promise<UserPlanDetails> {
       onIntroPricing:
         expired.proSubscriptionStatus === "trialing" ||
         (isLaunchWeekActive() && expired.proSubscriptionStatus === "active"),
+      hasSubscription: true,
+      needsPayPalSetup: false,
     };
   }
 
   if (isPaidPro(expired)) {
-    return { plan: "pro" };
+    return {
+      plan: "pro",
+      hasSubscription: Boolean(expired.paypalSubscriptionId),
+      needsPayPalSetup: false,
+    };
   }
 
   if (isTrialActive(expired)) {
-    return { plan: "pro", trialEndsAt: expired.proTrialEndsAt };
+    return {
+      plan: "pro",
+      trialEndsAt: expired.proTrialEndsAt,
+      hasSubscription: false,
+      needsPayPalSetup: true,
+    };
   }
 
-  return { plan: expired.plan === "pro" ? "free" : (expired.plan ?? "free") };
+  return {
+    plan: expired.plan === "pro" ? "free" : (expired.plan ?? "free"),
+    hasSubscription: false,
+    needsPayPalSetup: false,
+  };
 }
 
 async function withEffectivePlan(user: StoredUser): Promise<StoredUser> {
@@ -171,12 +190,14 @@ export async function getUserPlanDetails(email: string): Promise<UserPlanDetails
   const normalized = email.toLowerCase();
 
   if (await isProGranted(normalized)) {
-    return { plan: "pro" };
+    return { plan: "pro", hasSubscription: false, needsPayPalSetup: false };
   }
 
   const users = await readUsers();
   const index = users.findIndex((u) => u.email === normalized);
-  if (index === -1) return { plan: "free" };
+  if (index === -1) {
+    return { plan: "free", hasSubscription: false, needsPayPalSetup: false };
+  }
 
   const expired = await expireTrialIfNeeded(users[index]);
   users[index] = expired;
@@ -254,38 +275,4 @@ export async function upgradeUserToPro(
   if (transactionId) user.paypalTransactionId = transactionId;
 
   await writeUsers(users);
-}
-
-export async function startLaunchTrial(
-  email: string,
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!isLaunchWeekActive()) {
-    return { ok: false, error: "launch_ended" };
-  }
-
-  const users = await readUsers();
-  const user = users.find((u) => u.email === email.toLowerCase());
-
-  if (!user) {
-    return { ok: false, error: "user_not_found" };
-  }
-
-  if (hasActiveSubscription(user) || isPaidPro(user)) {
-    return { ok: true };
-  }
-
-  if (isTrialActive(user)) {
-    return { ok: true };
-  }
-
-  if (user.proTrialUsed) {
-    return { ok: false, error: "trial_used" };
-  }
-
-  user.plan = "pro";
-  user.proTrialEndsAt = PRO_LAUNCH_WEEK_END.toISOString();
-  user.proTrialUsed = true;
-  await writeUsers(users);
-
-  return { ok: true };
 }

@@ -18,5 +18,7 @@ export async function GET() {
     trialEndsAt: details.trialEndsAt,
     subscriptionStatus: details.subscriptionStatus,
     onIntroPricing: details.onIntroPricing,
+    hasSubscription: details.hasSubscription,
+    needsPayPalSetup: details.needsPayPalSetup,
   });
 }

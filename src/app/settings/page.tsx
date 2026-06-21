@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bell, CheckCircle2, CreditCard, Crown, Shield } from "lucide-react";
 import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
-import { LaunchTrialButton } from "@/components/billing/LaunchTrialButton";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { PricingTable } from "@/components/billing/PricingTable";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
@@ -23,15 +22,34 @@ import { markStepComplete } from "@/lib/onboarding-store";
 import { scrollToUpgradeWithRetry } from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
 
+interface PlanApiResponse {
+  plan: "free" | "pro";
+  hasSubscription?: boolean;
+  needsPayPalSetup?: boolean;
+  trialEndsAt?: string;
+}
+
 export default function SettingsPage() {
   const pathname = usePathname();
   const { t } = useLocale();
   const { plan, isPro, syncPlan } = usePlan();
   const { data: session } = useSession();
+  const [planDetails, setPlanDetails] = useState<PlanApiResponse | null>(null);
   const [subMessage, setSubMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  const loadPlanDetails = useCallback(async () => {
+    try {
+      const res = await fetch("/api/user/plan");
+      if (res.ok) {
+        setPlanDetails((await res.json()) as PlanApiResponse);
+      }
+    } catch {
+      setPlanDetails(null);
+    }
+  }, []);
 
   useEffect(() => {
     const email = session?.user?.email;
@@ -39,9 +57,15 @@ export default function SettingsPage() {
   }, [session?.user?.email]);
 
   useEffect(() => {
+    if (session?.user?.email) {
+      loadPlanDetails();
+    }
+  }, [session?.user?.email, plan, loadPlanDetails]);
+
+  useEffect(() => {
     if (window.location.hash !== "#upgrade") return;
     scrollToUpgradeWithRetry();
-  }, [pathname, isPro]);
+  }, [pathname, isPro, planDetails]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -73,6 +97,7 @@ export default function SettingsPage() {
           const data = await res.json();
           if (res.ok) {
             await syncPlan();
+            await loadPlanDetails();
             setSubMessage({ type: "success", text: t.paypalSuccess });
           } else {
             setSubMessage({
@@ -86,12 +111,28 @@ export default function SettingsPage() {
           window.history.replaceState({}, "", "/settings#upgrade");
         });
     }
-  }, [syncPlan, t.paypalCancelled, t.paypalError, t.paypalSuccess]);
+  }, [
+    syncPlan,
+    loadPlanDetails,
+    t.paypalCancelled,
+    t.paypalError,
+    t.paypalSuccess,
+  ]);
 
   const scrollToCheckout = useCallback(() => {
     window.history.pushState(null, "", "/settings#upgrade");
     scrollToUpgradeWithRetry();
   }, []);
+
+  const handleCheckoutSuccess = useCallback(async () => {
+    await syncPlan();
+    await loadPlanDetails();
+  }, [syncPlan, loadPlanDetails]);
+
+  const needsPayPalSetup = Boolean(planDetails?.needsPayPalSetup);
+  const hasSubscription = Boolean(planDetails?.hasSubscription);
+  const showCheckout = !isPro || needsPayPalSetup;
+  const showProActive = isPro && !needsPayPalSetup;
 
   return (
     <DashboardShell title={t.settingsTitle} description={t.settingsDesc}>
@@ -106,7 +147,7 @@ export default function SettingsPage() {
             </h2>
           </div>
 
-          {!isPro && isLaunchWeekActive() && (
+          {showCheckout && isLaunchWeekActive() && (
             <div className="mb-8">
               <SaleCountdown />
             </div>
@@ -138,18 +179,37 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {isPro ? (
+          {showProActive && (
             <div className="mt-6 space-y-2 text-center">
               <p className="text-xs font-medium text-emerald-700">
                 {t.settingsProActive}
               </p>
-              <p className="text-[11px] text-muted-foreground">
-                {t.settingsManagePayPal}
-              </p>
+              {hasSubscription && (
+                <p className="text-[11px] text-muted-foreground">
+                  {isLaunchWeekActive()
+                    ? t.settingsProBillingScheduled
+                    : t.settingsManagePayPal}
+                </p>
+              )}
             </div>
-          ) : (
+          )}
+
+          {showCheckout && (
             <div className="mt-8 scroll-mt-24 space-y-4" id="upgrade" data-paypal-section>
-              {isLaunchWeekActive() && (
+              {needsPayPalSetup && (
+                <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-4">
+                  <p className="text-sm font-semibold text-amber-900">
+                    {t.billingSetupRequiredTitle}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-amber-800/90">
+                    {t.billingSetupRequiredDesc
+                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                  </p>
+                </div>
+              )}
+
+              {isLaunchWeekActive() && !needsPayPalSetup && (
                 <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-4">
                   <p className="text-sm font-semibold text-emerald-900">
                     {t.trialTitle}
@@ -159,9 +219,6 @@ export default function SettingsPage() {
                       .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
                       .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
                   </p>
-                  <div className="mt-4">
-                    <LaunchTrialButton onSuccess={syncPlan} />
-                  </div>
                 </div>
               )}
 
@@ -170,15 +227,10 @@ export default function SettingsPage() {
                   <CreditCard className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
                     {isLaunchWeekActive()
-                      ? t.paypalOptionalTitle
+                      ? t.paypalSubscribeTitle
                       : t.paypalTitle}
                   </h3>
                 </div>
-                {isLaunchWeekActive() && (
-                  <p className="mb-3 text-center text-xs font-medium text-muted-foreground">
-                    {t.launchTrialOrPayPal}
-                  </p>
-                )}
                 <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
                   {(isLaunchWeekActive()
                     ? t.paypalSubscribeDesc
@@ -190,7 +242,7 @@ export default function SettingsPage() {
                 <div className="mb-4">
                   <ProPlanPrice size="sm" showBadge />
                 </div>
-                <PayPalCheckout onSuccess={syncPlan} />
+                <PayPalCheckout onSuccess={handleCheckoutSuccess} />
               </div>
             </div>
           )}
