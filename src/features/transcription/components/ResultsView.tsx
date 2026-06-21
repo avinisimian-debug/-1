@@ -33,7 +33,7 @@ interface ResultsViewProps {
 
 const SENTIMENT_COLORS = {
   positive: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  neutral: "border-zinc-200 bg-zinc-50 text-zinc-600",
+  neutral: "border-border bg-muted/50 text-muted-foreground",
   mixed: "border-amber-200 bg-amber-50 text-amber-700",
   negative: "border-red-200 bg-red-50 text-red-700",
 };
@@ -41,7 +41,7 @@ const SENTIMENT_COLORS = {
 const PRIORITY_STYLES = {
   high: "bg-red-50 text-red-700 border-red-200",
   medium: "bg-amber-50 text-amber-700 border-amber-200",
-  low: "bg-zinc-50 text-zinc-500 border-zinc-200",
+  low: "bg-muted/50 text-muted-foreground border-border",
 };
 
 export function ResultsView({ result, onReset }: ResultsViewProps) {
@@ -107,18 +107,18 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
     <div className="mx-auto w-full max-w-4xl">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-accent">
             {t.resComplete}
           </p>
-          <h2 className="mt-1 text-2xl font-semibold text-zinc-900">
+          <h2 className="mt-1 text-2xl font-semibold text-foreground">
             {result.fileName}
           </h2>
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5 text-zinc-400" />
+              <Clock className="h-3.5 w-3.5 text-muted-foreground/70" />
               {result.duration}
             </span>
-            <span className="text-zinc-300">·</span>
+            <span className="text-border">·</span>
             <span>
               {t.resProcessed} {result.processedAt}
             </span>
@@ -135,7 +135,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
               <button
                 type="button"
                 onClick={() => promptUpgrade("sentimentAnalysis")}
-                className="rounded-full border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-0.5 text-[11px] font-medium text-zinc-500 transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
+                className="rounded-full border border-dashed border-border bg-muted/50 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:border-indigo-300 hover:bg-accent-muted hover:text-indigo-700"
               >
                 + {t.gateSentimentTeaser}
               </button>
@@ -162,7 +162,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
               variant="outline"
               size="sm"
               onClick={onReset}
-              className="gap-2 text-zinc-500"
+              className="gap-2 text-muted-foreground"
             >
               {t.resNewUpload}
             </Button>
@@ -176,7 +176,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
       </div>
 
       <div className="glass-card overflow-hidden rounded-lg">
-        <div className="flex overflow-x-auto border-b border-zinc-200">
+        <div className="flex overflow-x-auto border-b border-border">
           {tabs.map(({ key, label, icon: Icon, locked }) =>
             locked ? (
               <LockedTab
@@ -195,8 +195,8 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
                 className={cn(
                   "flex shrink-0 items-center justify-center gap-2 px-4 py-3.5 text-sm font-medium transition-all",
                   activeTab === key
-                    ? "border-b-2 border-zinc-900 text-zinc-900"
-                    : "text-zinc-500 hover:text-zinc-700",
+                    ? "border-b-2 border-zinc-900 text-foreground"
+                    : "text-muted-foreground hover:text-foreground/90",
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -246,24 +246,24 @@ function SummaryTab({
   return (
     <div className="space-y-8">
       {hasFeature(plan, "sentimentAnalysis") && result.sentiment && (
-        <section className="rounded-md border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <section className="rounded-md border border-border bg-muted/50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t.resSentiment}
           </p>
-          <p className="mt-2 text-sm text-zinc-600">{result.sentiment.description}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{result.sentiment.description}</p>
         </section>
       )}
       {result.summary.overview && (
         <section>
-          <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-            <FileText className="h-4 w-4 text-zinc-400" />
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <FileText className="h-4 w-4 text-muted-foreground/70" />
             {t.resOverview}
           </h3>
-          <div className="rounded-md border border-indigo-100 bg-indigo-50/50 p-5">
+          <div className="rounded-md border border-accent/15 bg-accent-muted/50 p-5">
             {result.summary.overview.split("\n").filter(Boolean).map((para, i) => (
               <p
                 key={i}
-                className={cn("text-sm leading-relaxed text-zinc-700", i > 0 && "mt-4")}
+                className={cn("text-sm leading-relaxed text-foreground/90", i > 0 && "mt-4")}
               >
                 {para}
               </p>
@@ -272,31 +272,31 @@ function SummaryTab({
         </section>
       )}
       <section>
-        <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-          <Sparkles className="h-4 w-4 text-zinc-400" />
+        <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <Sparkles className="h-4 w-4 text-muted-foreground/70" />
           {t.resExecutive}
         </h3>
         <ul className="space-y-3">
           {result.summary.executive.map((point, i) => (
-            <li key={i} className="flex gap-3 text-sm leading-relaxed text-zinc-700">
-              <span className="mt-2 h-1 w-4 shrink-0 rounded-full bg-zinc-900" />
+            <li key={i} className="flex gap-3 text-sm leading-relaxed text-foreground/90">
+              <span className="mt-2 h-1 w-4 shrink-0 rounded-full bg-foreground" />
               {point}
             </li>
           ))}
         </ul>
       </section>
       <section>
-        <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-          <CheckSquare className="h-4 w-4 text-zinc-400" />
+        <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          <CheckSquare className="h-4 w-4 text-muted-foreground/70" />
           {t.resTakeaways}
         </h3>
         <ul className="space-y-3">
           {result.summary.keyTakeaways.map((point, i) => (
             <li
               key={i}
-              className="flex gap-3 rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-sm leading-relaxed text-zinc-700"
+              className="flex gap-3 rounded-md border border-border bg-muted/50 px-4 py-3.5 text-sm leading-relaxed text-foreground/90"
             >
-              <span className="font-mono text-xs font-bold text-zinc-400">
+              <span className="font-mono text-xs font-bold text-muted-foreground/70">
                 {String(i + 1).padStart(2, "0")}
               </span>
               {point}
@@ -318,12 +318,12 @@ function ChaptersTab({
       {chapters.map((ch, i) => (
         <li
           key={i}
-          className="flex items-center gap-4 rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3.5 transition-colors hover:border-zinc-300"
+          className="flex items-center gap-4 rounded-md border border-border bg-muted/50 px-4 py-3.5 transition-colors hover:border-border"
         >
-          <span className="w-14 shrink-0 font-mono text-sm font-semibold text-indigo-600">
+          <span className="w-14 shrink-0 font-mono text-sm font-semibold text-accent">
             {ch.timestamp}
           </span>
-          <span className="text-sm text-zinc-700">{ch.title}</span>
+          <span className="text-sm text-foreground/90">{ch.title}</span>
         </li>
       ))}
     </ul>
@@ -356,23 +356,23 @@ function ActionItemsTab({
         <button
           type="button"
           onClick={onPrioritiesLocked}
-          className="mb-4 flex w-full items-center justify-between rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-start transition-colors hover:border-indigo-300 hover:bg-indigo-50/50"
+          className="mb-4 flex w-full items-center justify-between rounded-md border border-dashed border-border bg-muted/50 px-4 py-3 text-start transition-colors hover:border-indigo-300 hover:bg-accent-muted/50"
         >
-          <span className="text-xs text-zinc-600">
-            <span className="font-medium text-zinc-800">+ {t.gatePrioritiesTeaser}</span>
+          <span className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">+ {t.gatePrioritiesTeaser}</span>
             {" — "}
             {t.gatePrioritiesLine1}
           </span>
-          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-indigo-600">
+          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-accent">
             Pro
           </span>
         </button>
       )}
       <div className="mb-5 flex items-center justify-between">
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-muted-foreground">
           {completedCount} / {items.length} {t.resCompleted}
         </p>
-        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-200">
+        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-muted">
           <div
             className="h-full rounded-full bg-emerald-600 transition-all"
             style={{ width: `${(completedCount / items.length) * 100}%` }}
@@ -386,22 +386,22 @@ function ActionItemsTab({
               className={cn(
                 "flex cursor-pointer items-start gap-4 rounded-md border px-4 py-4 transition-all",
                 item.completed
-                  ? "border-zinc-100 bg-zinc-50 opacity-60"
-                  : "border-zinc-200 bg-white hover:border-zinc-300",
+                  ? "border-border/60 bg-muted/50 opacity-60"
+                  : "border-border bg-white hover:border-border",
               )}
             >
               <input
                 type="checkbox"
                 checked={item.completed}
                 onChange={() => onToggle(item.id)}
-                className="mt-1 h-4 w-4 shrink-0 rounded border-zinc-300 text-indigo-600"
+                className="mt-1 h-4 w-4 shrink-0 rounded border-border text-accent"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      item.completed ? "text-zinc-400 line-through" : "text-zinc-800",
+                      item.completed ? "text-muted-foreground/70 line-through" : "text-foreground",
                     )}
                   >
                     {item.task}
@@ -417,7 +417,7 @@ function ActionItemsTab({
                     </span>
                   )}
                 </div>
-                <div className="mt-2 flex flex-wrap gap-3 text-xs text-zinc-500">
+                <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
                     <User className="h-3 w-3" />
                     {item.owner}
@@ -470,7 +470,7 @@ function TranscriptTab({
     <div>
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
+          <Search className="absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
             value={query}
@@ -491,20 +491,20 @@ function TranscriptTab({
         </Button>
       </div>
       {filtered.length === 0 ? (
-        <p className="py-8 text-center text-sm text-zinc-500">{t.resNoResults}</p>
+        <p className="py-8 text-center text-sm text-muted-foreground">{t.resNoResults}</p>
       ) : (
         <div className="max-h-[28rem] space-y-1 overflow-y-auto pe-2">
           {filtered.map((entry, i) => (
             <div
               key={i}
-              className="group flex gap-4 rounded-md px-3 py-3 transition-colors hover:bg-zinc-50"
+              className="group flex gap-4 rounded-md px-3 py-3 transition-colors hover:bg-muted/50"
             >
-              <span className="w-12 shrink-0 font-mono text-xs text-zinc-400">
+              <span className="w-12 shrink-0 font-mono text-xs text-muted-foreground/70">
                 {entry.timestamp}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-indigo-600">{entry.speaker}</p>
-                <p className="mt-1 text-sm leading-relaxed text-zinc-700">{entry.text}</p>
+                <p className="text-xs font-semibold text-accent">{entry.speaker}</p>
+                <p className="mt-1 text-sm leading-relaxed text-foreground/90">{entry.text}</p>
               </div>
             </div>
           ))}

@@ -31,29 +31,31 @@ export function ProcessingState({
   const currentLabel = t[STAGE_LABELS[stage]];
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
-      <div className="glass-card rounded-lg p-8 sm:p-10">
+    <div className="mx-auto w-full max-w-2xl animate-fade-in-up">
+      <div className="glass-card rounded-2xl p-8 sm:p-10">
         <div className="flex flex-col items-center text-center">
           <div className="relative mb-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-muted/50">
+              <Loader2 className="h-8 w-8 animate-spin text-accent" />
             </div>
-            <div className="absolute -bottom-1 -end-1 flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-semibold text-white ring-2 ring-white">
+            <div className="absolute -bottom-1 -end-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-[10px] font-semibold text-background ring-2 ring-card">
               {stageIndex + 1}
             </div>
           </div>
 
-          <h2 className="text-xl font-semibold text-zinc-900">{currentLabel}</h2>
-          <p className="mt-2 text-sm text-zinc-500">{t.procWait}</p>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            {currentLabel}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">{t.procWait}</p>
 
           <div className="mt-5">
             <SelectedFileBadge name={fileName} size={fileSize} />
           </div>
 
           <div className="mt-8 w-full">
-            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200">
+            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-zinc-900 transition-all duration-700 ease-out"
+                className="usage-bar-fill h-full transition-all duration-700 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -69,18 +71,18 @@ export function ProcessingState({
                 <li
                   key={s.key}
                   className={cn(
-                    "flex items-center gap-3 rounded-md px-4 py-3 text-sm transition-all",
-                    isCurrent && "bg-indigo-50 text-indigo-900 ring-1 ring-indigo-200",
-                    isComplete && "text-zinc-600",
-                    !isCurrent && !isComplete && "text-zinc-400",
+                    "flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-all duration-200",
+                    isCurrent && "bg-accent-muted text-foreground ring-1 ring-accent/20",
+                    isComplete && "text-muted-foreground",
+                    !isCurrent && !isComplete && "text-muted-foreground/60",
                   )}
                 >
                   {isComplete ? (
                     <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
                   ) : isCurrent ? (
-                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-indigo-600" />
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin text-accent" />
                   ) : (
-                    <div className="h-4 w-4 shrink-0 rounded-full border border-zinc-300" />
+                    <div className="h-4 w-4 shrink-0 rounded-full border border-border" />
                   )}
                   {label}
                 </li>

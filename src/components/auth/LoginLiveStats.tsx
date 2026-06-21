@@ -88,24 +88,24 @@ export function LoginLiveStats({ className }: { className?: string }) {
 
       <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
         <div className="flex items-center gap-2.5 text-center sm:text-start">
-          <Users className="h-5 w-5 shrink-0 text-indigo-600" aria-hidden />
+          <Users className="h-5 w-5 shrink-0 text-accent" aria-hidden />
           <div>
-            <p className="text-2xl font-bold tabular-nums leading-none text-zinc-900 sm:text-3xl">
+            <p className="text-2xl font-bold tabular-nums leading-none text-foreground sm:text-3xl">
               {usersFormatted}+
             </p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {t.authLiveUsersLabel}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5 text-center sm:text-start">
-          <Activity className="h-5 w-5 shrink-0 text-indigo-600" aria-hidden />
+          <Activity className="h-5 w-5 shrink-0 text-accent" aria-hidden />
           <div>
-            <p className="text-2xl font-bold tabular-nums leading-none text-zinc-900 sm:text-3xl">
+            <p className="text-2xl font-bold tabular-nums leading-none text-foreground sm:text-3xl">
               {transcriptionsFormatted}
             </p>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {t.authLiveTodayLabel}
             </p>
           </div>

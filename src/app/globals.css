@@ -72,6 +72,7 @@
 
   /* Borders & inputs */
   --border: #e4e4e7;
+  --border-muted: #ebebef;
   --border-strong: #d4d4d8;
   --input: #e4e4e7;
   --ring: #5e6ad2;
@@ -758,9 +759,9 @@
   }
 
   .upload-zone {
-    border: 2px dashed color-mix(in srgb, var(--border) 85%, transparent);
+    border: 2px dashed color-mix(in srgb, var(--border-muted) 90%, var(--accent) 8%);
     background: var(--surface-sunken);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     transition:
       border-color var(--duration-base) var(--ease-default),
       background-color var(--duration-base) var(--ease-default),
@@ -769,17 +770,18 @@
   }
 
   .upload-zone:hover:not(.upload-zone-disabled) {
-    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-    background: color-mix(in srgb, var(--accent-muted) 50%, var(--card));
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+    background: color-mix(in srgb, var(--accent-muted) 45%, var(--card));
     box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
   }
 
   .upload-zone-dragging {
     border-color: var(--accent);
     border-style: dashed;
-    background: var(--accent-muted);
+    background: color-mix(in srgb, var(--accent-muted) 70%, var(--card));
     box-shadow: var(--shadow-focus);
-    transform: scale(1.005);
+    transform: scale(1.008);
   }
 
   .upload-icon-wrap {

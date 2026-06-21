@@ -115,14 +115,14 @@ function ChecklistBody({
             <li
               key={step.id}
               className={cn(
-                "rounded-lg border transition-all duration-300",
+                "overflow-hidden rounded-lg border transition-all duration-300 ease-out",
                 done &&
-                  "border-emerald-200/50 bg-emerald-50/25 px-3 py-2 opacity-70",
+                  "max-h-14 border-emerald-200/40 bg-emerald-50/20 px-3 py-2 opacity-65",
                 isActive &&
                   "border-accent/35 bg-card px-4 py-4 shadow-sm ring-1 ring-accent/15",
                 !done &&
                   !isActive &&
-                  "border-border/60 bg-muted/30 px-3 py-3 opacity-80",
+                  "border-border/60 bg-muted/25 px-3 py-3 opacity-75",
               )}
             >
               <div className={cn("flex gap-3", done && "items-center gap-2.5")}>

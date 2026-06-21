@@ -7,6 +7,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { getProPlanPriceLabel } from "@/lib/constants";
 import { getFeatureGateMeta } from "@/lib/feature-gate";
 import type { FeatureKey } from "@/lib/plan-features";
+import { SETTINGS_UPGRADE_PATH } from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
 
 interface UpgradeModalProps {
@@ -28,7 +29,7 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
 
   const handleTrial = () => {
     onClose();
-    router.push("/settings#upgrade");
+    router.push(SETTINGS_UPGRADE_PATH);
   };
 
   return (
@@ -36,59 +37,59 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
       <button
         type="button"
         aria-label={t.gateNotNow}
-        className="absolute inset-0 bg-zinc-900/15 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-foreground/15 backdrop-blur-sm"
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative w-full max-w-md overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-xl",
+          "relative w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-xl",
         )}
       >
-        <div className="border-b border-zinc-100 bg-zinc-50/80 px-6 py-4">
+        <div className="border-b border-border/60 bg-muted/30 px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 text-start">
               <LogoMark size={28} />
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Staz AI Pro
                 </p>
-                <p className="text-sm font-semibold text-zinc-900">{t.gateEyebrow}</p>
+                <p className="text-sm font-semibold text-foreground">{t.gateEyebrow}</p>
               </div>
             </div>
             <button
               type="button"
               aria-label={t.gateNotNow}
               onClick={onClose}
-              className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-200/60 hover:text-zinc-600"
+              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <div className="px-6 py-6">
-          <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-md bg-indigo-50">
-            <Icon className="h-5 w-5 text-indigo-600" />
+        <div className="px-6 py-6 text-start">
+          <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-accent-muted">
+            <Icon className="h-5 w-5 text-accent" />
           </div>
 
-          <h2 className="text-lg font-semibold tracking-tight text-zinc-900">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">
             {t[meta.titleKey] as string}
           </h2>
 
           <div className="mt-3 space-y-2">
-            <p className="text-sm leading-relaxed text-zinc-600">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {t[meta.line1Key] as string}
             </p>
-            <p className="text-sm leading-relaxed text-zinc-500">
+            <p className="text-sm leading-relaxed text-muted-foreground/80">
               {t[meta.line2Key] as string}
             </p>
           </div>
 
-          <div className="mt-5 flex items-center gap-2 rounded-md border border-indigo-100 bg-indigo-50/60 px-3 py-2">
-            <Crown className="h-3.5 w-3.5 text-indigo-600" />
-            <p className="text-xs text-indigo-900">
+          <div className="mt-5 flex items-center gap-2 rounded-lg border border-accent/20 bg-accent-muted/50 px-3 py-2">
+            <Crown className="h-3.5 w-3.5 text-accent" />
+            <p className="text-xs text-foreground">
               {t.gatePriceHint.replace("{price}", getProPlanPriceLabel())}
             </p>
           </div>
@@ -104,7 +105,7 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary flex-1 px-4 py-2.5 text-sm font-medium text-zinc-600"
+              className="btn-secondary flex-1 px-4 py-2.5 text-sm font-medium text-muted-foreground"
             >
               {t.gateNotNow}
             </button>

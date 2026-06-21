@@ -39,22 +39,22 @@ export function TestimonialsCarousel({
 
   if (isCompact) {
     return (
-      <div className={cn("rounded-md border border-zinc-200 bg-zinc-50/80 p-3", className)}>
+      <div className={cn("rounded-lg border border-border bg-muted/40 p-3", className)}>
         <div className="mb-2 flex items-center gap-0.5">
           {Array.from({ length: 5 }).map((_, i) => (
             <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
           ))}
-          <span className="ms-1 text-[9px] font-medium text-zinc-400">4.9</span>
+          <span className="ms-1 text-[9px] font-medium text-muted-foreground">4.9</span>
         </div>
         <p
           className={cn(
-            "text-[11px] leading-relaxed text-zinc-600 transition-all duration-300",
+            "text-[11px] leading-relaxed text-muted-foreground transition-all duration-300",
             visible ? "opacity-100" : "opacity-0",
           )}
         >
           &ldquo;{current.quote.length > 90 ? `${current.quote.slice(0, 90)}…` : current.quote}&rdquo;
         </p>
-        <p className="mt-2 text-[10px] font-medium text-zinc-800">{current.name}</p>
+        <p className="mt-2 text-[10px] font-medium text-foreground">{current.name}</p>
       </div>
     );
   }
@@ -63,20 +63,20 @@ export function TestimonialsCarousel({
     <section
       className={cn(
         isPremium
-          ? "relative overflow-hidden rounded-lg border border-zinc-200 bg-gradient-to-b from-white to-zinc-50/80 p-8 shadow-sm sm:p-10"
-          : "glass-card rounded-lg p-6 sm:p-8",
+          ? "glass-card relative overflow-hidden rounded-2xl p-8 sm:p-10"
+          : "glass-card rounded-xl p-6 sm:p-8",
         className,
       )}
     >
       {isPremium && (
-        <div className="pointer-events-none absolute -end-20 -top-20 h-40 w-40 rounded-full bg-indigo-100/40 blur-3xl" />
+        <div className="pointer-events-none absolute -end-20 -top-20 h-40 w-40 rounded-full bg-accent/10 blur-3xl" />
       )}
 
       <div className="relative mb-6 flex items-center justify-between">
-        <div>
+        <div className="text-start">
           <p
             className={cn(
-              "font-semibold uppercase tracking-wider text-zinc-400",
+              "font-semibold uppercase tracking-wider text-muted-foreground",
               isPremium ? "text-[11px] tracking-[0.2em]" : "text-[10px]",
             )}
           >
@@ -84,14 +84,14 @@ export function TestimonialsCarousel({
           </p>
           <h3
             className={cn(
-              "mt-1 font-semibold text-zinc-900",
-              isPremium ? "text-xl tracking-tight" : "text-lg",
+              "mt-1 font-semibold tracking-tight text-foreground",
+              isPremium ? "text-xl" : "text-lg",
             )}
           >
             {t.testimonialsTitle}
           </h3>
           {isPremium && (
-            <p className="mt-1 text-xs text-zinc-500">{t.trustTeamsCount}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t.trustTeamsCount}</p>
           )}
         </div>
         <div className="hidden items-center gap-0.5 sm:flex">
@@ -104,25 +104,25 @@ export function TestimonialsCarousel({
               )}
             />
           ))}
-          <span className="ms-2 text-xs font-medium text-zinc-500">4.9</span>
+          <span className="ms-2 text-xs font-medium text-muted-foreground">4.9</span>
         </div>
       </div>
 
       <div
         className={cn(
-          "relative transition-all duration-300",
+          "relative text-start transition-all duration-300",
           visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
         )}
       >
         <Quote
           className={cn(
-            "text-zinc-200",
+            "text-border",
             isPremium ? "mb-4 h-9 w-9" : "mb-3 h-7 w-7",
           )}
         />
         <blockquote
           className={cn(
-            "leading-relaxed text-zinc-600",
+            "leading-relaxed text-muted-foreground",
             isPremium
               ? "text-lg font-light tracking-tight sm:text-xl"
               : "text-base sm:text-lg",
@@ -134,7 +134,7 @@ export function TestimonialsCarousel({
         <div className="mt-6 flex items-center gap-4">
           <div
             className={cn(
-              "flex shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white ring-2 ring-white shadow-md",
+              "flex shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white shadow-md ring-2 ring-card",
               isPremium ? "h-12 w-12" : "h-10 w-10",
             )}
             style={{ backgroundColor: current.accent }}
@@ -142,10 +142,10 @@ export function TestimonialsCarousel({
             {current.initials}
           </div>
           <div>
-            <p className={cn("font-medium text-zinc-900", isPremium && "text-base")}>
+            <p className={cn("font-medium text-foreground", isPremium && "text-base")}>
               {current.name}
             </p>
-            <p className="text-xs text-zinc-500">{current.role}</p>
+            <p className="text-xs text-muted-foreground">{current.role}</p>
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@ export function TestimonialsCarousel({
             }}
             className={cn(
               "h-1.5 rounded-full transition-all duration-300",
-              i === active ? "w-6 bg-zinc-900" : "w-1.5 bg-zinc-300 hover:bg-zinc-400",
+              i === active ? "w-6 bg-foreground" : "w-1.5 bg-border hover:bg-muted-foreground/40",
             )}
           />
         ))}
