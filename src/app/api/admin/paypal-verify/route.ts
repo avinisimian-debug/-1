@@ -30,17 +30,18 @@ export async function GET() {
     checks.push({ name: "resolve_plan", ok: true, detail: planId });
 
     const baseUrl = getAppBaseUrl();
-    const subscriptionId = await createPayPalSubscription(
+    const subscription = await createPayPalSubscription(
       `${baseUrl}/settings?subscription=success`,
       `${baseUrl}/settings?subscription=cancel`,
+      session.user.email ?? undefined,
     );
     checks.push({
       name: "create_subscription",
       ok: true,
-      detail: subscriptionId,
+      detail: subscription.id,
     });
 
-    const sub = await getPayPalSubscription(subscriptionId);
+    const sub = await getPayPalSubscription(subscription.id);
     checks.push({
       name: "subscription_status",
       ok: ["APPROVAL_PENDING", "APPROVED", "ACTIVE"].includes(sub.status),

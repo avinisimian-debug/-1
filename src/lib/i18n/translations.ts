@@ -272,6 +272,8 @@ export interface Translations {
   paypalSubscribeDesc: string;
   paypalAutoBillingNote: string;
   paypalPreapprovalError: string;
+  paypalBuyerTip: string;
+  paypalRedirectCta: string;
   // Trial / launch Pro (PayPal subscription required)
   trialTitle: string;
   trialDesc: string;
@@ -663,7 +665,10 @@ const en: Translations = {
   paypalAutoBillingNote:
     "By subscribing you authorize PayPal to charge {intro}/month now, then {regular}/month. Cancel anytime in PayPal.",
   paypalPreapprovalError:
-    "PayPal could not set up recurring billing. Contact PayPal to enable Reference Transactions on your merchant account.",
+    "PayPal could not set up monthly billing. Try the button below, use a card linked to PayPal, or ask the merchant to enable Reference Transactions.",
+  paypalBuyerTip:
+    "Tip: recurring billing works best with a credit or debit card on PayPal — not bank transfer only.",
+  paypalRedirectCta: "Continue on PayPal.com",
   trialTitle: "Launch week — Pro for {intro}/month",
   trialDesc:
     "Subscribe with PayPal below. {intro}/month during launch week, then {regular}/month automatically every month.",
@@ -1050,7 +1055,10 @@ const he: Translations = {
   paypalAutoBillingNote:
     "באישור המנוי PayPal יחייב {intro}/חודש עכשיו, ואז {regular}/חודש. ניתן לבטל בכל עת ב-PayPal.",
   paypalPreapprovalError:
-    "PayPal לא הצליח להגדיר חיוב חוזר. פנו ל-PayPal לאישור Reference Transactions בחשבון הסוחר.",
+    "PayPal לא הצליח להגדיר חיוב חודשי. נסו את הכפתור למטה, כרטיס אשראי מחובר ל-PayPal, או בקשו מהסוחר לאשר Reference Transactions.",
+  paypalBuyerTip:
+    "טיפ: חיוב חוזר עובד הכי טוב עם כרטיס אשראי/חיוב ב-PayPal — לא העברה בנקאית בלבד.",
+  paypalRedirectCta: "המשך ב-PayPal.com",
   trialTitle: "שבוע השקה — Pro ב-{intro}/חודש",
   trialDesc:
     "הירשמו עם PayPal למטה. {intro}/חודש בשבוע ההשקה, ואז {regular}/חודש אוטומטית כל חודש.",

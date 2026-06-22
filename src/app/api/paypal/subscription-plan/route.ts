@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import {
-  createPayPalSubscription,
   formatPayPalError,
-  getAppBaseUrl,
+  getSubscriptionPlanId,
   isPayPalConfigured,
 } from "@/lib/paypal-subscriptions";
 
-export async function POST() {
+/** Returns the active PayPal plan ID for client-side subscription approval. */
+export async function GET() {
   try {
     const session = await auth();
 
@@ -22,19 +22,10 @@ export async function POST() {
       );
     }
 
-    const baseUrl = getAppBaseUrl();
-    const subscription = await createPayPalSubscription(
-      `${baseUrl}/settings?subscription=success`,
-      `${baseUrl}/settings?subscription=cancel`,
-      session.user.email,
-    );
-
-    return NextResponse.json({
-      subscriptionId: subscription.id,
-      approveUrl: subscription.approveUrl,
-    });
+    const planId = await getSubscriptionPlanId();
+    return NextResponse.json({ planId });
   } catch (error) {
-    console.error("Create subscription error:", error);
+    console.error("Subscription plan error:", error);
     return NextResponse.json(
       { error: formatPayPalError(error) },
       { status: 500 },

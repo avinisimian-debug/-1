@@ -5,10 +5,16 @@ import {
   PayPalButtons,
   PayPalScriptProvider,
 } from "@paypal/react-paypal-js";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import type { CreateSubscriptionActions } from "@paypal/paypal-js";
+import { CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import { isLaunchWeekActive, PRO_PLAN_INTRO_PRICE_LABEL, PRO_PLAN_REGULAR_PRICE_LABEL } from "@/lib/constants";
+import {
+  isLaunchWeekActive,
+  PRO_PLAN_INTRO_PRICE_LABEL,
+  PRO_PLAN_REGULAR_PRICE_LABEL,
+} from "@/lib/constants";
+import { Button } from "@/shared/ui/button";
 
 interface PayPalCheckoutProps {
   onSuccess?: () => void;
@@ -19,6 +25,7 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
   const { upgradeToPro } = usePlan();
   const [status, setStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
   const launchWeek = isLaunchWeekActive();
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
@@ -40,6 +47,62 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
     );
   }
 
+  const activateSubscription = async (subscriptionId: string) => {
+    const res = await fetch("/api/paypal/activate-subscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subscriptionId }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      setStatus("error");
+      setErrorMsg((result.error as string) ?? t.paypalError);
+      return false;
+    }
+
+    upgradeToPro();
+    setStatus("success");
+    onSuccess?.();
+    return true;
+  };
+
+  const handleRedirectCheckout = async () => {
+    setRedirecting(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await fetch("/api/paypal/create-subscription", {
+        method: "POST",
+      });
+
+      const data = (await res.json()) as {
+        approveUrl?: string;
+        subscriptionId?: string;
+        error?: string;
+      };
+
+      if (!res.ok) {
+        throw new Error(data.error || t.paypalError);
+      }
+
+      if (data.approveUrl) {
+        window.location.href = data.approveUrl;
+        return;
+      }
+
+      if (data.subscriptionId) {
+        await activateSubscription(data.subscriptionId);
+      }
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : t.paypalError);
+    } finally {
+      setRedirecting(false);
+    }
+  };
+
   return (
     <div>
       {status === "processing" && (
@@ -50,7 +113,10 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
       )}
 
       {errorMsg && (
-        <p className="mb-4 text-sm text-red-500">{errorMsg}</p>
+        <div className="mb-4 space-y-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p>{errorMsg}</p>
+          <p className="text-xs text-red-600/90">{t.paypalBuyerTip}</p>
+        </div>
       )}
 
       <PayPalButtons
@@ -61,35 +127,25 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
           label: "subscribe",
           height: 45,
         }}
-        disabled={status === "processing"}
-        createSubscription={async () => {
+        disabled={status === "processing" || redirecting}
+        createSubscription={async (_data, actions: CreateSubscriptionActions) => {
           setStatus("processing");
           setErrorMsg(null);
 
           try {
-            const res = await fetch("/api/paypal/create-subscription", {
-              method: "POST",
-            });
+            const res = await fetch("/api/paypal/subscription-plan");
+            const data = (await res.json()) as { planId?: string; error?: string };
 
-            let data: { subscriptionId?: string; error?: string } = {};
-            try {
-              data = await res.json();
-            } catch {
-              throw new Error(t.paypalError);
-            }
-
-            if (!res.ok) {
+            if (!res.ok || !data.planId) {
               const msg = data.error || t.paypalError;
               setStatus("error");
               setErrorMsg(msg);
               throw new Error(msg);
             }
 
-            if (!data.subscriptionId) {
-              throw new Error(t.paypalError);
-            }
-
-            return data.subscriptionId;
+            return actions.subscription.create({
+              plan_id: data.planId,
+            });
           } catch (err) {
             setStatus("error");
             setErrorMsg(err instanceof Error ? err.message : t.paypalError);
@@ -98,23 +154,12 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
         }}
         onApprove={async (data) => {
           try {
-            const res = await fetch("/api/paypal/activate-subscription", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ subscriptionId: data.subscriptionID }),
-            });
-
-            const result = await res.json();
-
-            if (!res.ok) {
+            if (!data.subscriptionID) {
               setStatus("error");
-              setErrorMsg(result.error ?? t.paypalError);
+              setErrorMsg(t.paypalError);
               return;
             }
-
-            upgradeToPro();
-            setStatus("success");
-            onSuccess?.();
+            await activateSubscription(data.subscriptionID);
           } catch {
             setStatus("error");
             setErrorMsg(t.paypalError);
@@ -122,14 +167,30 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
         }}
         onError={() => {
           setStatus("error");
-          setErrorMsg(
-            launchWeek ? t.paypalPreapprovalError : t.paypalError,
-          );
+          setErrorMsg(t.paypalPreapprovalError);
         }}
         onCancel={() => {
           setStatus("idle");
         }}
       />
+
+      <div className="mt-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full gap-2"
+          disabled={status === "processing" || redirecting}
+          onClick={handleRedirectCheckout}
+        >
+          {redirecting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ExternalLink className="h-4 w-4" />
+          )}
+          {t.paypalRedirectCta}
+        </Button>
+      </div>
 
       {launchWeek && (
         <p className="mt-3 text-center text-[11px] leading-relaxed text-muted-foreground">
@@ -138,6 +199,10 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
             .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
         </p>
       )}
+
+      <p className="mt-2 text-center text-[10px] leading-relaxed text-muted-foreground/80">
+        {t.paypalBuyerTip}
+      </p>
     </div>
   );
 }
