@@ -159,7 +159,7 @@ async function main() {
         sequence: 1,
         total_cycles: 1,
         pricing_scheme: {
-          fixed_price: { value: "14.90", currency_code: "USD" },
+          fixed_price: { value: "9.99", currency_code: "USD" },
         },
       },
       {
@@ -168,7 +168,7 @@ async function main() {
         sequence: 2,
         total_cycles: 0,
         pricing_scheme: {
-          fixed_price: { value: "29.90", currency_code: "USD" },
+          fixed_price: { value: "24.90", currency_code: "USD" },
         },
       },
     ],
@@ -190,7 +190,7 @@ async function main() {
   }
 
   const planId = planRes.json.id;
-  pass("create plan", `${planId} (2 cycles: $14.90 trial + $29.90 regular)`);
+  pass("create plan", `${planId} (2 cycles: $9.99 trial + $24.90 regular)`);
 
   const activateRes = await paypalFetch(
     token,

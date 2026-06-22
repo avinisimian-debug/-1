@@ -18,10 +18,9 @@ import {
 
 /**
  * PayPal allows at most 2 TRIAL cycles and 1 REGULAR cycle per plan.
- * v3: no $0 billing cycle — free launch week uses delayed start_time instead
- * (PayPal often fails preapproval on $0 trials).
+ * v4: launch intro $9.99/mo, then $24.90/mo (Jun 2026 promo).
  */
-const LAUNCH_PLAN_SCHEMA_VERSION = 3;
+const LAUNCH_PLAN_SCHEMA_VERSION = 4;
 
 class PayPalApiError extends Error {
   constructor(
@@ -117,8 +116,7 @@ async function createLaunchPlan(productId: string): Promise<string> {
     body: JSON.stringify({
       product_id: productId,
       name: "Staz AI Pro — Launch Week",
-      description:
-        "Free during launch week, then $14.90 for the first month, then $29.90/month",
+      description: `Free during launch week, then $${PRO_PLAN_INTRO_PRICE} for the first month, then $${PRO_PLAN_REGULAR_PRICE}/month`,
       billing_cycles: [
         {
           frequency: { interval_unit: "MONTH", interval_count: 1 },

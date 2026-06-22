@@ -93,7 +93,9 @@ export function SaleCountdown({ compact = false }: { compact?: boolean }) {
 
         {!compact && (
           <p className="mb-2 text-center text-sm text-zinc-600 sm:text-start">
-            {t.saleTitle}
+            {t.saleTitle
+              .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+              .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
           </p>
         )}
 

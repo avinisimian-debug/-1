@@ -1,17 +1,17 @@
 export type PlanTier = "free" | "pro";
 
-export const PRO_PLAN_REGULAR_PRICE = "29.90";
-export const PRO_PLAN_REGULAR_PRICE_LABEL = "$29.90";
+export const PRO_PLAN_REGULAR_PRICE = "24.90";
+export const PRO_PLAN_REGULAR_PRICE_LABEL = "$24.90";
 /** First paid month after the free launch week. */
-export const PRO_PLAN_INTRO_PRICE = "14.90";
-export const PRO_PLAN_INTRO_PRICE_LABEL = "$14.90";
+export const PRO_PLAN_INTRO_PRICE = "9.99";
+export const PRO_PLAN_INTRO_PRICE_LABEL = "$9.99";
 /** @deprecated Use PRO_PLAN_INTRO_PRICE — kept for imports during migration */
 export const PRO_PLAN_SALE_PRICE = PRO_PLAN_INTRO_PRICE;
 export const PRO_PLAN_SALE_PRICE_LABEL = PRO_PLAN_INTRO_PRICE_LABEL;
 
 export const PRO_TRIAL_DAYS = 7;
-/** Launch week ends Jun 27, 2026 — free Pro trial available until then. */
-export const PRO_LAUNCH_WEEK_END = new Date("2026-06-27T23:59:59");
+/** Launch week ends Jun 29, 2026 — free Pro + intro pricing until then. */
+export const PRO_LAUNCH_WEEK_END = new Date("2026-06-29T23:59:59");
 /** @deprecated Use PRO_LAUNCH_WEEK_END */
 export const PRO_PLAN_SALE_END = PRO_LAUNCH_WEEK_END;
 
