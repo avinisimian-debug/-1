@@ -201,7 +201,7 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
       )}
 
       <p className="mt-2 text-center text-[10px] leading-relaxed text-muted-foreground/80">
-        {t.paypalBuyerTip}
+        {t.paypalOnlyNote}
       </p>
     </div>
   );

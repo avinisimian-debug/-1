@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Bell, CheckCircle2, CreditCard, Crown, Shield } from "lucide-react";
+import { Bell, CheckCircle2, Crown, Shield, Wallet } from "lucide-react";
 import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { PricingTable } from "@/components/billing/PricingTable";
@@ -228,7 +228,7 @@ export default function SettingsPage() {
 
               <div className="premium-card rounded-xl p-5 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-accent" />
+                  <Wallet className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
                     {isLaunchWeekActive()
                       ? t.paypalSubscribeTitle
@@ -300,7 +300,7 @@ export default function SettingsPage() {
 
           <section className="glass-card rounded-xl p-6">
             <div className="mb-4 flex items-center gap-3">
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
+              <Wallet className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">
                 {t.settingsBilling}
               </h2>

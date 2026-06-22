@@ -272,6 +272,7 @@ export interface Translations {
   paypalSubscribeDesc: string;
   paypalAutoBillingNote: string;
   paypalPreapprovalError: string;
+  paypalOnlyNote: string;
   paypalBuyerTip: string;
   paypalRedirectCta: string;
   // Trial / launch Pro (PayPal subscription required)
@@ -652,22 +653,25 @@ const en: Translations = {
   adminEmpty: "No users registered yet.",
   adminEmailsCopied: "Emails copied to clipboard",
   paypalTitle: "Upgrade with PayPal",
-  paypalDesc: "Secure payment — unlock Pro instantly",
+  paypalDesc:
+    "PayPal only — no separate card gateway. Subscribe once; PayPal charges monthly and pays your Business account.",
   paypalPay: "Subscribe with PayPal",
   paypalSuccess: "Pro activated! Your subscription is set up.",
   paypalProcessing: "Processing...",
   paypalError: "Payment failed. Please try again.",
   paypalNotConfigured: "PayPal is not configured yet. Add keys to .env.local",
-  paypalSandboxNote: "Secure payment via PayPal",
-  paypalSubscribeTitle: "Launch week — Pro for {intro}/month",
+  paypalSandboxNote: "PayPal only — secure monthly billing",
+  paypalSubscribeTitle: "Launch week — Pro for {intro}/month via PayPal",
   paypalSubscribeDesc:
-    "Subscribe with PayPal for instant Pro. {intro}/month during launch week, then {regular}/month every month after.",
+    "PayPal handles everything: {intro}/month during launch week, then {regular}/month automatically. Cancel anytime in PayPal.",
   paypalAutoBillingNote:
     "By subscribing you authorize PayPal to charge {intro}/month now, then {regular}/month. Cancel anytime in PayPal.",
   paypalPreapprovalError:
-    "PayPal could not set up monthly billing. Try the button below, use a card linked to PayPal, or ask the merchant to enable Reference Transactions.",
+    "PayPal could not set up monthly billing. Try the PayPal.com button below, or contact PayPal Business Support to enable recurring payments (Reference Transactions) on your merchant account.",
+  paypalOnlyNote:
+    "No card gateway on our side — payments run entirely through PayPal.",
   paypalBuyerTip:
-    "Tip: recurring billing works best with a credit or debit card on PayPal — not bank transfer only.",
+    "Log in with your PayPal account to approve monthly billing. Funds go to the merchant's PayPal Business wallet.",
   paypalRedirectCta: "Continue on PayPal.com",
   trialTitle: "Launch week — Pro for {intro}/month",
   trialDesc:
@@ -1042,22 +1046,25 @@ const he: Translations = {
   adminEmpty: "עדיין אין משתמשים רשומים.",
   adminEmailsCopied: "המיילים הועתקו ללוח",
   paypalTitle: "שדרוג עם PayPal",
-  paypalDesc: "תשלום מאובטח — Pro מופעל מיד",
+  paypalDesc:
+    "רק PayPal — בלי מערכת סליקה נפרדת. מנוי אחד, PayPal מחייב כל חודש ומעביר לחשבון העסקי שלך.",
   paypalPay: "הירשמו עם PayPal",
   paypalSuccess: "Pro הופעל! המנוי שלכם מוגדר.",
   paypalProcessing: "מעבד...",
   paypalError: "יצירת המנוי נכשלה. נסו שוב או פנו לתמיכה.",
   paypalNotConfigured: "PayPal לא מוגדר. הוסף מפתחות ל-.env.local",
-  paypalSandboxNote: "תשלום מאובטח דרך PayPal",
-  paypalSubscribeTitle: "שבוע השקה — Pro ב-{intro}/חודש",
+  paypalSandboxNote: "רק PayPal — חיוב חודשי מאובטח",
+  paypalSubscribeTitle: "שבוע השקה — Pro ב-{intro}/חודש דרך PayPal",
   paypalSubscribeDesc:
-    "הירשמו עם PayPal לגישה מיידית ל-Pro. {intro}/חודש בשבוע ההשקה, ואז {regular}/חודש כל חודש.",
+    "PayPal מטפל בהכל: {intro}/חודש במבצע ההשקה, ואז {regular}/חודש אוטומטית. ביטול בכל עת ב-PayPal.",
   paypalAutoBillingNote:
     "באישור המנוי PayPal יחייב {intro}/חודש עכשיו, ואז {regular}/חודש. ניתן לבטל בכל עת ב-PayPal.",
   paypalPreapprovalError:
-    "PayPal לא הצליח להגדיר חיוב חודשי. נסו את הכפתור למטה, כרטיס אשראי מחובר ל-PayPal, או בקשו מהסוחר לאשר Reference Transactions.",
+    "PayPal לא הצליח להגדיר חיוב חודשי. נסו את כפתור PayPal.com למטה, או פנו לתמיכת PayPal Business לאישור חיוב חוזר (Reference Transactions) בחשבון הסוחר.",
+  paypalOnlyNote:
+    "אין אצלנו מערכת סליקה — התשלומים עוברים רק דרך PayPal.",
   paypalBuyerTip:
-    "טיפ: חיוב חוזר עובד הכי טוב עם כרטיס אשראי/חיוב ב-PayPal — לא העברה בנקאית בלבד.",
+    "התחברו עם חשבון PayPal לאישור חיוב חודשי. הכסף מגיע ישירות לארנק PayPal Business של הסוחר.",
   paypalRedirectCta: "המשך ב-PayPal.com",
   trialTitle: "שבוע השקה — Pro ב-{intro}/חודש",
   trialDesc:
