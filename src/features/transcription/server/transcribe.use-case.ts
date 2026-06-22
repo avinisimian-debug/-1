@@ -17,6 +17,9 @@ import type { TranscriptionResult } from "../types";
 import { prepareAudioForWhisper } from "./prepare-audio";
 
 interface GptAnalysisBase {
+  headline?: string;
+  topics?: string[];
+  decisions?: string[];
   overview?: string;
   executive: string[];
   keyTakeaways: string[];
@@ -35,6 +38,9 @@ interface GptAnalysisPro extends GptAnalysisBase {
     description: string;
   };
   chapters?: Array<{ timestamp: string; title: string }>;
+  keyQuotes?: Array<{ quote: string; context: string }>;
+  risks?: Array<{ risk: string; severity: "high" | "medium" | "low" }>;
+  followUpEmail?: { subject: string; body: string };
 }
 
 export interface TranscribeInput {
@@ -47,20 +53,29 @@ function buildAnalysisPrompt(isPro: boolean): string {
   if (isPro) {
     return `You are an expert meeting analyst and executive communications specialist. Analyze the meeting transcript and return a JSON object with this exact structure:
 {
+  "headline": "one compelling sentence capturing the meeting outcome",
+  "topics": ["3-5 short topic tags"],
+  "decisions": ["clear decision 1", "clear decision 2"],
   "overview": "2-3 polished paragraphs synthesizing the meeting at an executive level",
   "executive": ["bullet point 1", "bullet point 2"],
   "keyTakeaways": ["takeaway 1", "takeaway 2"],
   "sentiment": { "overall": "positive|neutral|mixed|negative", "label": "2-3 word mood label", "description": "one sentence about the meeting tone" },
   "chapters": [{ "timestamp": "MM:SS", "title": "chapter title describing this section" }],
+  "keyQuotes": [{ "quote": "memorable quote", "context": "who or what topic" }],
+  "risks": [{ "risk": "risk or blocker", "severity": "high|medium|low" }],
+  "followUpEmail": { "subject": "professional follow-up subject", "body": "ready-to-send follow-up email with action items" },
   "actionItems": [
     { "task": "description", "owner": "person name or Unassigned", "deadline": "date or TBD", "priority": "high|medium|low" }
   ]
 }
-Write in the same language as the transcript. Provide overview, 5-7 executive bullets, 4-6 takeaways, 4-8 chapters with timestamps, sentiment analysis, and all action items with priority. Use "Unassigned" or "TBD" when needed.`;
+Write in the same language as the transcript. Include headline, topics, decisions, overview, 5-7 executive bullets, 4-6 takeaways, 3-5 key quotes, 2-5 risks, follow-up email, 4-8 chapters, sentiment, and all action items with priority.`;
   }
 
   return `You are an expert meeting analyst. Analyze the meeting transcript and return a JSON object with this exact structure:
 {
+  "headline": "one compelling sentence capturing the meeting outcome",
+  "topics": ["3-5 short topic tags"],
+  "decisions": ["clear decision 1", "clear decision 2"],
   "overview": "2-3 polished paragraphs synthesizing the meeting",
   "executive": ["bullet point 1", "bullet point 2"],
   "keyTakeaways": ["takeaway 1", "takeaway 2"],
@@ -68,7 +83,7 @@ Write in the same language as the transcript. Provide overview, 5-7 executive bu
     { "task": "description", "owner": "person name or Unassigned", "deadline": "date or TBD" }
   ]
 }
-Write in the same language as the transcript. Provide overview, 5-7 executive bullets, 4-6 takeaways, and all action items.`;
+Write in the same language as the transcript. Include headline, topics, 3-6 decisions, overview, 5-7 executive bullets, 4-6 takeaways, and all action items.`;
 }
 
 function getOpenAIClient() {
@@ -188,6 +203,9 @@ export async function transcribeAudio({
         dateStyle: "medium",
         timeStyle: "short",
       }),
+      ...(analysis.headline?.trim() ? { headline: analysis.headline.trim() } : {}),
+      ...(analysis.topics?.length ? { topics: analysis.topics } : {}),
+      ...(analysis.decisions?.length ? { decisions: analysis.decisions } : {}),
       summary: {
         overview: analysis.overview?.trim() ?? "",
         executive: analysis.executive ?? [],
@@ -204,6 +222,9 @@ export async function transcribeAudio({
       transcript,
       ...(isPro && analysis.chapters?.length ? { chapters: analysis.chapters } : {}),
       ...(isPro && analysis.sentiment ? { sentiment: analysis.sentiment } : {}),
+      ...(isPro && analysis.keyQuotes?.length ? { keyQuotes: analysis.keyQuotes } : {}),
+      ...(isPro && analysis.risks?.length ? { risks: analysis.risks } : {}),
+      ...(isPro && analysis.followUpEmail ? { followUpEmail: analysis.followUpEmail } : {}),
     });
   } catch (error) {
     return failure(normalizeApiError(error));

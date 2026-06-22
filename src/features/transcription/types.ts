@@ -36,6 +36,9 @@ export interface TranscriptionResult {
   fileName: string;
   duration: string;
   processedAt: string;
+  headline?: string;
+  topics?: string[];
+  decisions?: string[];
   summary: {
     overview?: string;
     executive: string[];
@@ -45,6 +48,9 @@ export interface TranscriptionResult {
   transcript: TranscriptEntry[];
   chapters?: MeetingChapter[];
   sentiment?: SentimentAnalysis;
+  keyQuotes?: Array<{ quote: string; context: string }>;
+  risks?: Array<{ risk: string; severity: "high" | "medium" | "low" }>;
+  followUpEmail?: { subject: string; body: string };
 }
 
 export interface UploadedFile {

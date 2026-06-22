@@ -6,29 +6,44 @@ import { PLAN_FEATURE_ACCESS, type FeatureKey } from "@/lib/plan-features";
 import { cn } from "@/lib/utils";
 
 const FEATURE_ORDER: FeatureKey[] = [
+  "executiveSummary",
+  "smartDecisions",
+  "topicTags",
+  "actionItems",
   "transcriptSearch",
   "copyToClipboard",
   "pdfExport",
-  "txtExport",
   "history",
-  "largeFiles",
-  "languageSelect",
   "sentimentAnalysis",
   "meetingChapters",
   "actionPriorities",
+  "keyQuotes",
+  "risksBlockers",
+  "followUpEmail",
+  "largeFiles",
+  "languageSelect",
+  "priorityProcessing",
 ];
 
 const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translations").Translations> = {
+  executiveSummary: "featExecutiveSummary",
+  smartDecisions: "featSmartDecisions",
+  topicTags: "featTopicTags",
+  actionItems: "featActionItems",
   transcriptSearch: "featTranscriptSearch",
   copyToClipboard: "featCopyClipboard",
   pdfExport: "featPdfExport",
   txtExport: "featTxtExport",
   history: "featHistory",
-  largeFiles: "featLargeFiles",
-  languageSelect: "featLanguageSelect",
   sentimentAnalysis: "featSentiment",
   meetingChapters: "featChapters",
   actionPriorities: "featPriorities",
+  keyQuotes: "featKeyQuotes",
+  risksBlockers: "featRisksBlockers",
+  followUpEmail: "featFollowUpEmail",
+  largeFiles: "featLargeFiles",
+  languageSelect: "featLanguageSelect",
+  priorityProcessing: "featPriorityProcessing",
 };
 
 export function PlanFeatureComparison() {

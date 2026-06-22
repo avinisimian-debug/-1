@@ -7,9 +7,14 @@ import {
   Clock,
   Copy,
   FileText,
+  Lightbulb,
   ListChecks,
+  Mail,
+  MessageSquareQuote,
   Search,
+  ShieldAlert,
   Sparkles,
+  Tag,
   User,
 } from "lucide-react";
 import { LockedTab } from "@/components/billing/LockedFeatureTrigger";
@@ -24,7 +29,7 @@ import { Input } from "@/shared/ui/input";
 import type { ActionItem, TranscriptionResult } from "../types";
 import { ReportDownloadPicker } from "./ReportDownloadPicker";
 
-type TabKey = "summary" | "actions" | "chapters" | "transcript";
+type TabKey = "summary" | "actions" | "insights" | "chapters" | "transcript";
 
 interface ResultsViewProps {
   result: TranscriptionResult;
@@ -56,15 +61,32 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
   const showChapters =
     hasFeature(plan, "meetingChapters") && hasChaptersData;
 
-  const tabs: { key: TabKey; label: string; icon: typeof Sparkles; locked?: boolean }[] = [
+  const hasInsightsData =
+    (result.keyQuotes?.length ?? 0) > 0 ||
+    (result.risks?.length ?? 0) > 0 ||
+    Boolean(result.followUpEmail);
+  const showInsights =
+    !hasFeature(plan, "keyQuotes") || hasInsightsData;
+
+  const tabs: { key: TabKey; label: string; icon: typeof Sparkles; locked?: boolean; lockFeature?: "meetingChapters" | "keyQuotes" }[] = [
     { key: "summary", label: t.resSummary, icon: Sparkles },
     { key: "actions", label: t.resActions, icon: ListChecks },
+    ...(showInsights
+      ? [{
+          key: "insights" as const,
+          label: t.resInsights,
+          icon: Lightbulb,
+          locked: !hasFeature(plan, "keyQuotes"),
+          lockFeature: "keyQuotes" as const,
+        }]
+      : []),
     ...(!hasFeature(plan, "meetingChapters") || showChapters
       ? [{
           key: "chapters" as const,
           label: t.resChapters,
           icon: BookOpen,
           locked: !hasFeature(plan, "meetingChapters"),
+          lockFeature: "meetingChapters" as const,
         }]
       : []),
     { key: "transcript", label: t.resTranscript, icon: FileText },
@@ -177,11 +199,11 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
 
       <div className="glass-card overflow-hidden rounded-lg">
         <div className="flex overflow-x-auto border-b border-border">
-          {tabs.map(({ key, label, icon: Icon, locked }) =>
-            locked ? (
+          {tabs.map(({ key, label, icon: Icon, locked, lockFeature }) =>
+            locked && lockFeature ? (
               <LockedTab
                 key={key}
-                feature="meetingChapters"
+                feature={lockFeature}
                 label={label}
                 icon={<Icon className="h-4 w-4" />}
                 active={activeTab === key}
@@ -219,6 +241,9 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
               t={t}
             />
           )}
+          {activeTab === "insights" && hasFeature(plan, "keyQuotes") && (
+            <InsightsTab result={result} />
+          )}
           {activeTab === "chapters" && result.chapters && hasFeature(plan, "meetingChapters") && (
             <ChaptersTab chapters={result.chapters} />
           )}
@@ -245,6 +270,53 @@ function SummaryTab({
   const { t } = useLocale();
   return (
     <div className="space-y-8">
+      {result.headline && (
+        <section className="rounded-md border border-accent/20 bg-accent-muted/30 px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {t.resHeadline}
+          </p>
+          <p className="mt-2 text-base font-medium leading-relaxed text-foreground">
+            {result.headline}
+          </p>
+        </section>
+      )}
+      {(result.topics?.length ?? 0) > 0 && (
+        <section>
+          <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <Tag className="h-4 w-4 text-muted-foreground/70" />
+            {t.resTopics}
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {result.topics!.map((topic, i) => (
+              <span
+                key={i}
+                className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-foreground/90"
+              >
+                {topic}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+      {(result.decisions?.length ?? 0) > 0 && (
+        <section>
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <CheckSquare className="h-4 w-4 text-muted-foreground/70" />
+            {t.resDecisions}
+          </h3>
+          <ul className="space-y-2">
+            {result.decisions!.map((decision, i) => (
+              <li
+                key={i}
+                className="flex gap-3 rounded-md border border-emerald-200/60 bg-emerald-50/50 px-4 py-3 text-sm leading-relaxed text-foreground/90"
+              >
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600" />
+                {decision}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {hasFeature(plan, "sentimentAnalysis") && result.sentiment && (
         <section className="rounded-md border border-border bg-muted/50 p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -304,6 +376,111 @@ function SummaryTab({
           ))}
         </ul>
       </section>
+    </div>
+  );
+}
+
+function InsightsTab({ result }: { result: TranscriptionResult }) {
+  const { t } = useLocale();
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const handleCopyEmail = async () => {
+    if (!result.followUpEmail) return;
+    const text = `Subject: ${result.followUpEmail.subject}\n\n${result.followUpEmail.body}`;
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    }
+  };
+
+  const riskSeverityStyle = {
+    high: "border-red-200 bg-red-50 text-red-700",
+    medium: "border-amber-200 bg-amber-50 text-amber-700",
+    low: "border-border bg-muted/50 text-muted-foreground",
+  };
+
+  return (
+    <div className="space-y-8">
+      {(result.keyQuotes?.length ?? 0) > 0 && (
+        <section>
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <MessageSquareQuote className="h-4 w-4 text-muted-foreground/70" />
+            {t.resKeyQuotes}
+          </h3>
+          <ul className="space-y-3">
+            {result.keyQuotes!.map((item, i) => (
+              <li
+                key={i}
+                className="rounded-md border border-border bg-muted/50 px-4 py-4"
+              >
+                <p className="text-sm font-medium leading-relaxed text-foreground">
+                  &ldquo;{item.quote}&rdquo;
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">{item.context}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {(result.risks?.length ?? 0) > 0 && (
+        <section>
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <ShieldAlert className="h-4 w-4 text-muted-foreground/70" />
+            {t.resRisks}
+          </h3>
+          <ul className="space-y-2">
+            {result.risks!.map((item, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-3 rounded-md border border-border bg-white px-4 py-3"
+              >
+                <span
+                  className={cn(
+                    "mt-0.5 shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase",
+                    riskSeverityStyle[item.severity],
+                  )}
+                >
+                  {item.severity}
+                </span>
+                <p className="text-sm leading-relaxed text-foreground/90">{item.risk}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {result.followUpEmail && (
+        <section>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <Mail className="h-4 w-4 text-muted-foreground/70" />
+              {t.resFollowUpEmail}
+            </h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCopyEmail}
+              className="gap-2"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              {emailCopied ? t.resCopied : t.resCopyEmail}
+            </Button>
+          </div>
+          <div className="rounded-md border border-border bg-muted/50 p-5">
+            <p className="text-xs font-semibold text-muted-foreground">
+              {result.followUpEmail.subject}
+            </p>
+            <div className="mt-3 space-y-3">
+              {result.followUpEmail.body.split("\n").filter(Boolean).map((para, i) => (
+                <p key={i} className="text-sm leading-relaxed text-foreground/90">
+                  {para}
+                </p>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

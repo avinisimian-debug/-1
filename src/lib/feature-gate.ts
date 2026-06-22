@@ -5,6 +5,10 @@ import {
   Globe,
   Heart,
   ListOrdered,
+  Mail,
+  MessageSquareQuote,
+  ShieldAlert,
+  Zap,
 } from "lucide-react";
 import type { FeatureKey } from "./plan-features";
 import type { Translations } from "./i18n/translations";
@@ -46,6 +50,30 @@ export const PRO_FEATURE_GATE: Partial<Record<FeatureKey, FeatureGateMeta>> = {
     titleKey: "gatePrioritiesTitle",
     line1Key: "gatePrioritiesLine1",
     line2Key: "gatePrioritiesLine2",
+  },
+  keyQuotes: {
+    icon: MessageSquareQuote,
+    titleKey: "gateQuotesTitle",
+    line1Key: "gateQuotesLine1",
+    line2Key: "gateQuotesLine2",
+  },
+  risksBlockers: {
+    icon: ShieldAlert,
+    titleKey: "gateRisksTitle",
+    line1Key: "gateRisksLine1",
+    line2Key: "gateRisksLine2",
+  },
+  followUpEmail: {
+    icon: Mail,
+    titleKey: "gateEmailTitle",
+    line1Key: "gateEmailLine1",
+    line2Key: "gateEmailLine2",
+  },
+  priorityProcessing: {
+    icon: Zap,
+    titleKey: "gatePriorityProcTitle",
+    line1Key: "gatePriorityProcLine1",
+    line2Key: "gatePriorityProcLine2",
   },
 };
 

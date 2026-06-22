@@ -30,13 +30,28 @@ export function buildFullReportText(
     `Duration: ${result.duration} | Processed: ${result.processedAt}`,
     "=".repeat(60),
     "",
+  ];
+
+  if (result.headline) {
+    lines.push("HEADLINE", "-".repeat(40), result.headline, "");
+  }
+  if (result.topics?.length) {
+    lines.push("TOPICS", "-".repeat(40), result.topics.join(", "), "");
+  }
+  if (result.decisions?.length) {
+    lines.push("KEY DECISIONS", "-".repeat(40));
+    for (const d of result.decisions) lines.push(`• ${d}`);
+    lines.push("");
+  }
+
+  lines.push(
     "EXECUTIVE OVERVIEW",
     "-".repeat(40),
     result.summary.overview || "(No overview generated)",
     "",
     "EXECUTIVE SUMMARY",
     "-".repeat(40),
-  ];
+  );
 
   for (const point of result.summary.executive) {
     lines.push(`• ${point}`);
@@ -45,6 +60,26 @@ export function buildFullReportText(
   lines.push("", "KEY TAKEAWAYS", "-".repeat(40));
   for (const point of result.summary.keyTakeaways) {
     lines.push(`• ${point}`);
+  }
+
+  if (result.keyQuotes?.length) {
+    lines.push("", "KEY QUOTES", "-".repeat(40));
+    for (const q of result.keyQuotes) {
+      lines.push(`"${q.quote}"`);
+      lines.push(`  — ${q.context}`);
+    }
+  }
+
+  if (result.risks?.length) {
+    lines.push("", "RISKS & BLOCKERS", "-".repeat(40));
+    for (const r of result.risks) {
+      lines.push(`[${r.severity.toUpperCase()}] ${r.risk}`);
+    }
+  }
+
+  if (result.followUpEmail) {
+    lines.push("", "FOLLOW-UP EMAIL", "-".repeat(40));
+    lines.push(`Subject: ${result.followUpEmail.subject}`, "", result.followUpEmail.body);
   }
 
   lines.push("", "ACTION ITEMS", "-".repeat(40));
@@ -103,12 +138,24 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 }
 
 export function buildSummaryText(result: TranscriptionResult): string {
-  const lines = [
-    result.summary.overview ?? "",
-    "",
+  const lines: string[] = [];
+
+  if (result.headline) {
+    lines.push(result.headline, "");
+  }
+  if (result.topics?.length) {
+    lines.push(`Topics: ${result.topics.join(", ")}`, "");
+  }
+  if (result.decisions?.length) {
+    lines.push("KEY DECISIONS", result.decisions.map((d) => `• ${d}`).join("\n"), "");
+  }
+  if (result.summary.overview) {
+    lines.push(result.summary.overview, "");
+  }
+  lines.push(
     result.summary.executive.map((p) => `• ${p}`).join("\n"),
     "",
     result.summary.keyTakeaways.map((p) => `• ${p}`).join("\n"),
-  ];
+  );
   return lines.filter(Boolean).join("\n");
 }

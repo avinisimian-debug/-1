@@ -1,18 +1,30 @@
 import type { PlanTier } from "./constants";
 
 export type FeatureKey =
+  | "executiveSummary"
+  | "smartDecisions"
+  | "topicTags"
   | "transcriptSearch"
   | "copyToClipboard"
   | "pdfExport"
   | "txtExport"
   | "history"
+  | "actionItems"
   | "sentimentAnalysis"
   | "meetingChapters"
   | "actionPriorities"
+  | "keyQuotes"
+  | "risksBlockers"
+  | "followUpEmail"
   | "largeFiles"
-  | "languageSelect";
+  | "languageSelect"
+  | "priorityProcessing";
 
 export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
+  executiveSummary: "both",
+  smartDecisions: "both",
+  topicTags: "both",
+  actionItems: "both",
   transcriptSearch: "both",
   copyToClipboard: "both",
   pdfExport: "both",
@@ -21,8 +33,12 @@ export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   sentimentAnalysis: "pro",
   meetingChapters: "pro",
   actionPriorities: "pro",
+  keyQuotes: "pro",
+  risksBlockers: "pro",
+  followUpEmail: "pro",
   largeFiles: "pro",
   languageSelect: "pro",
+  priorityProcessing: "pro",
 };
 
 export function hasFeature(plan: PlanTier, feature: FeatureKey): boolean {

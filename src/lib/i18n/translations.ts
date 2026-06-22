@@ -140,6 +140,14 @@ export interface Translations {
   resGeneratingPdf: string;
   resOverview: string;
   resChapters: string;
+  resInsights: string;
+  resHeadline: string;
+  resTopics: string;
+  resDecisions: string;
+  resKeyQuotes: string;
+  resRisks: string;
+  resFollowUpEmail: string;
+  resCopyEmail: string;
   resSentiment: string;
   resCopySummary: string;
   resCopied: string;
@@ -162,6 +170,10 @@ export interface Translations {
   planProActive: string;
   planUsed: string;
   featColumnFeature: string;
+  featExecutiveSummary: string;
+  featSmartDecisions: string;
+  featTopicTags: string;
+  featActionItems: string;
   featTranscriptSearch: string;
   featCopyClipboard: string;
   featPdfExport: string;
@@ -172,6 +184,10 @@ export interface Translations {
   featSentiment: string;
   featChapters: string;
   featPriorities: string;
+  featKeyQuotes: string;
+  featRisksBlockers: string;
+  featFollowUpEmail: string;
+  featPriorityProcessing: string;
   // Settings
   settingsTitle: string;
   settingsDesc: string;
@@ -341,8 +357,21 @@ export interface Translations {
   gatePrioritiesTitle: string;
   gatePrioritiesLine1: string;
   gatePrioritiesLine2: string;
-  gateSentimentTeaser: string;
   gatePrioritiesTeaser: string;
+  gateInsightsTeaser: string;
+  gateQuotesTitle: string;
+  gateQuotesLine1: string;
+  gateQuotesLine2: string;
+  gateRisksTitle: string;
+  gateRisksLine1: string;
+  gateRisksLine2: string;
+  gateEmailTitle: string;
+  gateEmailLine1: string;
+  gateEmailLine2: string;
+  gatePriorityProcTitle: string;
+  gatePriorityProcLine1: string;
+  gatePriorityProcLine2: string;
+  gateSentimentTeaser: string;
   // Trust & live activity
   trustUsedBy: string;
   trustTeamsCount: string;
@@ -406,15 +435,15 @@ const en: Translations = {
   landingHeroUpload: "Drag a meeting recording here (or click to choose)",
   landingHeroUploadHint: "Works with Zoom, Teams, Google Meet, and more.",
   landingWhyTitle: "Why teams switch to us",
-  landingBenefit1Title: "Save hours",
+  landingBenefit1Title: "Smart decisions, instantly",
   landingBenefit1Desc:
-    "Process an hour-long meeting in under 5 minutes. Spend time on work, not typing.",
-  landingBenefit2Title: "Precision",
+    "AI extracts key decisions, topics, and executive summaries from every recording — automatically.",
+  landingBenefit2Title: "Pro-grade intelligence",
   landingBenefit2Desc:
-    "Our AI understands context, slang, and professional terms in Hebrew and English.",
-  landingBenefit3Title: "Smart automation",
+    "Unlock sentiment, chapters, quotes, risks, and ready-to-send follow-up emails with Pro.",
+  landingBenefit3Title: "From meeting to action",
   landingBenefit3Desc:
-    "Export action items and executive summaries as PDF — ready to share instantly.",
+    "Action items with owners, priorities, and PDF exports — ready to share in minutes.",
   landingPricingTitle: "Simple plans, no surprises",
   landingPricingFreeTitle: "Free (to try)",
   landingPricingProTitle: "Pro (for teams)",
@@ -495,6 +524,14 @@ const en: Translations = {
   resGeneratingPdf: "Generating PDF...",
   resOverview: "Executive Overview",
   resChapters: "Chapters",
+  resInsights: "AI Insights",
+  resHeadline: "Meeting headline",
+  resTopics: "Topics",
+  resDecisions: "Key decisions",
+  resKeyQuotes: "Key quotes",
+  resRisks: "Risks & blockers",
+  resFollowUpEmail: "Follow-up email",
+  resCopyEmail: "Copy email",
   resSentiment: "Meeting Tone",
   resCopySummary: "Copy summary",
   resCopied: "Copied!",
@@ -517,16 +554,24 @@ const en: Translations = {
   planProActive: "Pro active — upload videos up to 500 MB",
   planUsed: "used this month",
   featColumnFeature: "Feature",
+  featExecutiveSummary: "AI executive summary",
+  featSmartDecisions: "Key decisions extraction",
+  featTopicTags: "Auto topic tagging",
+  featActionItems: "Action items & owners",
   featTranscriptSearch: "Transcript search",
   featCopyClipboard: "Copy to clipboard",
   featPdfExport: "PDF report export",
   featTxtExport: "Text export",
-  featHistory: "Saved history",
+  featHistory: "Saved history (5 / 50)",
   featLargeFiles: "Large files (500 MB)",
   featLanguageSelect: "Language selection",
   featSentiment: "Sentiment analysis",
   featChapters: "Meeting chapters",
   featPriorities: "Action item priorities",
+  featKeyQuotes: "Key quotes highlights",
+  featRisksBlockers: "Risks & blockers",
+  featFollowUpEmail: "Follow-up email draft",
+  featPriorityProcessing: "Priority processing",
   settingsTitle: "Settings",
   settingsDesc: "Manage your account, plan, and preferences",
   settingsPlan: "Your Plan",
@@ -643,15 +688,15 @@ const en: Translations = {
   pricingSavePercent: "Save {percent}%",
   pricingBasicName: "Basic",
   pricingBasicDesc: "For individuals getting started with AI transcription.",
-  pricingBasicOutcome1: "Capture meeting notes in under 2 minutes",
-  pricingBasicOutcome2: "Send recap emails without manual typing",
-  pricingBasicOutcome3: "Never lose what was said in a quick call",
+  pricingBasicOutcome1: "AI summary, decisions & topic tags",
+  pricingBasicOutcome2: "Action items with owners & deadlines",
+  pricingBasicOutcome3: "10 transcriptions/month · 25 MB files",
   pricingBasicCta: "Get started free",
   pricingProName: "Pro",
   pricingProDesc: "For professionals who run on meetings and need outcomes fast.",
-  pricingProOutcome1: "Cut post-meeting admin by 3+ hours per week",
-  pricingProOutcome2: "Ship leadership-ready summaries the same day",
-  pricingProOutcome3: "Turn every recording into tracked action items",
+  pricingProOutcome1: "Sentiment, chapters & priority-ranked tasks",
+  pricingProOutcome2: "Key quotes, risks & follow-up email drafts",
+  pricingProOutcome3: "500 MB files · 100 transcriptions/month",
   pricingProCta: "Upgrade to Pro",
   pricingEnterpriseName: "Enterprise",
   pricingEnterpriseDesc: "For teams that need scale, control, and dedicated support.",
@@ -700,8 +745,21 @@ const en: Translations = {
   gatePrioritiesTitle: "Action item priorities",
   gatePrioritiesLine1: "High, medium, and low labels so your team knows what to do first.",
   gatePrioritiesLine2: "Turn meetings into a ranked to-do list — not a wall of notes.",
-  gateSentimentTeaser: "Sentiment",
   gatePrioritiesTeaser: "Priorities",
+  gateInsightsTeaser: "AI Insights",
+  gateQuotesTitle: "Key quote highlights",
+  gateQuotesLine1: "Surface the most important quotes from every meeting.",
+  gateQuotesLine2: "Share proof points without re-listening to the recording.",
+  gateRisksTitle: "Risks & blockers detection",
+  gateRisksLine1: "AI flags risks, blockers, and severity before they escalate.",
+  gateRisksLine2: "Stay ahead of delivery issues across your team.",
+  gateEmailTitle: "Follow-up email draft",
+  gateEmailLine1: "Get a ready-to-send recap email in seconds.",
+  gateEmailLine2: "Copy, edit, and send — no manual writing.",
+  gatePriorityProcTitle: "Priority processing",
+  gatePriorityProcLine1: "Your files jump the queue during peak hours.",
+  gatePriorityProcLine2: "Faster turnaround for time-sensitive meetings.",
+  gateSentimentTeaser: "Sentiment",
   trustUsedBy: "Trusted by leading teams at",
   trustTeamsCount: "From 2,400+ teams worldwide",
   liveActivityLabel: "Live activity",
@@ -764,15 +822,15 @@ const he: Translations = {
   landingHeroUpload: "גררו לכאן הקלטת פגישה (או לחצו לבחירה)",
   landingHeroUploadHint: "נתמך ב-Zoom, Teams, Google Meet ועוד.",
   landingWhyTitle: "למה צוותים עוברים אלינו?",
-  landingBenefit1Title: "חיסכון בזמן",
+  landingBenefit1Title: "החלטות חכמות, מיידית",
   landingBenefit1Desc:
-    "סיימו לעבד שעה של פגישה תוך פחות מ-5 דקות. הקדישו זמן לעשייה, לא לכתיבה.",
-  landingBenefit2Title: "דיוק מוחלט",
+    "ה-AI מחלץ החלטות, נושאים וסיכום מנהלים מכל פגישה — בלי רשימות ידניות.",
+  landingBenefit2Title: "אינטליגנציה ברמת Pro",
   landingBenefit2Desc:
-    "מנוע ה-AI שלנו מבין הקשר, סלנג ומונחים מקצועיים בעברית ובאנגלית.",
-  landingBenefit3Title: "אוטומציה חכמה",
+    "סנטימנט, פרקים, ציטוטים מרכזיים, סיכונים וטיוטת מייל המשך — הכל אוטומטי.",
+  landingBenefit3Title: "מפגישה לפעולה",
   landingBenefit3Desc:
-    "ייצאו סיכומי מנהלים ורשימות משימות כ-PDF — מוכנים לשיתוף מיידי.",
+    "משימות עם אחראים, עדיפויות ודדליינים — מוכנות לשיתוף באותו יום.",
   landingPricingTitle: "תוכניות פשוטות, ללא הפתעות",
   landingPricingFreeTitle: "חינמי (לניסיון)",
   landingPricingProTitle: "Pro (לצוותים)",
@@ -853,6 +911,14 @@ const he: Translations = {
   resGeneratingPdf: "מייצר PDF...",
   resOverview: "סקירה מנהלית",
   resChapters: "פרקים",
+  resInsights: "תובנות AI",
+  resHeadline: "כותרת הפגישה",
+  resTopics: "נושאים",
+  resDecisions: "החלטות מרכזיות",
+  resKeyQuotes: "ציטוטים מרכזיים",
+  resRisks: "סיכונים וחסמים",
+  resFollowUpEmail: "מייל המשך",
+  resCopyEmail: "העתק מייל",
   resSentiment: "אווירת הפגישה",
   resCopySummary: "העתק סיכום",
   resCopied: "הועתק!",
@@ -875,16 +941,24 @@ const he: Translations = {
   planProActive: "Pro פעיל — העלאה עד 500 MB",
   planUsed: "בשימוש החודש",
   featColumnFeature: "פיצ'ר",
+  featExecutiveSummary: "סיכום מנהלים AI",
+  featSmartDecisions: "חילוץ החלטות מרכזיות",
+  featTopicTags: "תיוג נושאים אוטומטי",
+  featActionItems: "משימות ואחראים",
   featTranscriptSearch: "חיפוש בתמלול",
   featCopyClipboard: "העתקה ללוח",
   featPdfExport: "ייצוא PDF",
   featTxtExport: "ייצוא טקסט",
-  featHistory: "היסטוריה שמורה",
+  featHistory: "היסטוריה שמורה (5 / 50)",
   featLargeFiles: "קבצים גדולים (500 MB)",
   featLanguageSelect: "בחירת שפה",
   featSentiment: "ניתוח סנטימנט",
   featChapters: "פרקי פגישה",
   featPriorities: "עדיפויות משימות",
+  featKeyQuotes: "ציטוטים מרכזיים",
+  featRisksBlockers: "סיכונים וחסמים",
+  featFollowUpEmail: "טיוטת מייל המשך",
+  featPriorityProcessing: "עיבוד בעדיפות",
   settingsTitle: "הגדרות",
   settingsDesc: "ניהול חשבון, חבילה והעדפות",
   settingsPlan: "החבילה שלך",
@@ -1001,15 +1075,15 @@ const he: Translations = {
   pricingSavePercent: "חיסכון {percent}%",
   pricingBasicName: "Basic",
   pricingBasicDesc: "לאנשים שרוצים להתחיל עם תמלול AI.",
-  pricingBasicOutcome1: "תיעוד פגישות תוך פחות מ-2 דקות",
-  pricingBasicOutcome2: "שליחת סיכומים בלי הקלדה ידנית",
-  pricingBasicOutcome3: "לא מאבדים מה שנאמר בשיחה קצרה",
+  pricingBasicOutcome1: "סיכום AI, החלטות ותיוג נושאים",
+  pricingBasicOutcome2: "משימות עם אחראים ודדליינים",
+  pricingBasicOutcome3: "10 תמלולים בחודש · קבצים עד 25 MB",
   pricingBasicCta: "התחילו בחינם",
   pricingProName: "Pro",
   pricingProDesc: "לאנשי מקצוע שחיים מפגישות וצריכים תוצאות מהר.",
-  pricingProOutcome1: "חיסכון של 3+ שעות עבודה אחרי כל פגישה בשבוע",
-  pricingProOutcome2: "סיכומים מוכנים להנהלה באותו יום",
-  pricingProOutcome3: "הפיכת כל הקלטה למשימות מעקב",
+  pricingProOutcome1: "סנטימנט, פרקים ומשימות מדורגות לפי עדיפות",
+  pricingProOutcome2: "ציטוטים מרכזיים, סיכונים וטיוטות מייל המשך",
+  pricingProOutcome3: "קבצים עד 500 MB · 100 תמלולים בחודש",
   pricingProCta: "שדרג ל-Pro",
   pricingEnterpriseName: "Enterprise",
   pricingEnterpriseDesc: "לצוותים שצריכים קנה מידה, שליטה ותמיכה ייעודית.",
@@ -1058,8 +1132,21 @@ const he: Translations = {
   gatePrioritiesTitle: "עדיפויות למשימות",
   gatePrioritiesLine1: "תוויות גבוהה, בינונית ונמוכה כדי שהצוות יידע מה לעשות קודם.",
   gatePrioritiesLine2: "הפכו פגישות לרשימת משימות מדורגת — לא קיר של הערות.",
-  gateSentimentTeaser: "סנטימנט",
   gatePrioritiesTeaser: "עדיפויות",
+  gateInsightsTeaser: "תובנות AI",
+  gateQuotesTitle: "ציטוטים מרכזיים",
+  gateQuotesLine1: "ה-AI מדגיש את הציטוטים החשובים ביותר מכל פגישה.",
+  gateQuotesLine2: "שתפו נקודות מפתח בלי להאזין שוב להקלטה.",
+  gateRisksTitle: "זיהוי סיכונים וחסמים",
+  gateRisksLine1: "ה-AI מסמן סיכונים, חסמים וחומרה לפני שהם מתגלים.",
+  gateRisksLine2: "הישארו צעד לפני בעיות משלוח בצוות.",
+  gateEmailTitle: "טיוטת מייל המשך",
+  gateEmailLine1: "קבלו מייל סיכום מוכן לשליחה תוך שניות.",
+  gateEmailLine2: "העתיקו, ערכו ושלחו — בלי כתיבה ידנית.",
+  gatePriorityProcTitle: "עיבוד בעדיפות",
+  gatePriorityProcLine1: "הקבצים שלכם עוברים לראש התור בשעות עומס.",
+  gatePriorityProcLine2: "זמן תגובה מהיר יותר לפגישות דחופות.",
+  gateSentimentTeaser: "סנטימנט",
   trustUsedBy: "נמצא בשימוש של צוותים מובילים ב:",
   trustTeamsCount: "מעל 2,400 צוותים ברחבי העולם",
   liveActivityLabel: "פעילות חיה",
