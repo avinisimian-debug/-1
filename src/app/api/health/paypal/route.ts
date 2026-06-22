@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import {
-  createPayPalSubscription,
-  formatPayPalError,
+  checkPayPalBillingSetup,
   getAppBaseUrl,
-  getSubscriptionPlanId,
   isPayPalConfigured,
 } from "@/lib/paypal-subscriptions";
-import { getPayPalAccessToken, getPayPalBaseUrl } from "@/lib/paypal";
+import { getPayPalAccessToken } from "@/lib/paypal";
 
 /** Public health — no secrets exposed. */
 export async function GET() {
@@ -28,12 +26,32 @@ export async function GET() {
     }
   }
 
+  const baseUrl = getAppBaseUrl();
+  const billing =
+    configured && authOk ? await checkPayPalBillingSetup() : null;
+
   return NextResponse.json({
     configured,
     publicClientId,
     mode,
     clientIdMatch: clientMatch,
     authOk,
-    baseUrl: getAppBaseUrl(),
+    baseUrl,
+    blobStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    billing: billing
+      ? {
+          planOk: billing.planOk,
+          planSource: billing.planSource,
+          launchWeekActive: billing.launchWeekActive,
+          schemaVersion: billing.schemaVersion,
+          error: billing.error,
+        }
+      : null,
+    webhookUrl: `${baseUrl}/api/paypal/webhook`,
+    ok:
+      configured &&
+      authOk &&
+      clientMatch &&
+      Boolean(billing?.planOk),
   });
 }

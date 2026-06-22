@@ -21,6 +21,8 @@ import {
  */
 const LAUNCH_PLAN_SCHEMA_VERSION = 6;
 
+export { LAUNCH_PLAN_SCHEMA_VERSION };
+
 class PayPalApiError extends Error {
   constructor(
     message: string,
@@ -375,6 +377,42 @@ export function formatPayPalError(error: unknown): string {
   }
   if (error instanceof Error) return error.message;
   return "Failed to create subscription.";
+}
+
+export function usesManualPayPalPlan(): boolean {
+  if (isLaunchWeekActive()) {
+    return Boolean(process.env.PAYPAL_LAUNCH_PLAN_ID);
+  }
+  return Boolean(process.env.PAYPAL_REGULAR_PLAN_ID);
+}
+
+export async function checkPayPalBillingSetup(): Promise<{
+  planOk: boolean;
+  planSource: "auto" | "env";
+  launchWeekActive: boolean;
+  schemaVersion: number;
+  error?: string;
+}> {
+  const launchWeekActive = isLaunchWeekActive();
+  const planSource = usesManualPayPalPlan() ? "env" : "auto";
+
+  try {
+    await getSubscriptionPlanId();
+    return {
+      planOk: true,
+      planSource,
+      launchWeekActive,
+      schemaVersion: LAUNCH_PLAN_SCHEMA_VERSION,
+    };
+  } catch (error) {
+    return {
+      planOk: false,
+      planSource,
+      launchWeekActive,
+      schemaVersion: LAUNCH_PLAN_SCHEMA_VERSION,
+      error: formatPayPalError(error),
+    };
+  }
 }
 
 export { isPayPalConfigured };

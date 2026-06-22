@@ -87,30 +87,41 @@ export default function SettingsPage() {
     }
 
     const subscriptionId = params.get("subscription_id");
-    if (params.get("subscription") === "success" && subscriptionId) {
-      fetch("/api/paypal/activate-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscriptionId }),
-      })
-        .then(async (res) => {
-          const data = await res.json();
-          if (res.ok) {
-            await syncPlan();
-            await loadPlanDetails();
-            setSubMessage({ type: "success", text: t.paypalSuccess });
-          } else {
-            setSubMessage({
-              type: "error",
-              text: (data.error as string) ?? t.paypalError,
-            });
-          }
-        })
-        .catch(() => setSubMessage({ type: "error", text: t.paypalError }))
-        .finally(() => {
-          window.history.replaceState({}, "", "/settings#upgrade");
-        });
+    if (!subscriptionId) return;
+
+    const activationKey = `paypal-activated:${subscriptionId}`;
+    if (sessionStorage.getItem(activationKey)) {
+      window.history.replaceState({}, "", "/settings#upgrade");
+      return;
     }
+    sessionStorage.setItem(activationKey, "1");
+
+    fetch("/api/paypal/activate-subscription", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subscriptionId }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (res.ok) {
+          await syncPlan();
+          await loadPlanDetails();
+          setSubMessage({ type: "success", text: t.paypalSuccess });
+        } else {
+          sessionStorage.removeItem(activationKey);
+          setSubMessage({
+            type: "error",
+            text: (data.error as string) ?? t.paypalError,
+          });
+        }
+      })
+      .catch(() => {
+        sessionStorage.removeItem(activationKey);
+        setSubMessage({ type: "error", text: t.paypalError });
+      })
+      .finally(() => {
+        window.history.replaceState({}, "", "/settings#upgrade");
+      });
   }, [
     syncPlan,
     loadPlanDetails,
