@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bell, CheckCircle2, Crown, Shield, Wallet } from "lucide-react";
+import { IntegrationBridge } from "@/features/integrations";
 import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { PricingTable } from "@/components/billing/PricingTable";
@@ -266,6 +267,10 @@ export default function SettingsPage() {
         </section>
 
         <div className="mx-auto max-w-2xl space-y-6">
+          <section className="glass-card rounded-xl p-6 sm:p-8">
+            <IntegrationBridge />
+          </section>
+
           <section className="glass-card rounded-xl p-6">
             <h2 className="mb-4 text-base font-semibold text-foreground">
               {t.settingsProfile}

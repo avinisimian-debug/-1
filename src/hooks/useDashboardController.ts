@@ -60,6 +60,7 @@ export function useDashboardController() {
     setLanguage,
     displayResult,
     uploadedFile: transcription.uploadedFile,
+    audioSrc: transcription.audioObjectUrl ?? undefined,
     stage: transcription.stage,
     stageIndex: transcription.stageIndex,
     error: transcription.error,

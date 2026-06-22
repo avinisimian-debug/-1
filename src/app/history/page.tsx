@@ -2,8 +2,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, FileAudio, Search, Trash2 } from "lucide-react";
+import { Clock, FileAudio, Trash2 } from "lucide-react";
 import { HISTORY_VIEW_KEY } from "@/features/transcription";
+import { HistorySmartSearch } from "@/features/search";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
@@ -22,7 +23,21 @@ export default function HistoryPage() {
   const filtered = useMemo(() => {
     if (!query.trim()) return items;
     const q = query.toLowerCase();
-    return items.filter((h) => h.result.fileName.toLowerCase().includes(q));
+    return items.filter((h) => {
+      const { result } = h;
+      if (result.fileName.toLowerCase().includes(q)) return true;
+      if (result.headline?.toLowerCase().includes(q)) return true;
+      if (result.summary.executive.some((line) => line.toLowerCase().includes(q))) {
+        return true;
+      }
+      if (result.transcript.some((line) => line.text.toLowerCase().includes(q))) {
+        return true;
+      }
+      if (result.actionItems.some((item) => item.task.toLowerCase().includes(q))) {
+        return true;
+      }
+      return false;
+    });
   }, [items, query]);
 
   const handleView = (id: string) => {
@@ -41,20 +56,17 @@ export default function HistoryPage() {
 
   return (
     <DashboardShell title={t.historyTitle} description={t.historyDesc}>
-      <div className="mx-auto w-full max-w-4xl">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1 sm:max-w-sm">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t.historySearch}
-              className="input-field py-2.5 ps-10"
-            />
-          </div>
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <HistorySmartSearch
+          entries={items}
+          query={query}
+          onQueryChange={setQuery}
+          onOpenEntry={handleView}
+        />
+
+        <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-zinc-500">
-            {items.length} / {limit} {t.historyRecordings}
+            {filtered.length} / {limit} {t.historyRecordings}
           </p>
         </div>
 
@@ -110,7 +122,7 @@ export default function HistoryPage() {
           </div>
         )}
 
-        <p className="mt-4 text-center text-[11px] text-zinc-400">{t.historyLimitNote}</p>
+        <p className="text-center text-[11px] text-zinc-400">{t.historyLimitNote}</p>
       </div>
     </DashboardShell>
   );

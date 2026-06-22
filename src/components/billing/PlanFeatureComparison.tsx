@@ -23,6 +23,10 @@ const FEATURE_ORDER: FeatureKey[] = [
   "largeFiles",
   "languageSelect",
   "priorityProcessing",
+  "integrationsPush",
+  "sharedLinks",
+  "smartSearch",
+  "summaryTemplates",
 ];
 
 const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translations").Translations> = {
@@ -44,6 +48,10 @@ const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translatio
   largeFiles: "featLargeFiles",
   languageSelect: "featLanguageSelect",
   priorityProcessing: "featPriorityProcessing",
+  integrationsPush: "featIntegrationsPush",
+  sharedLinks: "featSharedLinks",
+  smartSearch: "featSmartSearch",
+  summaryTemplates: "featSummaryTemplates",
 };
 
 export function PlanFeatureComparison() {

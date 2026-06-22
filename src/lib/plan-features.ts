@@ -18,7 +18,11 @@ export type FeatureKey =
   | "followUpEmail"
   | "largeFiles"
   | "languageSelect"
-  | "priorityProcessing";
+  | "priorityProcessing"
+  | "integrationsPush"
+  | "sharedLinks"
+  | "smartSearch"
+  | "summaryTemplates";
 
 export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   executiveSummary: "both",
@@ -39,6 +43,10 @@ export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   largeFiles: "pro",
   languageSelect: "pro",
   priorityProcessing: "pro",
+  integrationsPush: "pro",
+  sharedLinks: "pro",
+  smartSearch: "both",
+  summaryTemplates: "pro",
 };
 
 export function hasFeature(plan: PlanTier, feature: FeatureKey): boolean {

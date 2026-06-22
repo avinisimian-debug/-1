@@ -188,6 +188,10 @@ export interface Translations {
   featRisksBlockers: string;
   featFollowUpEmail: string;
   featPriorityProcessing: string;
+  featIntegrationsPush: string;
+  featSharedLinks: string;
+  featSmartSearch: string;
+  featSummaryTemplates: string;
   // Settings
   settingsTitle: string;
   settingsDesc: string;
@@ -275,7 +279,81 @@ export interface Translations {
   paypalOnlyNote: string;
   paypalBuyerTip: string;
   paypalRedirectCta: string;
-  // Trial / launch Pro (PayPal subscription required)
+  // Integrations bridge
+  integTitle: string;
+  integSubtitle: string;
+  integLoading: string;
+  integConnected: string;
+  integComingSoon: string;
+  integComingSoonDetail: string;
+  integSave: string;
+  integSaveSuccess: string;
+  integSaveFailed: string;
+  integLoadFailed: string;
+  integPayloadNote: string;
+  integEmptyTitle: string;
+  integEmptyDesc: string;
+  integEmptyStat: string;
+  integEmptyCta: string;
+  integWebhookName: string;
+  integWebhookDesc: string;
+  integSlackName: string;
+  integSlackDesc: string;
+  integNotionName: string;
+  integNotionDesc: string;
+  integZapierName: string;
+  integZapierDesc: string;
+  integWebhookUrlLabel: string;
+  integWebhookUrlHint: string;
+  integWebhookUrlRequired: string;
+  integWebhookSecretLabel: string;
+  integWebhookSecretHint: string;
+  integWebhookSecretPlaceholder: string;
+  integWebhookEnabled: string;
+  integPushCta: string;
+  integPushSuccess: string;
+  integPushFailed: string;
+  settingsIntegrations: string;
+  // Smart search
+  searchSmartPlaceholder: string;
+  searchNoHits: string;
+  searchFieldFileName: string;
+  searchFieldHeadline: string;
+  searchFieldSummary: string;
+  searchFieldTranscript: string;
+  searchFieldActions: string;
+  searchFieldTopics: string;
+  // Sharing
+  shareTitle: string;
+  shareDesc: string;
+  sharePrivate: string;
+  sharePublicLink: string;
+  shareCopyLink: string;
+  gateIntegrationsTitle: string;
+  gateIntegrationsLine1: string;
+  gateIntegrationsLine2: string;
+  gateShareTitle: string;
+  gateShareLine1: string;
+  gateShareLine2: string;
+  // Meeting workspace
+  workspaceValueEyebrow: string;
+  workspaceValueTitle: string;
+  workspaceMeetingDuration: string;
+  workspaceChapters: string;
+  workspaceTranscript: string;
+  workspacePlay: string;
+  workspacePause: string;
+  workspaceNoAudio: string;
+  workspaceCopyTranscript: string;
+  gateSummaryTemplatesTitle: string;
+  gateSummaryTemplatesLine1: string;
+  gateSummaryTemplatesLine2: string;
+  summaryModeTitle: string;
+  summaryModeHint: string;
+  summaryPreviewTitle: string;
+  summaryPreviewLoading: string;
+  summaryPreviewEmpty: string;
+  summaryFromCache: string;
   trialTitle: string;
   trialDesc: string;
   // Sale / launch week
@@ -575,6 +653,10 @@ const en: Translations = {
   featRisksBlockers: "Risks & blockers",
   featFollowUpEmail: "Follow-up email draft",
   featPriorityProcessing: "Priority processing",
+  featIntegrationsPush: "Integration bridge (webhook)",
+  featSharedLinks: "Shareable read-only links",
+  featSmartSearch: "Smart history search",
+  featSummaryTemplates: "Summary templates (Manager / Student / Technical)",
   settingsTitle: "Settings",
   settingsDesc: "Manage your account, plan, and preferences",
   settingsPlan: "Your Plan",
@@ -673,6 +755,80 @@ const en: Translations = {
   paypalBuyerTip:
     "Log in with your PayPal account to approve monthly billing. Funds go to the merchant's PayPal Business wallet.",
   paypalRedirectCta: "Continue on PayPal.com",
+  integTitle: "Integration Bridge",
+  integSubtitle:
+    "Push action items to your stack automatically — no copy-paste after every meeting.",
+  integLoading: "Loading integrations…",
+  integConnected: "Connected",
+  integComingSoon: "Soon",
+  integComingSoonDetail: "OAuth setup for this connector is coming in the next release.",
+  integSave: "Save integration",
+  integSaveSuccess: "Integration saved.",
+  integSaveFailed: "Could not save integration.",
+  integLoadFailed: "Could not load integrations.",
+  integPayloadNote:
+    "Webhook payloads include meeting metadata and action items as JSON (HTTPS only).",
+  integEmptyTitle: "Ship action items where your team already works",
+  integEmptyDesc:
+    "Connect Zapier, Slack, or a custom webhook so tasks land in your tools the moment a meeting ends.",
+  integEmptyStat: "Teams save ~2 hours/week on follow-up admin",
+  integEmptyCta: "Unlock integrations with Pro",
+  integWebhookName: "Custom webhook",
+  integWebhookDesc: "POST action items to Zapier, Make, or any HTTPS endpoint.",
+  integSlackName: "Slack",
+  integSlackDesc: "Drop action items into a channel after each meeting.",
+  integNotionName: "Notion",
+  integNotionDesc: "Create a database row per meeting with tasks attached.",
+  integZapierName: "Zapier",
+  integZapierDesc: "Trigger 6,000+ apps from your meeting outcomes.",
+  integWebhookUrlLabel: "Webhook URL",
+  integWebhookUrlHint: "Must be HTTPS. Zapier and Make both provide webhook URLs.",
+  integWebhookUrlRequired: "Enter a webhook URL or disable the integration.",
+  integWebhookSecretLabel: "Signing secret (optional)",
+  integWebhookSecretHint: "We send X-Staz-Signature: sha256=… for verification.",
+  integWebhookSecretPlaceholder: "Optional HMAC secret",
+  integWebhookEnabled: "Enable webhook push",
+  integPushCta: "Push action items",
+  integPushSuccess: "Sent!",
+  integPushFailed: "Push failed",
+  settingsIntegrations: "Integrations",
+  searchSmartPlaceholder: "Search meetings, transcripts, and action items…",
+  searchNoHits: "No matches in your history.",
+  searchFieldFileName: "File",
+  searchFieldHeadline: "Headline",
+  searchFieldSummary: "Summary",
+  searchFieldTranscript: "Transcript",
+  searchFieldActions: "Actions",
+  searchFieldTopics: "Topics",
+  shareTitle: "Share summary",
+  shareDesc: "Create a read-only link for “{title}” — no login required.",
+  sharePrivate: "Private",
+  sharePublicLink: "Share link",
+  shareCopyLink: "Copy link",
+  gateIntegrationsTitle: "Integration Bridge",
+  gateIntegrationsLine1: "Auto-send action items to Slack, Notion, or Zapier.",
+  gateIntegrationsLine2: "Stop re-typing tasks — keep momentum after every call.",
+  gateShareTitle: "Shareable meeting links",
+  gateShareLine1: "Send stakeholders a read-only summary link.",
+  gateShareLine2: "No account required — perfect for clients and execs.",
+  workspaceValueEyebrow: "Productivity ROI",
+  workspaceValueTitle: "Estimated time saved in this meeting: {minutes} mins",
+  workspaceMeetingDuration: "Meeting length: {duration}",
+  workspaceChapters: "Chapters",
+  workspaceTranscript: "Interactive transcript",
+  workspacePlay: "Play",
+  workspacePause: "Pause",
+  workspaceNoAudio: "Audio playback is available for new uploads in this session. History items open without the original file.",
+  workspaceCopyTranscript: "Copy transcript",
+  gateSummaryTemplatesTitle: "Summary templates",
+  gateSummaryTemplatesLine1: "Reframe the same meeting for managers, students, or engineers.",
+  gateSummaryTemplatesLine2: "Switch modes instantly — no re-processing wait.",
+  summaryModeTitle: "Summary mode",
+  summaryModeHint: "Instant switch",
+  summaryPreviewTitle: "Template preview",
+  summaryPreviewLoading: "Preparing templates…",
+  summaryPreviewEmpty: "Select a mode to preview the formatted summary.",
+  summaryFromCache: "Instant",
   trialTitle: "Launch week — Pro for {intro}/month",
   trialDesc:
     "Subscribe with PayPal below. {intro}/month during launch week, then {regular}/month automatically every month.",
@@ -968,6 +1124,10 @@ const he: Translations = {
   featRisksBlockers: "סיכונים וחסמים",
   featFollowUpEmail: "טיוטת מייל המשך",
   featPriorityProcessing: "עיבוד בעדיפות",
+  featIntegrationsPush: "גשר אינטגרציות (Webhook)",
+  featSharedLinks: "קישורי שיתוף לקריאה בלבד",
+  featSmartSearch: "חיפוש חכם בהיסטוריה",
+  featSummaryTemplates: "תבניות סיכום (מנהל / סטודנט / טכני)",
   settingsTitle: "הגדרות",
   settingsDesc: "ניהול חשבון, חבילה והעדפות",
   settingsPlan: "החבילה שלך",
@@ -1066,6 +1226,80 @@ const he: Translations = {
   paypalBuyerTip:
     "התחברו עם חשבון PayPal לאישור חיוב חודשי. הכסף מגיע ישירות לארנק PayPal Business של הסוחר.",
   paypalRedirectCta: "המשך ב-PayPal.com",
+  integTitle: "גשר אינטגרציות",
+  integSubtitle:
+    "דחיפת משימות לאוטומציה שלך — בלי העתקה אחרי כל פגישה.",
+  integLoading: "טוען אינטגרציות…",
+  integConnected: "מחובר",
+  integComingSoon: "בקרוב",
+  integComingSoonDetail: "חיבור OAuth לקונקטור הזה יגיע בגרסה הבאה.",
+  integSave: "שמור אינטגרציה",
+  integSaveSuccess: "האינטגרציה נשמרה.",
+  integSaveFailed: "לא ניתן לשמור את האינטגרציה.",
+  integLoadFailed: "לא ניתן לטעון אינטגרציות.",
+  integPayloadNote:
+    "Webhook שולח JSON עם מטא-דאטה של הפגישה ומשימות (HTTPS בלבד).",
+  integEmptyTitle: "שלחו משימות למקום שבו הצוות כבר עובד",
+  integEmptyDesc:
+    "חברו Zapier, Slack או Webhook מותאם — המשימות מגיעות מיד בסיום הפגישה.",
+  integEmptyStat: "צוותים חוסכים ~2 שעות בשבוע על מעקב אחרי פגישות",
+  integEmptyCta: "פתחו אינטגרציות עם Pro",
+  integWebhookName: "Webhook מותאם",
+  integWebhookDesc: "שליחת משימות ל-Zapier, Make או כל HTTPS endpoint.",
+  integSlackName: "Slack",
+  integSlackDesc: "פרסום משימות בערוץ אחרי כל פגישה.",
+  integNotionName: "Notion",
+  integNotionDesc: "יצירת שורה במסד נתונים עם משימות מצורפות.",
+  integZapierName: "Zapier",
+  integZapierDesc: "הפעלת 6,000+ אפליקציות מתוצאות הפגישה.",
+  integWebhookUrlLabel: "כתובת Webhook",
+  integWebhookUrlHint: "חייב להיות HTTPS. Zapier ו-Make מספקים כתובת מוכנה.",
+  integWebhookUrlRequired: "הזינו כתובת Webhook או בטלו את האינטגרציה.",
+  integWebhookSecretLabel: "מפתח חתימה (אופציונלי)",
+  integWebhookSecretHint: "נשלח X-Staz-Signature: sha256=… לאימות.",
+  integWebhookSecretPlaceholder: "סוד HMAC אופציונלי",
+  integWebhookEnabled: "הפעל דחיפת Webhook",
+  integPushCta: "דחוף משימות",
+  integPushSuccess: "נשלח!",
+  integPushFailed: "השליחה נכשלה",
+  settingsIntegrations: "אינטגרציות",
+  searchSmartPlaceholder: "חיפוש בפגישות, תמלולים ומשימות…",
+  searchNoHits: "לא נמצאו התאמות בהיסטוריה.",
+  searchFieldFileName: "קובץ",
+  searchFieldHeadline: "כותרת",
+  searchFieldSummary: "סיכום",
+  searchFieldTranscript: "תמלול",
+  searchFieldActions: "משימות",
+  searchFieldTopics: "נושאים",
+  shareTitle: "שיתוף סיכום",
+  shareDesc: "צרו קישור לקריאה בלבד ל\"{title}\" — בלי התחברות.",
+  sharePrivate: "פרטי",
+  sharePublicLink: "קישור שיתוף",
+  shareCopyLink: "העתק קישור",
+  gateIntegrationsTitle: "גשר אינטגרציות",
+  gateIntegrationsLine1: "שליחה אוטומטית של משימות ל-Slack, Notion או Zapier.",
+  gateIntegrationsLine2: "בלי להקליד שוב — שמרו מומנטום אחרי כל שיחה.",
+  gateShareTitle: "קישורי שיתוף לפגישות",
+  gateShareLine1: "שלחו לבעלי עניין סיכום לקריאה בלבד.",
+  gateShareLine2: "בלי חשבון — מושלם ללקוחות והנהלה.",
+  workspaceValueEyebrow: "תשואה על הזמן",
+  workspaceValueTitle: "זמן מוערך שנחסך בפגישה זו: {minutes} דק׳",
+  workspaceMeetingDuration: "אורך הפגישה: {duration}",
+  workspaceChapters: "פרקים",
+  workspaceTranscript: "תמלול אינטראקטיבי",
+  workspacePlay: "נגן",
+  workspacePause: "השהה",
+  workspaceNoAudio: "ניגון אודיו זמין להעלאות חדשות בסשן הנוכחי. פריטים מההיסטוריה נפתחים בלי קובץ המקור.",
+  workspaceCopyTranscript: "העתק תמלול",
+  gateSummaryTemplatesTitle: "תבניות סיכום",
+  gateSummaryTemplatesLine1: "אותה פגישה בניסוח למנהלים, סטודנטים או מהנדסים.",
+  gateSummaryTemplatesLine2: "מעבר מיידי בין מצבים — בלי להמתין לעיבוד מחדש.",
+  summaryModeTitle: "מצב סיכום",
+  summaryModeHint: "מעבר מיידי",
+  summaryPreviewTitle: "תצוגה מקדימה",
+  summaryPreviewLoading: "מכין תבניות…",
+  summaryPreviewEmpty: "בחרו מצב כדי לראות את הסיכום המעוצב.",
+  summaryFromCache: "מיידי",
   trialTitle: "שבוע השקה — Pro ב-{intro}/חודש",
   trialDesc:
     "הירשמו עם PayPal למטה. {intro}/חודש בשבוע ההשקה, ואז {regular}/חודש אוטומטית כל חודש.",

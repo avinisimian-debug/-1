@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePlan } from "@/context/PlanContext";
 import { useUsage } from "@/hooks/useUsage";
 import { PROCESSING_STAGES } from "@/lib/constants";
@@ -23,14 +23,27 @@ export function useTranscription() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [result, setResult] = useState<TranscriptionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [audioObjectUrl, setAudioObjectUrl] = useState<string | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+
+  const revokeAudioUrl = useCallback(() => {
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+    setAudioObjectUrl(null);
+  }, []);
+
+  useEffect(() => () => revokeAudioUrl(), [revokeAudioUrl]);
 
   const reset = useCallback(() => {
+    revokeAudioUrl();
     setStatus("idle");
     setStage("uploading");
     setUploadedFile(null);
     setResult(null);
     setError(null);
-  }, []);
+  }, [revokeAudioUrl]);
 
   const processFile = useCallback(
     (file: File, language = "auto") => {
@@ -39,6 +52,11 @@ export function useTranscription() {
         setStatus("error");
         return;
       }
+
+      revokeAudioUrl();
+      const objectUrl = URL.createObjectURL(file);
+      audioUrlRef.current = objectUrl;
+      setAudioObjectUrl(objectUrl);
 
       setUploadedFile({
         name: file.name,
@@ -69,7 +87,7 @@ export function useTranscription() {
         saveToHistory(uploadResult.data, HISTORY_LIMITS[plan]);
       });
     },
-    [plan, canTranscribe, recordUsage],
+    [plan, canTranscribe, recordUsage, revokeAudioUrl],
   );
 
   const stageIndex = PROCESSING_STAGES.findIndex((s) => s.key === stage);
@@ -79,6 +97,7 @@ export function useTranscription() {
     stage,
     stageIndex,
     uploadedFile,
+    audioObjectUrl,
     result,
     error,
     processFile,

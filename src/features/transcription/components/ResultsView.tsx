@@ -11,7 +11,6 @@ import {
   ListChecks,
   Mail,
   MessageSquareQuote,
-  Search,
   ShieldAlert,
   Sparkles,
   Tag,
@@ -21,18 +20,22 @@ import { LockedTab } from "@/components/billing/LockedFeatureTrigger";
 import { useFeatureGate } from "@/context/FeatureGateContext";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import { buildSummaryText, buildTranscriptText, copyToClipboard } from "@/lib/export";
+import { buildSummaryText, copyToClipboard } from "@/lib/export";
 import { hasFeature } from "@/lib/plan-features";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import type { ActionItem, TranscriptionResult } from "../types";
 import { ReportDownloadPicker } from "./ReportDownloadPicker";
+import { PushActionItemsButton } from "@/features/integrations/components/PushActionItemsButton";
+import { SummaryTemplatePanel } from "@/features/summarization";
+import { ShareLinkPanel } from "@/features/sharing";
+import { MeetingWorkspace } from "@/features/workspace";
 
 type TabKey = "summary" | "actions" | "insights" | "chapters" | "transcript";
 
 interface ResultsViewProps {
   result: TranscriptionResult;
+  audioSrc?: string;
   onReset: () => void;
 }
 
@@ -49,7 +52,7 @@ const PRIORITY_STYLES = {
   low: "bg-muted/50 text-muted-foreground border-border",
 };
 
-export function ResultsView({ result, onReset }: ResultsViewProps) {
+export function ResultsView({ result, audioSrc, onReset }: ResultsViewProps) {
   const { t } = useLocale();
   const { plan } = usePlan();
   const { promptUpgrade } = useFeatureGate();
@@ -126,7 +129,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
+    <div className={cn("mx-auto w-full", activeTab === "transcript" ? "max-w-6xl" : "max-w-4xl")}>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-accent">
@@ -197,6 +200,15 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
         </div>
       </div>
 
+      <details className="mb-4 rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
+        <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+          {t.shareTitle}
+        </summary>
+        <div className="mt-3">
+          <ShareLinkPanel meetingTitle={result.fileName} />
+        </div>
+      </details>
+
       <div className="glass-card overflow-hidden rounded-lg">
         <div className="flex overflow-x-auto border-b border-border">
           {tabs.map(({ key, label, icon: Icon, locked, lockFeature }) =>
@@ -234,6 +246,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
           )}
           {activeTab === "actions" && (
             <ActionItemsTab
+              result={result}
               items={actionItems}
               onToggle={toggleActionItem}
               showPriority={hasFeature(plan, "actionPriorities")}
@@ -248,11 +261,7 @@ export function ResultsView({ result, onReset }: ResultsViewProps) {
             <ChaptersTab chapters={result.chapters} />
           )}
           {activeTab === "transcript" && (
-            <TranscriptTab
-              entries={result.transcript}
-              onCopy={async () => copyToClipboard(buildTranscriptText(result))}
-              t={t}
-            />
+            <MeetingWorkspace result={result} audioSrc={audioSrc} />
           )}
         </div>
       </div>
@@ -270,6 +279,7 @@ function SummaryTab({
   const { t } = useLocale();
   return (
     <div className="space-y-8">
+      <SummaryTemplatePanel result={result} />
       {result.headline && (
         <section className="rounded-md border border-accent/20 bg-accent-muted/30 px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -508,12 +518,14 @@ function ChaptersTab({
 }
 
 function ActionItemsTab({
+  result,
   items,
   onToggle,
   showPriority,
   onPrioritiesLocked,
   t,
 }: {
+  result: TranscriptionResult;
   items: ActionItem[];
   onToggle: (id: string) => void;
   showPriority: boolean;
@@ -545,15 +557,18 @@ function ActionItemsTab({
           </span>
         </button>
       )}
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
           {completedCount} / {items.length} {t.resCompleted}
         </p>
-        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-emerald-600 transition-all"
-            style={{ width: `${(completedCount / items.length) * 100}%` }}
-          />
+        <div className="flex flex-wrap items-center gap-2">
+          <PushActionItemsButton result={result} actionItems={items} />
+          <div className="h-1.5 w-32 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-emerald-600 transition-all"
+              style={{ width: `${(completedCount / items.length) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
       <ul className="space-y-3">
@@ -609,84 +624,6 @@ function ActionItemsTab({
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-function TranscriptTab({
-  entries,
-  onCopy,
-  t,
-}: {
-  entries: TranscriptionResult["transcript"];
-  onCopy: () => Promise<boolean>;
-  t: ReturnType<typeof useLocale>["t"];
-}) {
-  const [query, setQuery] = useState("");
-  const [copied, setCopied] = useState(false);
-
-  const filtered = useMemo(() => {
-    if (!query.trim()) return entries;
-    const q = query.toLowerCase();
-    return entries.filter(
-      (e) =>
-        e.text.toLowerCase().includes(q) ||
-        e.speaker.toLowerCase().includes(q),
-    );
-  }, [entries, query]);
-
-  const handleCopy = async () => {
-    const ok = await onCopy();
-    if (ok) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  return (
-    <div>
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t.resSearchTranscript}
-            className="ps-9"
-          />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleCopy}
-          className="gap-2"
-        >
-          <Copy className="h-3.5 w-3.5" />
-          {copied ? t.resCopied : t.resCopySummary}
-        </Button>
-      </div>
-      {filtered.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">{t.resNoResults}</p>
-      ) : (
-        <div className="max-h-[28rem] space-y-1 overflow-y-auto pe-2">
-          {filtered.map((entry, i) => (
-            <div
-              key={i}
-              className="group flex gap-4 rounded-md px-3 py-3 transition-colors hover:bg-muted/50"
-            >
-              <span className="w-12 shrink-0 font-mono text-xs text-muted-foreground/70">
-                {entry.timestamp}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-accent">{entry.speaker}</p>
-                <p className="mt-1 text-sm leading-relaxed text-foreground/90">{entry.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

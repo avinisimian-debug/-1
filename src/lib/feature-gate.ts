@@ -1,9 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Blocks,
   BookOpen,
   FileAudio,
+  FileStack,
   Globe,
   Heart,
+  Link2,
   ListOrdered,
   Mail,
   MessageSquareQuote,
@@ -74,6 +77,24 @@ export const PRO_FEATURE_GATE: Partial<Record<FeatureKey, FeatureGateMeta>> = {
     titleKey: "gatePriorityProcTitle",
     line1Key: "gatePriorityProcLine1",
     line2Key: "gatePriorityProcLine2",
+  },
+  integrationsPush: {
+    icon: Blocks,
+    titleKey: "gateIntegrationsTitle",
+    line1Key: "gateIntegrationsLine1",
+    line2Key: "gateIntegrationsLine2",
+  },
+  sharedLinks: {
+    icon: Link2,
+    titleKey: "gateShareTitle",
+    line1Key: "gateShareLine1",
+    line2Key: "gateShareLine2",
+  },
+  summaryTemplates: {
+    icon: FileStack,
+    titleKey: "gateSummaryTemplatesTitle",
+    line1Key: "gateSummaryTemplatesLine1",
+    line2Key: "gateSummaryTemplatesLine2",
   },
 };
 

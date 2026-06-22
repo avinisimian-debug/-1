@@ -69,7 +69,11 @@ export function DashboardContent() {
       )}
 
       {dash.phase === "complete" && dash.displayResult && (
-        <ResultsView result={dash.displayResult} onReset={dash.resetAll} />
+        <ResultsView
+          result={dash.displayResult}
+          audioSrc={dash.audioSrc}
+          onReset={dash.resetAll}
+        />
       )}
     </DashboardShell>
   );
