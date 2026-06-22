@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import {
+  PRO_PLAN_INTRO_PRICE,
   PRO_PLAN_INTRO_PRICE_LABEL,
   PRO_PLAN_REGULAR_PRICE,
   PRO_PLAN_REGULAR_PRICE_LABEL,
@@ -209,7 +210,9 @@ export function PricingTable({
         )}
         {landing && launchWeek && (
           <p className="mt-4 text-sm font-medium text-accent">
-            {t.pricingProLaunchNote}
+            {t.pricingProLaunchNote
+              .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+              .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
           </p>
         )}
       </div>
@@ -220,7 +223,7 @@ export function PricingTable({
           const isCurrent = !landing && tier.id === activeTier;
           const saleMonthly =
             tier.id === "pro" && launchWeek && interval === "monthly"
-              ? 0
+              ? parseFloat(PRO_PLAN_INTRO_PRICE)
               : undefined;
 
           const { amount, perMonth, savingsPercent } = getDisplayPrice(

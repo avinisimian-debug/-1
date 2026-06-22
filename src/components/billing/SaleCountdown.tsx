@@ -87,7 +87,7 @@ export function SaleCountdown({ compact = false }: { compact?: boolean }) {
             {t.saleBadge}
           </span>
           <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-            {t.saleFreeWeek}
+            {t.saleFreeWeek.replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)}
           </span>
         </div>
 

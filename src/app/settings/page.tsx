@@ -188,6 +188,8 @@ export default function SettingsPage() {
                 <p className="text-[11px] text-muted-foreground">
                   {isLaunchWeekActive()
                     ? t.settingsProBillingScheduled
+                        .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                        .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)
                     : t.settingsManagePayPal}
                 </p>
               )}
@@ -212,7 +214,9 @@ export default function SettingsPage() {
               {isLaunchWeekActive() && !needsPayPalSetup && (
                 <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-4">
                   <p className="text-sm font-semibold text-emerald-900">
-                    {t.trialTitle}
+                    {t.trialTitle
+                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-emerald-800/90">
                     {t.trialDesc
@@ -228,6 +232,8 @@ export default function SettingsPage() {
                   <h3 className="text-sm font-semibold text-foreground">
                     {isLaunchWeekActive()
                       ? t.paypalSubscribeTitle
+                          .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
+                          .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)
                       : t.paypalTitle}
                   </h3>
                 </div>

@@ -1,6 +1,5 @@
 import {
   isLaunchWeekActive,
-  PRO_LAUNCH_WEEK_END,
   PRO_PLAN_INTRO_PRICE,
   PRO_PLAN_REGULAR_PRICE,
 } from "@/lib/constants";
@@ -18,9 +17,9 @@ import {
 
 /**
  * PayPal allows at most 2 TRIAL cycles and 1 REGULAR cycle per plan.
- * v4: launch intro $9.99/mo, then $24.90/mo (Jun 2026 promo).
+ * v5: launch week charges $9.99/mo immediately (no free period).
  */
-const LAUNCH_PLAN_SCHEMA_VERSION = 4;
+const LAUNCH_PLAN_SCHEMA_VERSION = 5;
 
 class PayPalApiError extends Error {
   constructor(
@@ -99,24 +98,13 @@ async function ensureProductId(cached: CachedPayPalPlans): Promise<string> {
   return product.id;
 }
 
-/** First PayPal charge: 1h after launch week ends (free period handled in-app). */
-export function getLaunchSubscriptionStartTime(now = Date.now()): string {
-  const start = new Date(PRO_LAUNCH_WEEK_END);
-  start.setHours(start.getHours() + 1);
-  if (start.getTime() <= now + 60_000) {
-    const soon = new Date(now + 5 * 60_000);
-    return soon.toISOString();
-  }
-  return start.toISOString();
-}
-
 async function createLaunchPlan(productId: string): Promise<string> {
   const plan = await paypalFetch<{ id: string }>("/v1/billing/plans", {
     method: "POST",
     body: JSON.stringify({
       product_id: productId,
       name: "Staz AI Pro — Launch Week",
-      description: `Free during launch week, then $${PRO_PLAN_INTRO_PRICE} for the first month, then $${PRO_PLAN_REGULAR_PRICE}/month`,
+      description: `Launch week: $${PRO_PLAN_INTRO_PRICE}/month, then $${PRO_PLAN_REGULAR_PRICE}/month`,
       billing_cycles: [
         {
           frequency: { interval_unit: "MONTH", interval_count: 1 },
@@ -256,7 +244,6 @@ export async function createPayPalSubscription(
   cancelUrl: string,
 ): Promise<string> {
   const planId = await getSubscriptionPlanId();
-  const launch = isLaunchWeekActive();
 
   const body: Record<string, unknown> = {
     plan_id: planId,
@@ -269,10 +256,6 @@ export async function createPayPalSubscription(
       cancel_url: cancelUrl,
     },
   };
-
-  if (launch) {
-    body.start_time = getLaunchSubscriptionStartTime();
-  }
 
   const subscription = await paypalFetch<{ id: string }>(
     "/v1/billing/subscriptions",

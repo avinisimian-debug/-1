@@ -4,7 +4,6 @@ import {
   createPayPalSubscription,
   formatPayPalError,
   getAppBaseUrl,
-  getLaunchSubscriptionStartTime,
   getSubscriptionPlanId,
   getPayPalSubscription,
   isPayPalConfigured,
@@ -48,25 +47,8 @@ export async function GET() {
       detail: sub.status,
     });
 
-    if (sub.start_time) {
-      checks.push({
-        name: "delayed_start_time",
-        ok: true,
-        detail: sub.start_time,
-      });
-    }
-
-    const approveLink = sub.links?.find((l) => l.rel === "approve")?.href;
-
-    checks.push({
-      name: "approval_link",
-      ok: Boolean(approveLink),
-      detail: approveLink ? "present" : "missing",
-    });
-
     return NextResponse.json({
       ok: checks.every((c) => c.ok),
-      launchStartTime: getLaunchSubscriptionStartTime(),
       checks,
       note: "Buyer approval on PayPal.com was not tested (requires a PayPal login).",
     });

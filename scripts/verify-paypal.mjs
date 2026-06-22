@@ -120,7 +120,7 @@ async function main() {
     process.exit(1);
   }
 
-  const launchEnd = new Date("2026-06-27T23:59:59");
+  const launchEnd = new Date("2026-06-29T23:59:59");
   const launchActive = Date.now() < launchEnd.getTime();
   pass("launch week", launchActive ? "active" : "ended");
 
@@ -140,13 +140,6 @@ async function main() {
   }
   const productId = productRes.json.id;
   pass("create product", productId);
-
-  const startTime = new Date(launchEnd);
-  startTime.setHours(startTime.getHours() + 1);
-  const startIso =
-    startTime.getTime() > Date.now() + 60_000
-      ? startTime.toISOString()
-      : new Date(Date.now() + 5 * 60_000).toISOString();
 
   const planBody = {
     product_id: productId,
@@ -205,7 +198,6 @@ async function main() {
 
   const subBody = {
     plan_id: planId,
-    start_time: launchActive ? startIso : undefined,
     application_context: {
       brand_name: "Staz AI",
       locale: "en-US",
@@ -215,7 +207,6 @@ async function main() {
       cancel_url: "https://1stazai.com/settings?subscription=cancel",
     },
   };
-  if (!launchActive) delete subBody.start_time;
 
   const subRes = await paypalFetch(token, "/v1/billing/subscriptions", {
     method: "POST",
@@ -235,12 +226,6 @@ async function main() {
     pass("approval link", "generated (buyer would open this in PayPal)");
   } else {
     fail("approval link", "missing from subscription response");
-  }
-
-  if (launchActive && subRes.json.start_time) {
-    pass("delayed start_time", subRes.json.start_time);
-  } else if (launchActive) {
-    pass("delayed start_time", `requested ${startIso}`);
   }
 
   const getSub = await paypalFetch(token, `/v1/billing/subscriptions/${subId}`);
