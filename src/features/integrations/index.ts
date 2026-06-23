@@ -12,3 +12,7 @@ export {
   saveIntegrationsConfig,
   pushActionItems,
 } from "./api/integrations.client";
+export {
+  IntegrationBridgeService,
+  integrationBridge,
+} from "./server/integration-bridge.service";

@@ -4,7 +4,8 @@ export type IntegrationProviderId =
   | "webhook"
   | "slack"
   | "notion"
-  | "zapier";
+  | "zapier"
+  | "jira";
 
 export interface WebhookIntegrationConfig {
   url: string;

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getUserIntegrations } from "@/features/integrations/server/integrations-store";
-import { pushActionItemsToIntegrations } from "@/features/integrations/server/push-action-items.use-case";
+import { pushActionItemsToIntegrations } from "@/features/integrations/server/integration-bridge.service";
 import type {
   ActionItemsPushPayload,
   IntegrationProviderId,
