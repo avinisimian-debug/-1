@@ -71,7 +71,8 @@ export function DashboardContent() {
       {dash.phase === "complete" && dash.displayResult && (
         <ResultsView
           result={dash.displayResult}
-          audioSrc={dash.audioSrc}
+          mediaSrc={dash.audioSrc}
+          mediaKind={dash.mediaKind}
           onReset={dash.resetAll}
         />
       )}

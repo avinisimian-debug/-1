@@ -20,9 +20,11 @@ export type FeatureKey =
   | "languageSelect"
   | "priorityProcessing"
   | "integrationsPush"
+  | "transcriptionWebhooks"
   | "sharedLinks"
   | "smartSearch"
-  | "summaryTemplates";
+  | "summaryTemplates"
+  | "speakerDiarization";
 
 export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   executiveSummary: "both",
@@ -44,9 +46,11 @@ export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   languageSelect: "pro",
   priorityProcessing: "pro",
   integrationsPush: "pro",
+  transcriptionWebhooks: "pro",
   sharedLinks: "pro",
   smartSearch: "both",
   summaryTemplates: "pro",
+  speakerDiarization: "pro",
 };
 
 export function hasFeature(plan: PlanTier, feature: FeatureKey): boolean {

@@ -82,13 +82,23 @@ Rules:
 ${isPro ? "- Include 4-8 chapters with accurate MM:SS timestamps from the transcript.\n- Include 3-5 key quotes verbatim when possible." : ""}`;
 }
 
-export function buildAnalysisUserPrompt(transcriptText: string, fileName?: string): string {
+export function buildAnalysisUserPrompt(
+  transcriptText: string,
+  fileName?: string,
+  labeledLines?: Array<{ speaker: string; text: string }>,
+): string {
+  const formatted =
+    labeledLines && labeledLines.length > 0
+      ? labeledLines.map((line) => `${line.speaker}: ${line.text}`).join("\n")
+      : transcriptText;
+
   return `Analyze this meeting recording.
 
 File: ${fileName ?? "meeting"}
 Duration context: use timestamps from segments when present.
+${labeledLines?.length ? "The transcript includes speaker diarization labels — use them for quotes, action owners, and context." : ""}
 
 --- TRANSCRIPT ---
-${transcriptText}
+${formatted}
 --- END ---`;
 }

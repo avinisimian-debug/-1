@@ -5,6 +5,7 @@ export type {
   ProcessingStage,
   SentimentAnalysis,
   TranscriptEntry,
+  TimedWord,
   TranscriptionResult,
   TranscriptionStatus,
   UploadedFile,

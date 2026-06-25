@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   BookOpen,
+  Brain,
   CheckSquare,
   Clock,
   Copy,
@@ -31,11 +32,15 @@ import { PushActionItemsButton } from "@/features/integrations/components/PushAc
 import { SummaryTemplatePanel } from "@/features/summarization";
 import { ShareLinkPanel } from "@/features/sharing";
 import { MeetingWorkspace } from "@/features/workspace";
+import { AiInsightsPanel, useAiInsights } from "@/features/insights";
 
-type TabKey = "summary" | "actions" | "insights" | "chapters" | "transcript";
+type TabKey = "summary" | "aiInsights" | "actions" | "insights" | "chapters" | "transcript";
 
 interface ResultsViewProps {
   result: TranscriptionResult;
+  mediaSrc?: string;
+  mediaKind?: "audio" | "video";
+  /** @deprecated Use mediaSrc */
   audioSrc?: string;
   onReset: () => void;
 }
@@ -53,13 +58,30 @@ const PRIORITY_STYLES = {
   low: "bg-muted/50 text-muted-foreground border-border",
 };
 
-export function ResultsView({ result, audioSrc, onReset }: ResultsViewProps) {
+export function ResultsView({
+  result,
+  mediaSrc,
+  mediaKind = "audio",
+  audioSrc,
+  onReset,
+}: ResultsViewProps) {
+  const resolvedMediaSrc = mediaSrc ?? audioSrc;
   const { t } = useLocale();
   const { plan } = usePlan();
   const { promptUpgrade } = useFeatureGate();
   const [activeTab, setActiveTab] = useState<TabKey>("summary");
   const [actionItems, setActionItems] = useState(result.actionItems);
+  const [transcript, setTranscript] = useState(result.transcript);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setTranscript(result.transcript);
+  }, [result.fileName, result.processedAt]);
+
+  const displayResult = useMemo(
+    () => ({ ...result, transcript }),
+    [result, transcript],
+  );
 
   const hasChaptersData = (result.chapters?.length ?? 0) > 0;
   const showChapters =
@@ -74,6 +96,7 @@ export function ResultsView({ result, audioSrc, onReset }: ResultsViewProps) {
 
   const tabs: { key: TabKey; label: string; icon: typeof Sparkles; locked?: boolean; lockFeature?: "meetingChapters" | "keyQuotes" }[] = [
     { key: "summary", label: t.resSummary, icon: Sparkles },
+    { key: "aiInsights", label: t.resAiInsights, icon: Brain },
     { key: "actions", label: t.resActions, icon: ListChecks },
     ...(showInsights
       ? [{
@@ -194,7 +217,7 @@ export function ResultsView({ result, audioSrc, onReset }: ResultsViewProps) {
             </Button>
           </div>
           <ReportDownloadPicker
-            result={result}
+            result={displayResult}
             actionItems={actionItems}
             pdfLabels={pdfLabels}
           />
@@ -245,6 +268,9 @@ export function ResultsView({ result, audioSrc, onReset }: ResultsViewProps) {
           {activeTab === "summary" && (
             <SummaryTab result={result} plan={plan} />
           )}
+          {activeTab === "aiInsights" && (
+            <AiInsightsTab result={result} />
+          )}
           {activeTab === "actions" && (
             <ActionItemsTab
               result={result}
@@ -262,7 +288,12 @@ export function ResultsView({ result, audioSrc, onReset }: ResultsViewProps) {
             <ChaptersTab chapters={result.chapters} />
           )}
           {activeTab === "transcript" && (
-            <MeetingWorkspace result={result} audioSrc={audioSrc} />
+            <MeetingWorkspace
+              result={displayResult}
+              mediaSrc={resolvedMediaSrc}
+              mediaKind={mediaKind}
+              onTranscriptChange={setTranscript}
+            />
           )}
         </div>
       </div>
@@ -415,6 +446,18 @@ function SummaryTab({
         </ul>
       </section>
     </div>
+  );
+}
+
+function AiInsightsTab({ result }: { result: TranscriptionResult }) {
+  const ai = useAiInsights(result);
+  return (
+    <AiInsightsPanel
+      insights={ai.insights}
+      isLoading={ai.isLoading}
+      error={ai.error}
+      onRegenerate={ai.regenerate}
+    />
   );
 }
 

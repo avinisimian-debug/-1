@@ -13,12 +13,27 @@ import {
   type ApiError,
 } from "@/shared/api";
 import { failure, isFailure, success, type Result } from "@/shared/lib/result";
-import type { TranscriptionResult } from "../types";
+import type { TimedWord, TranscriptionResult } from "../types";
 import { prepareAudioForWhisper } from "./prepare-audio";
 import {
   buildAnalysisSystemPrompt,
   buildAnalysisUserPrompt,
 } from "./analysis-prompts";
+import {
+  alignWhisperSegmentsWithDiarization,
+  utterancesToTranscript,
+} from "./align-speakers";
+import {
+  attachWordsToEntries,
+  mapAssemblyAIWordsToTimedWords,
+  mapWhisperWordsToTimedWords,
+} from "./build-word-timestamps";
+import {
+  diarizeAudioUtterances,
+  isDiarizationConfigured,
+  transcribeWithDiarization,
+} from "./diarize-audio";
+import { hasFeature } from "@/lib/plan-features";
 
 interface GptAnalysisBase {
   headline?: string;
@@ -112,30 +127,106 @@ export async function transcribeAudio({
       return failure(new BadRequestError(prepared.error.message));
     }
     const audioFile = prepared.data.file;
+    const useDiarization =
+      isPro &&
+      hasFeature("pro", "speakerDiarization") &&
+      isDiarizationConfigured();
 
-    const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-1",
-      response_format: "verbose_json",
-      ...(isPro && language && language !== "auto" ? { language } : {}),
-    });
+    let transcriptText = "";
+    let durationSeconds = 0;
+    let transcript: TranscriptionResult["transcript"] = [];
+    let diarizationEnabled = false;
+    let timedWords: TimedWord[] = [];
 
-    const segments = transcription.segments ?? [];
-    const transcriptText = transcription.text?.trim() ?? "";
+    if (useDiarization) {
+      const diarized = await transcribeWithDiarization(audioFile, language);
+      if (!isFailure(diarized)) {
+        const {
+          utterances,
+          transcriptText: diarizedText,
+          durationSeconds: dur,
+          timedWords: diarizedWords,
+        } = diarized.data;
+        transcriptText = diarizedText;
+        durationSeconds = dur;
+        transcript = utterancesToTranscript(utterances);
+        diarizationEnabled = transcript.length > 0;
+        if (diarizedWords?.length) {
+          timedWords = diarizedWords;
+          transcript = attachWordsToEntries(transcript, timedWords);
+        }
+      }
+    }
 
-    const durationSeconds =
-      segments.length > 0 ? segments[segments.length - 1].end : 0;
+    if (!transcriptText) {
+      const transcription = await openai.audio.transcriptions.create({
+        file: audioFile,
+        model: "whisper-1",
+        response_format: "verbose_json",
+        timestamp_granularities: ["word", "segment"],
+        ...(isPro && language && language !== "auto" ? { language } : {}),
+      });
 
-    const transcript =
-      segments.length > 0
-        ? segments.map((segment) => ({
+      const segments = transcription.segments ?? [];
+      const whisperWords = transcription.words ?? [];
+      transcriptText = transcription.text?.trim() ?? "";
+
+      durationSeconds =
+        segments.length > 0 ? segments[segments.length - 1].end : 0;
+
+      if (useDiarization && isDiarizationConfigured() && segments.length > 0) {
+        const utterancesResult = await diarizeAudioUtterances(audioFile, language);
+        if (!isFailure(utterancesResult) && utterancesResult.data.length > 0) {
+          transcript = alignWhisperSegmentsWithDiarization(
+            segments.map((s) => ({
+              start: s.start,
+              end: s.end,
+              text: s.text,
+            })),
+            utterancesResult.data,
+          );
+          diarizationEnabled = true;
+        } else {
+          transcript = segments.map((segment) => ({
             timestamp: formatTimestamp(segment.start),
-            speaker: "Speaker",
+            speaker: "Speaker 1",
+            speakerId: "1",
             text: segment.text.trim(),
-          }))
-        : transcriptText
-          ? [{ timestamp: "00:00", speaker: "Speaker", text: transcriptText }]
-          : [];
+          }));
+        }
+      } else {
+        transcript =
+          segments.length > 0
+            ? segments.map((segment) => ({
+                timestamp: formatTimestamp(segment.start),
+                speaker: "Speaker 1",
+                speakerId: "1",
+                text: segment.text.trim(),
+              }))
+            : transcriptText
+              ? [
+                  {
+                    timestamp: "00:00",
+                    speaker: "Speaker 1",
+                    speakerId: "1",
+                    text: transcriptText,
+                  },
+                ]
+              : [];
+      }
+
+      if (whisperWords.length > 0 && timedWords.length === 0) {
+        timedWords = mapWhisperWordsToTimedWords(
+          transcript,
+          whisperWords.map((w) => ({
+            word: w.word,
+            start: w.start,
+            end: w.end,
+          })),
+        );
+        transcript = attachWordsToEntries(transcript, timedWords);
+      }
+    }
 
     if (!transcriptText) {
       return failure(
@@ -154,7 +245,16 @@ export async function transcribeAudio({
         },
         {
           role: "user",
-          content: buildAnalysisUserPrompt(transcriptText, file.name),
+          content: buildAnalysisUserPrompt(
+            transcriptText,
+            file.name,
+            diarizationEnabled
+              ? transcript.map((line) => ({
+                  speaker: line.speaker,
+                  text: line.text,
+                }))
+              : undefined,
+          ),
         },
       ],
     });
@@ -195,6 +295,8 @@ export async function transcribeAudio({
         ...(isPro && item.priority ? { priority: item.priority } : {}),
       })),
       transcript,
+      ...(timedWords.length > 0 ? { timedWords } : {}),
+      ...(diarizationEnabled ? { diarizationEnabled: true } : {}),
       ...(isPro && analysis.chapters?.length ? { chapters: analysis.chapters } : {}),
       ...(isPro && analysis.sentiment ? { sentiment: analysis.sentiment } : {}),
       ...(isPro && analysis.keyQuotes?.length ? { keyQuotes: analysis.keyQuotes } : {}),

@@ -24,9 +24,11 @@ const FEATURE_ORDER: FeatureKey[] = [
   "languageSelect",
   "priorityProcessing",
   "integrationsPush",
+  "transcriptionWebhooks",
   "sharedLinks",
   "smartSearch",
   "summaryTemplates",
+  "speakerDiarization",
 ];
 
 const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translations").Translations> = {
@@ -49,9 +51,11 @@ const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translatio
   languageSelect: "featLanguageSelect",
   priorityProcessing: "featPriorityProcessing",
   integrationsPush: "featIntegrationsPush",
+  transcriptionWebhooks: "featTranscriptionWebhooks",
   sharedLinks: "featSharedLinks",
   smartSearch: "featSmartSearch",
   summaryTemplates: "featSummaryTemplates",
+  speakerDiarization: "featSpeakerDiarization",
 };
 
 export function PlanFeatureComparison() {

@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { transcribeAudio } from "@/features/transcription/server/transcribe.use-case";
+import {
+  resolveUserId,
+  triggerWebhook,
+} from "@/features/webhooks/server/trigger-webhook";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
+import { waitUntil } from "@/lib/wait-until";
 import { getUserPlan } from "@/lib/users-store";
 import { BadRequestError, UnauthorizedError, withApiHandler } from "@/shared/api";
 import { isFailure } from "@/shared/lib/result";
@@ -30,6 +35,15 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   }
 
   await incrementTranscriptionsToday();
+
+  const userId = resolveUserId(session.user.email);
+  waitUntil(
+    triggerWebhook(userId, {
+      userEmail: session.user.email,
+      plan,
+      result: result.data,
+    }),
+  );
 
   return result.data;
 });

@@ -125,8 +125,11 @@ export interface Translations {
   resDownload: string;
   resDownloadFormat: string;
   downloadFormatPdf: string;
+  downloadFormatDocx: string;
   downloadFormatFullTxt: string;
   downloadFormatTranscriptTxt: string;
+  downloadFormatSrt: string;
+  downloadFormatVtt: string;
   resGeneratingDownload: string;
   resNewUpload: string;
   resSummary: string;
@@ -141,6 +144,7 @@ export interface Translations {
   resOverview: string;
   resChapters: string;
   resInsights: string;
+  resAiInsights: string;
   resHeadline: string;
   resTopics: string;
   resDecisions: string;
@@ -190,9 +194,11 @@ export interface Translations {
   featFollowUpEmail: string;
   featPriorityProcessing: string;
   featIntegrationsPush: string;
+  featTranscriptionWebhooks: string;
   featSharedLinks: string;
   featSmartSearch: string;
   featSummaryTemplates: string;
+  featSpeakerDiarization: string;
   // Settings
   settingsTitle: string;
   settingsDesc: string;
@@ -338,6 +344,44 @@ export interface Translations {
   gateIntegrationsTitle: string;
   gateIntegrationsLine1: string;
   gateIntegrationsLine2: string;
+  gateWebhooksTitle: string;
+  gateWebhooksLine1: string;
+  gateWebhooksLine2: string;
+  webhooksPageTitle: string;
+  webhooksPageDesc: string;
+  webhooksBackToSettings: string;
+  webhooksSectionTitle: string;
+  webhooksSectionDesc: string;
+  webhooksSettingsCardTitle: string;
+  webhooksSettingsCardDesc: string;
+  webhooksSettingsCardCta: string;
+  webhooksUrlLabel: string;
+  webhooksUrlHint: string;
+  webhooksUrlRequired: string;
+  webhooksUrlInvalid: string;
+  webhooksSecretLabel: string;
+  webhooksSecretHint: string;
+  webhooksSecretPlaceholder: string;
+  webhooksEnabled: string;
+  webhooksActiveLabel: string;
+  webhooksSave: string;
+  webhooksSaved: string;
+  webhooksTest: string;
+  webhooksTestSent: string;
+  webhooksSaveSuccess: string;
+  webhooksSaveFailed: string;
+  webhooksLoadFailed: string;
+  webhooksLoading: string;
+  webhooksTestSuccess: string;
+  webhooksTestFailed: string;
+  webhooksPayloadNote: string;
+  webhooksLockedTitle: string;
+  webhooksLockedDesc: string;
+  webhooksLockedCta: string;
+  webhooksLockedBadge: string;
+  webhooksLockedFeature1: string;
+  webhooksLockedFeature2: string;
+  webhooksLockedFeature3: string;
   gateShareTitle: string;
   gateShareLine1: string;
   gateShareLine2: string;
@@ -347,10 +391,33 @@ export interface Translations {
   workspaceMeetingDuration: string;
   workspaceChapters: string;
   workspaceTranscript: string;
+  workspaceRenameSpeakers: string;
+  workspaceSpeakerRenamePlaceholder: string;
+  workspaceRenameSpeakerAction: string;
+  workspaceDiarizationBadge: string;
   workspacePlay: string;
   workspacePause: string;
   workspaceNoAudio: string;
   workspaceCopyTranscript: string;
+  workspaceInteractivePlayer: string;
+  workspaceEditableHint: string;
+  workspaceSaveTranscript: string;
+  workspaceTranscriptSaved: string;
+  workspaceTranscriptSaving: string;
+  workspaceTranscriptUnsaved: string;
+  workspaceAudioMode: string;
+  workspaceSeek: string;
+  aiInsightsLoading: string;
+  aiInsightsLoadingHint: string;
+  aiInsightsError: string;
+  aiInsightsRegenerate: string;
+  aiInsightsCopyAll: string;
+  aiInsightsExecutive: string;
+  aiInsightsActions: string;
+  aiInsightsTopics: string;
+  aiInsightsPoweredBy: string;
+  aiInsightsNoActions: string;
+  aiInsightsNoTopics: string;
   gateSummaryTemplatesTitle: string;
   gateSummaryTemplatesLine1: string;
   gateSummaryTemplatesLine2: string;
@@ -596,8 +663,11 @@ const en: Translations = {
   resDownload: "Download",
   resDownloadFormat: "File format",
   downloadFormatPdf: "PDF Report — styled & complete",
+  downloadFormatDocx: "Word document (.docx)",
   downloadFormatFullTxt: "Full report (.txt)",
   downloadFormatTranscriptTxt: "Transcript only (.txt)",
+  downloadFormatSrt: "Subtitles (.srt)",
+  downloadFormatVtt: "WebVTT subtitles (.vtt)",
   resGeneratingDownload: "Preparing download...",
   resNewUpload: "New Upload",
   resSummary: "Summary",
@@ -611,7 +681,8 @@ const en: Translations = {
   resGeneratingPdf: "Generating PDF...",
   resOverview: "Executive Overview",
   resChapters: "Chapters",
-  resInsights: "AI Insights",
+  resInsights: "Advanced Insights",
+  resAiInsights: "AI Insights",
   resHeadline: "Meeting headline",
   resTopics: "Topics",
   resDecisions: "Key decisions",
@@ -661,9 +732,11 @@ const en: Translations = {
   featFollowUpEmail: "Follow-up email draft",
   featPriorityProcessing: "Priority processing",
   featIntegrationsPush: "Integration bridge (webhook)",
+  featTranscriptionWebhooks: "Completion webhooks (automation)",
   featSharedLinks: "Shareable read-only links",
   featSmartSearch: "Smart history search",
   featSummaryTemplates: "Summary templates (Manager / Student / Technical)",
+  featSpeakerDiarization: "Speaker diarization (Speaker 1, 2, …)",
   settingsTitle: "Settings",
   settingsDesc: "Manage your account, plan, and preferences",
   settingsPlan: "Your Plan",
@@ -821,6 +894,48 @@ const en: Translations = {
   gateIntegrationsTitle: "Integration Bridge",
   gateIntegrationsLine1: "Auto-send action items to Slack, Notion, or Zapier.",
   gateIntegrationsLine2: "Stop re-typing tasks — keep momentum after every call.",
+  gateWebhooksTitle: "Transcription webhooks",
+  gateWebhooksLine1: "POST full transcripts and AI summaries to your automation stack when a job completes.",
+  gateWebhooksLine2: "Available on Pro — power users only.",
+  webhooksPageTitle: "Webhooks",
+  webhooksPageDesc: "Automate your workflow when transcriptions complete.",
+  webhooksBackToSettings: "Back to settings",
+  webhooksSectionTitle: "Completion webhook",
+  webhooksSectionDesc:
+    "We POST to your URL when a transcription finishes. Payload includes metadata, full text, and AI summary.",
+  webhooksSettingsCardTitle: "Webhooks",
+  webhooksSettingsCardDesc:
+    "Send transcription results to Zapier, Make, n8n, or your own API.",
+  webhooksSettingsCardCta: "Configure",
+  webhooksUrlLabel: "Webhook URL",
+  webhooksUrlHint: "Must be HTTPS. Use Zapier, Make, or your own endpoint.",
+  webhooksUrlRequired: "Enter a webhook URL or disable the webhook.",
+  webhooksUrlInvalid: "URL must be a valid HTTPS address (max 2048 characters).",
+  webhooksSecretLabel: "Signing secret (optional)",
+  webhooksSecretHint: "We send X-Staz-Signature: sha256=… for verification.",
+  webhooksSecretPlaceholder: "Optional HMAC secret",
+  webhooksEnabled: "Automatically POST when a transcription completes",
+  webhooksActiveLabel: "Webhook active",
+  webhooksSave: "Save changes",
+  webhooksSaved: "Saved!",
+  webhooksTest: "Send test event",
+  webhooksTestSent: "Sent!",
+  webhooksSaveSuccess: "Webhook settings saved.",
+  webhooksSaveFailed: "Could not save webhook settings.",
+  webhooksLoadFailed: "Could not load webhook settings.",
+  webhooksLoading: "Loading webhook settings…",
+  webhooksTestSuccess: "Test event delivered (HTTP {status}).",
+  webhooksTestFailed: "Test webhook failed.",
+  webhooksPayloadNote:
+    "Event: transcription.completed · Includes metadata, fullText, transcript[], summary, and actionItems[].",
+  webhooksLockedTitle: "Automation webhooks",
+  webhooksLockedDesc:
+    "Upgrade to Pro to POST completed transcriptions to your custom HTTPS endpoint.",
+  webhooksLockedCta: "Upgrade to Pro",
+  webhooksLockedBadge: "Pro feature",
+  webhooksLockedFeature1: "Instant POST when transcription completes",
+  webhooksLockedFeature2: "Full text, AI summary, and metadata in one payload",
+  webhooksLockedFeature3: "Optional HMAC signing for secure verification",
   gateShareTitle: "Shareable meeting links",
   gateShareLine1: "Send stakeholders a read-only summary link.",
   gateShareLine2: "No account required — perfect for clients and execs.",
@@ -829,10 +944,33 @@ const en: Translations = {
   workspaceMeetingDuration: "Meeting length: {duration}",
   workspaceChapters: "Chapters",
   workspaceTranscript: "Interactive transcript",
+  workspaceRenameSpeakers: "Speakers",
+  workspaceSpeakerRenamePlaceholder: "Name…",
+  workspaceRenameSpeakerAction: "Rename {name}",
+  workspaceDiarizationBadge: "Diarized",
   workspacePlay: "Play",
   workspacePause: "Pause",
   workspaceNoAudio: "Audio playback is available for new uploads in this session. History items open without the original file.",
   workspaceCopyTranscript: "Copy transcript",
+  workspaceInteractivePlayer: "Sync player",
+  workspaceEditableHint: "Click any line to edit — changes auto-save and apply to exports.",
+  workspaceSaveTranscript: "Save changes",
+  workspaceTranscriptSaved: "All changes saved",
+  workspaceTranscriptSaving: "Saving…",
+  workspaceTranscriptUnsaved: "Unsaved changes",
+  workspaceAudioMode: "Audio recording — use the controls below to play",
+  workspaceSeek: "Seek",
+  aiInsightsLoading: "Generating AI insights…",
+  aiInsightsLoadingHint: "GPT-4o mini is analyzing your transcript",
+  aiInsightsError: "Could not generate insights",
+  aiInsightsRegenerate: "Regenerate",
+  aiInsightsCopyAll: "Copy all",
+  aiInsightsExecutive: "Executive summary",
+  aiInsightsActions: "Action items",
+  aiInsightsTopics: "Main topics",
+  aiInsightsPoweredBy: "Powered by GPT-4o mini",
+  aiInsightsNoActions: "No action items identified.",
+  aiInsightsNoTopics: "No topics identified.",
   gateSummaryTemplatesTitle: "Summary templates",
   gateSummaryTemplatesLine1: "Reframe the same meeting for managers, students, or engineers.",
   gateSummaryTemplatesLine2: "Switch modes instantly — no re-processing wait.",
@@ -1074,8 +1212,11 @@ const he: Translations = {
   resDownload: "הורד",
   resDownloadFormat: "סוג קובץ",
   downloadFormatPdf: "דוח PDF — מעוצב ומלא",
+  downloadFormatDocx: "מסמך Word (.docx)",
   downloadFormatFullTxt: "דוח מלא (.txt)",
   downloadFormatTranscriptTxt: "תמלול בלבד (.txt)",
+  downloadFormatSrt: "כתוביות (.srt)",
+  downloadFormatVtt: "כתוביות WebVTT (.vtt)",
   resGeneratingDownload: "מכין הורדה...",
   resNewUpload: "העלאה חדשה",
   resSummary: "סיכום",
@@ -1089,7 +1230,8 @@ const he: Translations = {
   resGeneratingPdf: "מייצר PDF...",
   resOverview: "סקירה מנהלית",
   resChapters: "פרקים",
-  resInsights: "תובנות AI",
+  resInsights: "תובנות מתקדמות",
+  resAiInsights: "תובנות AI",
   resHeadline: "כותרת הפגישה",
   resTopics: "נושאים",
   resDecisions: "החלטות מרכזיות",
@@ -1139,9 +1281,11 @@ const he: Translations = {
   featFollowUpEmail: "טיוטת מייל המשך",
   featPriorityProcessing: "עיבוד בעדיפות",
   featIntegrationsPush: "גשר אינטגרציות (Webhook)",
+  featTranscriptionWebhooks: "Webhooks בסיום תמלול",
   featSharedLinks: "קישורי שיתוף לקריאה בלבד",
   featSmartSearch: "חיפוש חכם בהיסטוריה",
   featSummaryTemplates: "תבניות סיכום (מנהל / סטודנט / טכני)",
+  featSpeakerDiarization: "זיהוי דוברים (דובר 1, 2, …)",
   settingsTitle: "הגדרות",
   settingsDesc: "ניהול חשבון, חבילה והעדפות",
   settingsPlan: "החבילה שלך",
@@ -1293,6 +1437,48 @@ const he: Translations = {
   gateIntegrationsTitle: "גשר אינטגרציות",
   gateIntegrationsLine1: "שליחה אוטומטית של משימות ל-Slack, Notion או Zapier.",
   gateIntegrationsLine2: "בלי להקליד שוב — שמרו מומנטום אחרי כל שיחה.",
+  gateWebhooksTitle: "Webhooks לתמלול",
+  gateWebhooksLine1: "שליחת תמלול מלא וסיכום AI לאוטומציה שלכם כשהתמלול מסתיים.",
+  gateWebhooksLine2: "זמין ב-Pro — למשתמשים מתקדמים.",
+  webhooksPageTitle: "Webhooks",
+  webhooksPageDesc: "אוטומציה לסיום תמלול.",
+  webhooksBackToSettings: "חזרה להגדרות",
+  webhooksSectionTitle: "Webhook בסיום תמלול",
+  webhooksSectionDesc:
+    "נשלח POST לכתובת שלכם כשתמלול מסתיים — כולל מטא-דאטה, טקסט מלא וסיכום AI.",
+  webhooksSettingsCardTitle: "Webhooks",
+  webhooksSettingsCardDesc:
+    "שליחת תוצאות תמלול ל-Zapier, Make, n8n או API משלכם.",
+  webhooksSettingsCardCta: "הגדרה",
+  webhooksUrlLabel: "כתובת Webhook",
+  webhooksUrlHint: "חייב HTTPS. Zapier, Make או שרת משלכם.",
+  webhooksUrlRequired: "הזינו כתובת Webhook או בטלו את השליחה.",
+  webhooksUrlInvalid: "הכתובת חייבת להיות HTTPS תקינה (עד 2048 תווים).",
+  webhooksSecretLabel: "מפתח חתימה (אופציונלי)",
+  webhooksSecretHint: "נשלח X-Staz-Signature: sha256=… לאימות.",
+  webhooksSecretPlaceholder: "סוד HMAC אופציונלי",
+  webhooksEnabled: "שליחה אוטומטית כשתמלול מסתיים",
+  webhooksActiveLabel: "Webhook פעיל",
+  webhooksSave: "שמור",
+  webhooksSaved: "נשמר!",
+  webhooksTest: "שליחת אירוע בדיקה",
+  webhooksTestSent: "נשלח!",
+  webhooksSaveSuccess: "הגדרות Webhook נשמרו.",
+  webhooksSaveFailed: "לא ניתן לשמור את הגדרות ה-Webhook.",
+  webhooksLoadFailed: "לא ניתן לטעון את הגדרות ה-Webhook.",
+  webhooksLoading: "טוען הגדרות Webhook…",
+  webhooksTestSuccess: "אירוע בדיקה נשלח (HTTP {status}).",
+  webhooksTestFailed: "בדיקת Webhook נכשלה.",
+  webhooksPayloadNote:
+    "אירוע: transcription.completed · כולל metadata, fullText, transcript[], summary ו-actionItems[].",
+  webhooksLockedTitle: "Webhooks לאוטומציה",
+  webhooksLockedDesc:
+    "שדרגו ל-Pro כדי לשלוח תמלולים מושלמים ל-HTTPS endpoint מותאם.",
+  webhooksLockedCta: "שדרוג ל-Pro",
+  webhooksLockedBadge: "תכונת Pro",
+  webhooksLockedFeature1: "POST מיידי כשתמלול מסתיים",
+  webhooksLockedFeature2: "טקסט מלא, סיכום AI ומטא-דאטה ב-payload אחד",
+  webhooksLockedFeature3: "חתימת HMAC אופציונלית לאימות מאובטח",
   gateShareTitle: "קישורי שיתוף לפגישות",
   gateShareLine1: "שלחו לבעלי עניין סיכום לקריאה בלבד.",
   gateShareLine2: "בלי חשבון — מושלם ללקוחות והנהלה.",
@@ -1301,10 +1487,33 @@ const he: Translations = {
   workspaceMeetingDuration: "אורך הפגישה: {duration}",
   workspaceChapters: "פרקים",
   workspaceTranscript: "תמלול אינטראקטיבי",
+  workspaceRenameSpeakers: "דוברים",
+  workspaceSpeakerRenamePlaceholder: "שם…",
+  workspaceRenameSpeakerAction: "שנה שם ל{name}",
+  workspaceDiarizationBadge: "זיהוי דוברים",
   workspacePlay: "נגן",
   workspacePause: "השהה",
   workspaceNoAudio: "ניגון אודיו זמין להעלאות חדשות בסשן הנוכחי. פריטים מההיסטוריה נפתחים בלי קובץ המקור.",
   workspaceCopyTranscript: "העתק תמלול",
+  workspaceInteractivePlayer: "נגן מסונכרן",
+  workspaceEditableHint: "לחצו על שורה לעריכה — השינויים נשמרים אוטומטית ומשפיעים על הייצוא.",
+  workspaceSaveTranscript: "שמור שינויים",
+  workspaceTranscriptSaved: "כל השינויים נשמרו",
+  workspaceTranscriptSaving: "שומר…",
+  workspaceTranscriptUnsaved: "שינויים שלא נשמרו",
+  workspaceAudioMode: "הקלטת אודיו — השתמשו בפקדים למטה לניגון",
+  workspaceSeek: "גלילה",
+  aiInsightsLoading: "מייצר תובנות AI…",
+  aiInsightsLoadingHint: "GPT-4o mini מנתח את התמלול",
+  aiInsightsError: "לא ניתן לייצר תובנות",
+  aiInsightsRegenerate: "יצירה מחדש",
+  aiInsightsCopyAll: "העתק הכל",
+  aiInsightsExecutive: "סיכום מנהלים",
+  aiInsightsActions: "משימות לביצוע",
+  aiInsightsTopics: "נושאים עיקריים",
+  aiInsightsPoweredBy: "מופעל על ידי GPT-4o mini",
+  aiInsightsNoActions: "לא זוהו משימות.",
+  aiInsightsNoTopics: "לא זוהו נושאים.",
   gateSummaryTemplatesTitle: "תבניות סיכום",
   gateSummaryTemplatesLine1: "אותה פגישה בניסוח למנהלים, סטודנטים או מהנדסים.",
   gateSummaryTemplatesLine2: "מעבר מיידי בין מצבים — בלי להמתין לעיבוד מחדש.",

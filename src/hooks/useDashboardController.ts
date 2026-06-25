@@ -61,6 +61,7 @@ export function useDashboardController() {
     displayResult,
     uploadedFile: transcription.uploadedFile,
     audioSrc: transcription.audioObjectUrl ?? undefined,
+    mediaKind: transcription.mediaKind,
     stage: transcription.stage,
     stageIndex: transcription.stageIndex,
     error: transcription.error,

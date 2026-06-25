@@ -1,3 +1,5 @@
+import type { AiInsights } from "@/features/insights/types";
+
 export type ProcessingStage = "uploading" | "transcribing" | "analyzing";
 
 export type TranscriptionStatus =
@@ -29,7 +31,20 @@ export interface SentimentAnalysis {
 export interface TranscriptEntry {
   timestamp: string;
   speaker: string;
+  /** Stable id for rename UI — e.g. "1", "2" */
+  speakerId?: string;
   text: string;
+  /** Word-level sync data for interactive player */
+  words?: TimedWord[];
+}
+
+/** Standard JSON word timing — used by the interactive media player. */
+export interface TimedWord {
+  word: string;
+  start_time: number;
+  end_time: number;
+  speaker?: string;
+  speakerId?: string;
 }
 
 export interface TranscriptionResult {
@@ -53,6 +68,14 @@ export interface TranscriptionResult {
   keyQuotes?: Array<{ quote: string; context: string }>;
   risks?: Array<{ risk: string; severity: "high" | "medium" | "low" }>;
   followUpEmail?: { subject: string; body: string };
+  /** User-renamed speaker labels keyed by speakerId */
+  speakerLabels?: Record<string, string>;
+  /** True when multi-speaker diarization was applied */
+  diarizationEnabled?: boolean;
+  /** Flat word-level timing list (word, start_time, end_time) */
+  timedWords?: TimedWord[];
+  /** GPT-4o-mini generated insights (summary, actions, topics) */
+  aiInsights?: AiInsights;
 }
 
 export interface UploadedFile {

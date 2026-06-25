@@ -11,6 +11,7 @@ import {
   Mail,
   MessageSquareQuote,
   ShieldAlert,
+  Webhook,
   Zap,
 } from "lucide-react";
 import type { FeatureKey } from "./plan-features";
@@ -83,6 +84,12 @@ export const PRO_FEATURE_GATE: Partial<Record<FeatureKey, FeatureGateMeta>> = {
     titleKey: "gateIntegrationsTitle",
     line1Key: "gateIntegrationsLine1",
     line2Key: "gateIntegrationsLine2",
+  },
+  transcriptionWebhooks: {
+    icon: Webhook,
+    titleKey: "gateWebhooksTitle",
+    line1Key: "gateWebhooksLine1",
+    line2Key: "gateWebhooksLine2",
   },
   sharedLinks: {
     icon: Link2,

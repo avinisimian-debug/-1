@@ -1,7 +1,10 @@
 export { MeetingWorkspace } from "./components/MeetingWorkspace";
 export { AudioTranscriptPlayer } from "./components/AudioTranscriptPlayer";
+export { SplitMediaTranscriptPlayer } from "./components/SplitMediaTranscriptPlayer";
+export { WordTimedTranscript } from "./components/WordTimedTranscript";
+export { MediaPlayerPane } from "./components/MediaPlayerPane";
 export { MeetingValueIndicator } from "./components/MeetingValueIndicator";
 export { InteractiveTranscriptPlayer } from "./components/InteractiveTranscriptPlayer";
 export { ChapterNavigation } from "./components/ChapterNavigation";
 export { WorkspaceAudioPlayer } from "./components/WorkspaceAudioPlayer";
-export { useAudioPlayback } from "./hooks/useAudioPlayback";
+export { useMediaPlayback, useAudioPlayback } from "./hooks/useMediaPlayback";

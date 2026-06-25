@@ -1,10 +1,18 @@
 import type { ActionItem, TranscriptionResult } from "./types";
+import {
+  applySpeakerLabelOverrides,
+} from "@/features/transcription/lib/speaker-labels";
+import { buildSrtFromResult, buildVttFromResult } from "./export-subtitles";
 
 function sanitizeFileName(name: string): string {
   return name.replace(/\.[^/.]+$/, "").replace(/[^\w\s-]/g, "").trim() || "transcript";
 }
 
 export function buildTranscriptText(result: TranscriptionResult): string {
+  const entries = applySpeakerLabelOverrides(
+    result.transcript,
+    result.speakerLabels,
+  );
   const lines = [
     `TRANSCRIPT — ${result.fileName}`,
     `Duration: ${result.duration} | Processed: ${result.processedAt}`,
@@ -12,7 +20,7 @@ export function buildTranscriptText(result: TranscriptionResult): string {
     "",
   ];
 
-  for (const entry of result.transcript) {
+  for (const entry of entries) {
     lines.push(`[${entry.timestamp}] ${entry.speaker}`);
     lines.push(entry.text);
     lines.push("");
@@ -94,7 +102,11 @@ export function buildFullReportText(
   }
 
   lines.push("", "FULL TRANSCRIPT", "-".repeat(40));
-  for (const entry of result.transcript) {
+  const labeledTranscript = applySpeakerLabelOverrides(
+    result.transcript,
+    result.speakerLabels,
+  );
+  for (const entry of labeledTranscript) {
     lines.push(`[${entry.timestamp}] ${entry.speaker}: ${entry.text}`);
   }
 
@@ -119,6 +131,23 @@ export function downloadTranscript(
 ): void {
   const base = sanitizeFileName(result.fileName);
   downloadTextFile(buildTranscriptText(result), `${base}-transcript.txt`);
+}
+
+export function downloadSrt(result: TranscriptionResult): void {
+  const base = sanitizeFileName(result.fileName);
+  downloadTextFile(buildSrtFromResult(result), `${base}.srt`);
+}
+
+export function downloadVtt(result: TranscriptionResult): void {
+  const base = sanitizeFileName(result.fileName);
+  const content = buildVttFromResult(result);
+  const blob = new Blob([content], { type: "text/vtt;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${base}.vtt`;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }
 
 export function downloadFullReport(

@@ -3,15 +3,27 @@
 import { useRef, useState } from "react";
 import { ChevronDown, Download, Loader2 } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { downloadDocxReport } from "@/lib/export-docx";
 import { downloadPdfReport } from "@/lib/export-pdf";
-import { downloadFullReport, downloadTranscript } from "@/lib/export";
+import {
+  downloadFullReport,
+  downloadSrt,
+  downloadTranscript,
+  downloadVtt,
+} from "@/lib/export";
 import { isRtl } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/ui/button";
 import type { ActionItem, TranscriptionResult } from "../types";
 import { PdfReportTemplate, type PdfReportLabels } from "./PdfReportTemplate";
 
-export type DownloadFormat = "pdf" | "full-txt" | "transcript-txt";
+export type DownloadFormat =
+  | "pdf"
+  | "docx"
+  | "full-txt"
+  | "transcript-txt"
+  | "srt"
+  | "vtt";
 
 interface ReportDownloadPickerProps {
   result: TranscriptionResult;
@@ -33,8 +45,11 @@ export function ReportDownloadPicker({
 
   const formatOptions: { value: DownloadFormat; label: string }[] = [
     { value: "pdf", label: t.downloadFormatPdf },
+    { value: "docx", label: t.downloadFormatDocx },
     { value: "full-txt", label: t.downloadFormatFullTxt },
     { value: "transcript-txt", label: t.downloadFormatTranscriptTxt },
+    { value: "srt", label: t.downloadFormatSrt },
+    { value: "vtt", label: t.downloadFormatVtt },
   ];
 
   const handleDownload = async () => {
@@ -47,11 +62,25 @@ export function ReportDownloadPicker({
             await downloadPdfReport(pdfRef.current, result.fileName);
           }
           break;
+        case "docx":
+          await downloadDocxReport(
+            result,
+            actionItems,
+            pdfLabels,
+            isRtl(locale),
+          );
+          break;
         case "full-txt":
           downloadFullReport(result, actionItems);
           break;
         case "transcript-txt":
           downloadTranscript(result);
+          break;
+        case "srt":
+          downloadSrt(result);
+          break;
+        case "vtt":
+          downloadVtt(result);
           break;
       }
     } catch (err) {

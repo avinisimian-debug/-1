@@ -24,6 +24,7 @@ export function useTranscription() {
   const [result, setResult] = useState<TranscriptionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [audioObjectUrl, setAudioObjectUrl] = useState<string | null>(null);
+  const [mediaKind, setMediaKind] = useState<"audio" | "video">("audio");
   const audioUrlRef = useRef<string | null>(null);
 
   const revokeAudioUrl = useCallback(() => {
@@ -32,6 +33,7 @@ export function useTranscription() {
       audioUrlRef.current = null;
     }
     setAudioObjectUrl(null);
+    setMediaKind("audio");
   }, []);
 
   useEffect(() => () => revokeAudioUrl(), [revokeAudioUrl]);
@@ -63,6 +65,11 @@ export function useTranscription() {
         size: file.size,
         type: file.type,
       });
+      setMediaKind(
+        file.type.startsWith("video/") || /\.(mp4|m4v)$/i.test(file.name)
+          ? "video"
+          : "audio",
+      );
       setStatus("processing");
       setStage("uploading");
       setResult(null);
@@ -98,6 +105,7 @@ export function useTranscription() {
     stageIndex,
     uploadedFile,
     audioObjectUrl,
+    mediaKind,
     result,
     error,
     processFile,

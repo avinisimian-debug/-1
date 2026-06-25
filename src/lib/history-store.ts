@@ -40,6 +40,75 @@ export function deleteHistoryEntry(id: string): void {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
 }
 
+export function updateHistorySpeakerLabels(
+  fileName: string,
+  processedAt: string,
+  speakerLabels: Record<string, string>,
+): void {
+  const history = getHistory();
+  const updated = history.map((entry) => {
+    if (
+      entry.result.fileName === fileName &&
+      entry.result.processedAt === processedAt
+    ) {
+      const labels =
+        Object.keys(speakerLabels).length > 0 ? speakerLabels : undefined;
+      const { speakerLabels: _removed, ...rest } = entry.result;
+      return {
+        ...entry,
+        result: {
+          ...rest,
+          ...(labels ? { speakerLabels: labels } : {}),
+        },
+      };
+    }
+    return entry;
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+}
+
+export function updateHistoryAiInsights(
+  fileName: string,
+  processedAt: string,
+  aiInsights: import("@/features/insights/types").AiInsights,
+): void {
+  const history = getHistory();
+  const updated = history.map((entry) => {
+    if (
+      entry.result.fileName === fileName &&
+      entry.result.processedAt === processedAt
+    ) {
+      return {
+        ...entry,
+        result: { ...entry.result, aiInsights },
+      };
+    }
+    return entry;
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+}
+
+export function updateHistoryTranscript(
+  fileName: string,
+  processedAt: string,
+  transcript: TranscriptionResult["transcript"],
+): void {
+  const history = getHistory();
+  const updated = history.map((entry) => {
+    if (
+      entry.result.fileName === fileName &&
+      entry.result.processedAt === processedAt
+    ) {
+      return {
+        ...entry,
+        result: { ...entry.result, transcript },
+      };
+    }
+    return entry;
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+}
+
 export function clearHistory(): void {
   localStorage.removeItem(HISTORY_KEY);
 }

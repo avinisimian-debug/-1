@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bell, CheckCircle2, Crown, Shield, Wallet } from "lucide-react";
 import { IntegrationBridge } from "@/features/integrations";
+import { WebhooksSettingsCard } from "@/features/webhooks";
 import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { PricingTable } from "@/components/billing/PricingTable";
@@ -262,6 +263,8 @@ export default function SettingsPage() {
           <section className="glass-card rounded-xl p-6 sm:p-8">
             <IntegrationBridge />
           </section>
+
+          <WebhooksSettingsCard />
 
           <section className="glass-card rounded-xl p-6">
             <h2 className="mb-4 text-base font-semibold text-foreground">
