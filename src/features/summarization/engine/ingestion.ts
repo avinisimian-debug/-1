@@ -26,6 +26,7 @@ export function ingestFromResult(
       executive: result.summary.executive,
       keyTakeaways: result.summary.keyTakeaways,
       actionItems: result.actionItems,
+      markdown: result.summary.markdown,
     },
   };
 }

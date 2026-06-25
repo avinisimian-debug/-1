@@ -43,6 +43,8 @@ export interface TranscriptionResult {
     overview?: string;
     executive: string[];
     keyTakeaways: string[];
+    /** Full GPT-generated Markdown brief */
+    markdown?: string;
   };
   actionItems: ActionItem[];
   transcript: TranscriptEntry[];

@@ -151,6 +151,7 @@ export interface Translations {
   resSentiment: string;
   resCopySummary: string;
   resCopied: string;
+  resMarkdownBrief: string;
   resSearchTranscript: string;
   resNoResults: string;
   resPriorityHigh: string;
@@ -208,6 +209,7 @@ export interface Translations {
   settingsProPlanLine: string;
   settingsManagePayPal: string;
   settingsProBillingScheduled: string;
+  settingsProLifetime: string;
   billingSetupRequiredTitle: string;
   billingSetupRequiredDesc: string;
   paypalCancelled: string;
@@ -279,6 +281,10 @@ export interface Translations {
   paypalOnlyNote: string;
   paypalBuyerTip: string;
   paypalRedirectCta: string;
+  paypalLifetimeNote: string;
+  proLifetimeOnce: string;
+  proLifetimeBadge: string;
+  proLifetimePricingNote: string;
   // Integrations bridge
   integTitle: string;
   integSubtitle: string;
@@ -616,6 +622,7 @@ const en: Translations = {
   resSentiment: "Meeting Tone",
   resCopySummary: "Copy summary",
   resCopied: "Copied!",
+  resMarkdownBrief: "Professional brief (Markdown)",
   resSearchTranscript: "Search transcript...",
   resNoResults: "No matching lines found.",
   resPriorityHigh: "High",
@@ -668,16 +675,17 @@ const en: Translations = {
   settingsNameLabel: "Name",
   settingsEmailLabel: "Email",
   settingsNotificationsBody: "Product updates enabled for {email}",
-  settingsBasicPlan: "Basic Plan — $0/month",
-  settingsProPlanLine: "Pro Plan — {price}/month",
-  settingsManagePayPal: "Manage or cancel your subscription in your PayPal account.",
+  settingsBasicPlan: "Basic Plan — $0",
+  settingsProPlanLine: "Pro Plan — {price} lifetime",
+  settingsManagePayPal: "Your lifetime Pro purchase was processed via PayPal.",
   settingsProBillingScheduled:
-    "Auto-billing active — {intro}/mo now during launch, then {regular}/mo monthly.",
-  billingSetupRequiredTitle: "Add PayPal to keep Pro",
+    "Lifetime Pro active — you paid once and keep Pro forever.",
+  settingsProLifetime: "Lifetime Pro — no recurring charges.",
+  billingSetupRequiredTitle: "Unlock lifetime Pro",
   billingSetupRequiredDesc:
-    "Subscribe with PayPal below. {intro}/month is charged now, then {regular}/month automatically.",
+    "Pay once with PayPal below — {price} during launch week, then Pro is yours forever.",
   paypalCancelled: "PayPal subscription was cancelled.",
-  pricingProLaunchNote: "Launch week — Pro for {intro}/mo via PayPal, then {regular}/mo.",
+  pricingProLaunchNote: "Launch week — lifetime Pro for {intro} (one payment, Pro forever).",
   historyTitle: "History",
   historyDesc: "Browse your past transcriptions and summaries",
   historySearch: "Search history...",
@@ -736,25 +744,30 @@ const en: Translations = {
   adminEmailsCopied: "Emails copied to clipboard",
   paypalTitle: "Upgrade with PayPal",
   paypalDesc:
-    "PayPal only — no separate card gateway. Subscribe once; PayPal charges monthly and pays your Business account.",
-  paypalPay: "Subscribe with PayPal",
-  paypalSuccess: "Pro activated! Your subscription is set up.",
-  paypalProcessing: "Processing...",
+    "PayPal only — one secure payment. Pro is yours forever — no monthly subscription.",
+  paypalPay: "Pay with PayPal",
+  paypalSuccess: "Pro activated for life! Enjoy unlimited access.",
+  paypalProcessing: "Processing payment...",
   paypalError: "Payment failed. Please try again.",
   paypalNotConfigured: "PayPal is not configured yet. Add keys to .env.local",
-  paypalSandboxNote: "PayPal only — secure monthly billing",
-  paypalSubscribeTitle: "Launch week — Pro for {intro}/month via PayPal",
+  paypalSandboxNote: "PayPal only — secure one-time payment",
+  paypalSubscribeTitle: "Launch week — lifetime Pro for {intro}",
   paypalSubscribeDesc:
-    "PayPal handles everything: {intro}/month during launch week, then {regular}/month automatically. Cancel anytime in PayPal.",
+    "One payment via PayPal. {intro} during launch week — Pro forever, no recurring charges.",
   paypalAutoBillingNote:
-    "By subscribing you authorize PayPal to charge {intro}/month now, then {regular}/month. Cancel anytime in PayPal.",
+    "By paying you authorize a single charge of {intro}. No subscription.",
   paypalPreapprovalError:
-    "PayPal could not set up monthly billing. Try the PayPal.com button below, or contact PayPal Business Support to enable recurring payments (Reference Transactions) on your merchant account.",
+    "PayPal could not complete the payment. Try again or contact PayPal support.",
   paypalOnlyNote:
     "No card gateway on our side — payments run entirely through PayPal.",
   paypalBuyerTip:
-    "Log in with your PayPal account to approve monthly billing. Funds go to the merchant's PayPal Business wallet.",
+    "Log in with your PayPal account to approve the one-time payment.",
   paypalRedirectCta: "Continue on PayPal.com",
+  paypalLifetimeNote:
+    "Launch price {price} — one payment, Pro forever. Regular price {regular}.",
+  proLifetimeOnce: "once",
+  proLifetimeBadge: "Pay once · Pro forever",
+  proLifetimePricingNote: "Single payment — no monthly subscription.",
   integTitle: "Integration Bridge",
   integSubtitle:
     "Push action items to your stack automatically — no copy-paste after every meeting.",
@@ -1087,6 +1100,7 @@ const he: Translations = {
   resSentiment: "אווירת הפגישה",
   resCopySummary: "העתק סיכום",
   resCopied: "הועתק!",
+  resMarkdownBrief: "תקציר מקצועי (Markdown)",
   resSearchTranscript: "חיפוש בתמלול...",
   resNoResults: "לא נמצאו תוצאות.",
   resPriorityHigh: "גבוהה",
@@ -1139,16 +1153,16 @@ const he: Translations = {
   settingsNameLabel: "שם",
   settingsEmailLabel: "אימייל",
   settingsNotificationsBody: "עדכוני מוצר פעילים עבור {email}",
-  settingsBasicPlan: "חבילת Basic — $0/חודש",
-  settingsProPlanLine: "חבילת Pro — {price}/חודש",
-  settingsManagePayPal: "ניהול או ביטול המנוי דרך חשבון PayPal שלכם.",
-  settingsProBillingScheduled:
-    "חיוב אוטומטי פעיל — {intro}/חודש עכשיו במבצע ההשקה, ואז {regular}/חודש.",
-  billingSetupRequiredTitle: "הוסיפו PayPal כדי לשמור על Pro",
+  settingsBasicPlan: "חבילת Basic — $0",
+  settingsProPlanLine: "חבילת Pro — {price} לכל החיים",
+  settingsManagePayPal: "רכישת Pro לכל החיים בוצעה דרך PayPal.",
+  settingsProBillingScheduled: "Pro לכל החיים פעיל — שילמתם פעם אחת ושומרים על Pro לנצח.",
+  settingsProLifetime: "Pro לכל החיים — ללא חיובים חוזרים.",
+  billingSetupRequiredTitle: "פתחו Pro לכל החיים",
   billingSetupRequiredDesc:
-    "הירשמו עם PayPal למטה. {intro}/חודש יחויב עכשיו, ואז {regular}/חודש אוטומטית.",
-  paypalCancelled: "הרשמת המנוי ב-PayPal בוטלה.",
-  pricingProLaunchNote: "שבוע השקה — Pro ב-{intro}/חודש ב-PayPal, ואז {regular}/חודש.",
+    "שלמו פעם אחת עם PayPal למטה — {price} בשבוע ההשקה, ואז Pro שלכם לנצח.",
+  paypalCancelled: "התשלום ב-PayPal בוטל.",
+  pricingProLaunchNote: "שבוע השקה — Pro לכל החיים ב-{intro} (תשלום אחד, Pro לנצח).",
   historyTitle: "היסטוריה",
   historyDesc: "עיין בתמלולים וסיכומים קודמים",
   historySearch: "חיפוש בהיסטוריה...",
@@ -1207,25 +1221,25 @@ const he: Translations = {
   adminEmailsCopied: "המיילים הועתקו ללוח",
   paypalTitle: "שדרוג עם PayPal",
   paypalDesc:
-    "רק PayPal — בלי מערכת סליקה נפרדת. מנוי אחד, PayPal מחייב כל חודש ומעביר לחשבון העסקי שלך.",
-  paypalPay: "הירשמו עם PayPal",
-  paypalSuccess: "Pro הופעל! המנוי שלכם מוגדר.",
-  paypalProcessing: "מעבד...",
-  paypalError: "יצירת המנוי נכשלה. נסו שוב או פנו לתמיכה.",
+    "רק PayPal — תשלום מאובטח אחד. Pro שלכם לנצח — בלי מנוי חודשי.",
+  paypalPay: "שלמו עם PayPal",
+  paypalSuccess: "Pro הופעל לכל החיים! תהנו מגישה מלאה.",
+  paypalProcessing: "מעבד תשלום...",
+  paypalError: "התשלום נכשל. נסו שוב.",
   paypalNotConfigured: "PayPal לא מוגדר. הוסף מפתחות ל-.env.local",
-  paypalSandboxNote: "רק PayPal — חיוב חודשי מאובטח",
-  paypalSubscribeTitle: "שבוע השקה — Pro ב-{intro}/חודש דרך PayPal",
+  paypalSandboxNote: "רק PayPal — תשלום חד-פעמי מאובטח",
+  paypalSubscribeTitle: "שבוע השקה — Pro לכל החיים ב-{intro}",
   paypalSubscribeDesc:
-    "PayPal מטפל בהכל: {intro}/חודש במבצע ההשקה, ואז {regular}/חודש אוטומטית. ביטול בכל עת ב-PayPal.",
-  paypalAutoBillingNote:
-    "באישור המנוי PayPal יחייב {intro}/חודש עכשיו, ואז {regular}/חודש. ניתן לבטל בכל עת ב-PayPal.",
-  paypalPreapprovalError:
-    "PayPal לא הצליח להגדיר חיוב חודשי. נסו את כפתור PayPal.com למטה, או פנו לתמיכת PayPal Business לאישור חיוב חוזר (Reference Transactions) בחשבון הסוחר.",
-  paypalOnlyNote:
-    "אין אצלנו מערכת סליקה — התשלומים עוברים רק דרך PayPal.",
-  paypalBuyerTip:
-    "התחברו עם חשבון PayPal לאישור חיוב חודשי. הכסף מגיע ישירות לארנק PayPal Business של הסוחר.",
+    "תשלום אחד דרך PayPal. {intro} בשבוע ההשקה — Pro לנצח, בלי חיובים חוזרים.",
+  paypalAutoBillingNote: "באישור התשלום יחויב סכום חד-פעמי של {intro}. ללא מנוי.",
+  paypalPreapprovalError: "PayPal לא הצליח להשלים את התשלום. נסו שוב או פנו לתמיכה.",
+  paypalOnlyNote: "אין אצלנו מערכת סליקה — התשלומים עוברים רק דרך PayPal.",
+  paypalBuyerTip: "התחברו עם חשבון PayPal לאישור תשלום חד-פעמי.",
   paypalRedirectCta: "המשך ב-PayPal.com",
+  paypalLifetimeNote: "מחיר השקה {price} — תשלום אחד, Pro לנצח. מחיר רגיל {regular}.",
+  proLifetimeOnce: "פעם אחת",
+  proLifetimeBadge: "שלמו פעם אחת · Pro לנצח",
+  proLifetimePricingNote: "תשלום יחיד — ללא מנוי חודשי.",
   integTitle: "גשר אינטגרציות",
   integSubtitle:
     "דחיפת משימות לאוטומציה שלך — בלי העתקה אחרי כל פגישה.",

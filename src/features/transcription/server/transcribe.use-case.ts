@@ -15,6 +15,10 @@ import {
 import { failure, isFailure, success, type Result } from "@/shared/lib/result";
 import type { TranscriptionResult } from "../types";
 import { prepareAudioForWhisper } from "./prepare-audio";
+import {
+  buildAnalysisSystemPrompt,
+  buildAnalysisUserPrompt,
+} from "./analysis-prompts";
 
 interface GptAnalysisBase {
   headline?: string;
@@ -41,6 +45,7 @@ interface GptAnalysisPro extends GptAnalysisBase {
   keyQuotes?: Array<{ quote: string; context: string }>;
   risks?: Array<{ risk: string; severity: "high" | "medium" | "low" }>;
   followUpEmail?: { subject: string; body: string };
+  markdownReport?: string;
 }
 
 export interface TranscribeInput {
@@ -50,40 +55,7 @@ export interface TranscribeInput {
 }
 
 function buildAnalysisPrompt(isPro: boolean): string {
-  if (isPro) {
-    return `You are an expert meeting analyst and executive communications specialist. Analyze the meeting transcript and return a JSON object with this exact structure:
-{
-  "headline": "one compelling sentence capturing the meeting outcome",
-  "topics": ["3-5 short topic tags"],
-  "decisions": ["clear decision 1", "clear decision 2"],
-  "overview": "2-3 polished paragraphs synthesizing the meeting at an executive level",
-  "executive": ["bullet point 1", "bullet point 2"],
-  "keyTakeaways": ["takeaway 1", "takeaway 2"],
-  "sentiment": { "overall": "positive|neutral|mixed|negative", "label": "2-3 word mood label", "description": "one sentence about the meeting tone" },
-  "chapters": [{ "timestamp": "MM:SS", "title": "chapter title describing this section" }],
-  "keyQuotes": [{ "quote": "memorable quote", "context": "who or what topic" }],
-  "risks": [{ "risk": "risk or blocker", "severity": "high|medium|low" }],
-  "followUpEmail": { "subject": "professional follow-up subject", "body": "ready-to-send follow-up email with action items" },
-  "actionItems": [
-    { "task": "description", "owner": "person name or Unassigned", "deadline": "date or TBD", "priority": "high|medium|low" }
-  ]
-}
-Write in the same language as the transcript. Include headline, topics, decisions, overview, 5-7 executive bullets, 4-6 takeaways, 3-5 key quotes, 2-5 risks, follow-up email, 4-8 chapters, sentiment, and all action items with priority.`;
-  }
-
-  return `You are an expert meeting analyst. Analyze the meeting transcript and return a JSON object with this exact structure:
-{
-  "headline": "one compelling sentence capturing the meeting outcome",
-  "topics": ["3-5 short topic tags"],
-  "decisions": ["clear decision 1", "clear decision 2"],
-  "overview": "2-3 polished paragraphs synthesizing the meeting",
-  "executive": ["bullet point 1", "bullet point 2"],
-  "keyTakeaways": ["takeaway 1", "takeaway 2"],
-  "actionItems": [
-    { "task": "description", "owner": "person name or Unassigned", "deadline": "date or TBD" }
-  ]
-}
-Write in the same language as the transcript. Include headline, topics, 3-6 decisions, overview, 5-7 executive bullets, 4-6 takeaways, and all action items.`;
+  return buildAnalysisSystemPrompt(isPro);
 }
 
 function getOpenAIClient() {
@@ -174,7 +146,7 @@ export async function transcribeAudio({
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       response_format: { type: "json_object" },
-      temperature: 0.3,
+      temperature: 0.2,
       messages: [
         {
           role: "system",
@@ -182,7 +154,7 @@ export async function transcribeAudio({
         },
         {
           role: "user",
-          content: `Analyze this meeting transcript:\n\n${transcriptText}`,
+          content: buildAnalysisUserPrompt(transcriptText, file.name),
         },
       ],
     });
@@ -210,6 +182,9 @@ export async function transcribeAudio({
         overview: analysis.overview?.trim() ?? "",
         executive: analysis.executive ?? [],
         keyTakeaways: analysis.keyTakeaways ?? [],
+        ...(analysis.markdownReport?.trim()
+          ? { markdown: analysis.markdownReport.trim() }
+          : {}),
       },
       actionItems: (analysis.actionItems ?? []).map((item, index) => ({
         id: String(index + 1),

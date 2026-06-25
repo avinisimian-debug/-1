@@ -3,6 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { cn } from "@/lib/utils";
+import { MarkdownView } from "@/shared/ui/markdown-view";
 import type { SummarizationOutput } from "../types";
 
 interface SummaryTemplatePreviewProps {
@@ -43,9 +44,13 @@ export function SummaryTemplatePreview({
             {t.summaryPreviewLoading}
           </div>
         ) : output ? (
-          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">
-            {output.content}
-          </pre>
+          output.format === "markdown" ? (
+            <MarkdownView content={output.content} className="text-sm" />
+          ) : (
+            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">
+              {output.content}
+            </pre>
+          )
         ) : (
           <p className="py-8 text-center text-sm text-muted-foreground">
             {t.summaryPreviewEmpty}

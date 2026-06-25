@@ -4,20 +4,17 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import {
-  PRO_PLAN_INTRO_PRICE,
-  PRO_PLAN_INTRO_PRICE_LABEL,
-  PRO_PLAN_REGULAR_PRICE,
-  PRO_PLAN_REGULAR_PRICE_LABEL,
+  PRO_LIFETIME_LAUNCH_PRICE,
+  PRO_LIFETIME_PRICE,
+  PRO_LIFETIME_PRICE_LABEL,
   isLaunchWeekActive,
 } from "@/lib/constants";
 import {
-  type BillingInterval,
   type PricingTierId,
   TIER_PRICING,
   appPlanToPricingTier,
   formatPrice,
   getDisplayPrice,
-  YEARLY_DISCOUNT_PERCENT,
 } from "@/lib/pricing-tiers";
 import type { Translations } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils";
@@ -80,11 +77,11 @@ const TIERS: TierConfig[] = [
 
 function AnimatedPrice({
   value,
-  interval,
+  lifetime,
   className,
 }: {
   value: number;
-  interval: BillingInterval;
+  lifetime?: boolean;
   className?: string;
 }) {
   const [display, setDisplay] = useState(value);
@@ -110,66 +107,10 @@ function AnimatedPrice({
       )}
     >
       {formatPrice(display)}
-      {interval === "yearly" && display > 0 && (
-        <span className="text-sm font-normal text-muted-foreground">/yr</span>
-      )}
-      {interval === "monthly" && (
-        <span className="text-sm font-normal text-muted-foreground">/mo</span>
-      )}
+      {lifetime ? (
+        <span className="text-sm font-normal text-muted-foreground"> once</span>
+      ) : null}
     </span>
-  );
-}
-
-function BillingToggle({
-  interval,
-  onChange,
-  t,
-}: {
-  interval: BillingInterval;
-  onChange: (v: BillingInterval) => void;
-  t: Translations;
-}) {
-  const yearly = interval === "yearly";
-
-  return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="inline-flex items-center rounded-md border border-border bg-muted/60 p-1">
-        <button
-          type="button"
-          onClick={() => onChange("monthly")}
-          className={cn(
-            "rounded px-4 py-1.5 text-sm font-medium transition-all",
-            !yearly
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {t.pricingMonthly}
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange("yearly")}
-          className={cn(
-            "rounded px-4 py-1.5 text-sm font-medium transition-all",
-            yearly
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {t.pricingYearly}
-        </button>
-      </div>
-      <span
-        className={cn(
-          "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-all duration-500",
-          yearly
-            ? "discount-badge-active border-emerald-200 bg-emerald-50 text-emerald-700"
-            : "border-transparent text-transparent",
-        )}
-      >
-        {t.pricingYearlySave.replace("{percent}", String(YEARLY_DISCOUNT_PERCENT))}
-      </span>
-    </div>
   );
 }
 
@@ -182,7 +123,6 @@ export function PricingTable({
   onLandingSignup,
 }: PricingTableProps) {
   const { t } = useLocale();
-  const [interval, setInterval] = useState<BillingInterval>("monthly");
   const activeTier = landing ? null : appPlanToPricingTier(currentPlan);
   const launchWeek = isLaunchWeekActive();
 
@@ -204,15 +144,16 @@ export function PricingTable({
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">{t.pricingSubtitle}</p>
         {!landing && (
-          <div className="mt-6">
-            <BillingToggle interval={interval} onChange={setInterval} t={t} />
-          </div>
+          <p className="mt-4 text-xs font-medium text-muted-foreground">
+            {t.proLifetimePricingNote}
+          </p>
         )}
         {landing && launchWeek && (
           <p className="mt-4 text-sm font-medium text-accent">
-            {t.pricingProLaunchNote
-              .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-              .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+            {t.pricingProLaunchNote.replace(
+              "{intro}",
+              `$${PRO_LIFETIME_LAUNCH_PRICE}`,
+            )}
           </p>
         )}
       </div>
@@ -221,22 +162,19 @@ export function PricingTable({
         {TIERS.map((tier) => {
           const isPopular = tier.popular;
           const isCurrent = !landing && tier.id === activeTier;
-          const saleMonthly =
-            tier.id === "pro" && launchWeek && interval === "monthly"
-              ? parseFloat(PRO_PLAN_INTRO_PRICE)
-              : undefined;
+          const isLifetimePro = tier.id === "pro";
+          const salePrice =
+            isLifetimePro && launchWeek
+              ? parseFloat(PRO_LIFETIME_LAUNCH_PRICE)
+              : isLifetimePro
+                ? parseFloat(PRO_LIFETIME_PRICE)
+                : undefined;
 
-          const { amount, perMonth, savingsPercent } = getDisplayPrice(
-            tier.id,
-            interval,
-            { proSaleMonthly: saleMonthly },
-          );
+          const { amount } = getDisplayPrice(tier.id, "monthly", {
+            proSaleMonthly: salePrice,
+          });
 
-          const showStrike =
-            tier.id === "pro" &&
-            launchWeek &&
-            interval === "monthly" &&
-            saleMonthly != null;
+          const showStrike = isLifetimePro && launchWeek && salePrice != null;
 
           return (
             <div
@@ -276,28 +214,15 @@ export function PricingTable({
               <div className="mb-1 min-h-[3.5rem]">
                 {showStrike && (
                   <p className="text-sm text-muted-foreground line-through">
-                    {formatPrice(parseFloat(PRO_PLAN_REGULAR_PRICE))}/mo
+                    {PRO_LIFETIME_PRICE_LABEL}
                   </p>
                 )}
                 <p className="text-3xl font-semibold text-foreground">
-                  <AnimatedPrice value={amount} interval={interval} />
+                  <AnimatedPrice value={amount} lifetime={isLifetimePro} />
                 </p>
-                {interval === "yearly" && amount > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formatPrice(perMonth)}
-                    {t.pricingPerMonthEquiv}
-                    {savingsPercent > 0 && (
-                      <span className="ms-1 font-medium text-emerald-600">
-                        · {t.pricingSavePercent.replace("{percent}", String(savingsPercent))}
-                      </span>
-                    )}
-                  </p>
-                )}
-                {tier.id === "pro" && launchWeek && interval === "monthly" && (
+                {isLifetimePro && launchWeek && (
                   <p className="mt-1 text-xs font-medium text-accent">
-                    {t.saleFirstMonth
-                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                    {t.proLifetimeBadge}
                   </p>
                 )}
               </div>

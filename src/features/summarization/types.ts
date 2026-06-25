@@ -42,6 +42,7 @@ export interface IngestedTranscript {
     executive: string[];
     keyTakeaways: string[];
     actionItems: ActionItem[];
+    markdown?: string;
   };
 }
 

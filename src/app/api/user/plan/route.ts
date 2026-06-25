@@ -20,5 +20,6 @@ export async function GET() {
     onIntroPricing: details.onIntroPricing,
     hasSubscription: details.hasSubscription,
     needsPayPalSetup: details.needsPayPalSetup,
+    proLifetime: details.proLifetime,
   });
 }

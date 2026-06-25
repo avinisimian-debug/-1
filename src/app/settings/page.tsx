@@ -14,10 +14,9 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import {
-  getProPlanPriceLabel,
+  getProLifetimePriceLabel,
   isLaunchWeekActive,
-  PRO_PLAN_INTRO_PRICE_LABEL,
-  PRO_PLAN_REGULAR_PRICE_LABEL,
+  PRO_LIFETIME_PRICE_LABEL,
 } from "@/lib/constants";
 import { markStepComplete } from "@/lib/onboarding-store";
 import { scrollToUpgradeWithRetry } from "@/lib/upgrade-navigation";
@@ -28,6 +27,7 @@ interface PlanApiResponse {
   hasSubscription?: boolean;
   needsPayPalSetup?: boolean;
   trialEndsAt?: string;
+  proLifetime?: boolean;
 }
 
 export default function SettingsPage() {
@@ -143,6 +143,7 @@ export default function SettingsPage() {
 
   const needsPayPalSetup = Boolean(planDetails?.needsPayPalSetup);
   const hasSubscription = Boolean(planDetails?.hasSubscription);
+  const proLifetime = Boolean(planDetails?.proLifetime);
   const showCheckout = !isPro || needsPayPalSetup;
   const showProActive = isPro && !needsPayPalSetup;
 
@@ -196,15 +197,11 @@ export default function SettingsPage() {
               <p className="text-xs font-medium text-emerald-700">
                 {t.settingsProActive}
               </p>
-              {hasSubscription && (
-                <p className="text-[11px] text-muted-foreground">
-                  {isLaunchWeekActive()
-                    ? t.settingsProBillingScheduled
-                        .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                        .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)
-                    : t.settingsManagePayPal}
-                </p>
-              )}
+              <p className="text-[11px] text-muted-foreground">
+                {hasSubscription && !proLifetime
+                  ? t.settingsManagePayPal
+                  : t.settingsProLifetime}
+              </p>
             </div>
           )}
 
@@ -216,9 +213,10 @@ export default function SettingsPage() {
                     {t.billingSetupRequiredTitle}
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-amber-800/90">
-                    {t.billingSetupRequiredDesc
-                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                    {t.billingSetupRequiredDesc.replace(
+                      "{price}",
+                      getProLifetimePriceLabel(),
+                    )}
                   </p>
                 </div>
               )}
@@ -226,14 +224,10 @@ export default function SettingsPage() {
               {isLaunchWeekActive() && !needsPayPalSetup && (
                 <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-4">
                   <p className="text-sm font-semibold text-emerald-900">
-                    {t.trialTitle
-                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                    {t.trialTitle.replace("{intro}", getProLifetimePriceLabel())}
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-emerald-800/90">
-                    {t.trialDesc
-                      .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                      .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                    {t.trialDesc.replace("{intro}", getProLifetimePriceLabel())}
                   </p>
                 </div>
               )}
@@ -243,19 +237,17 @@ export default function SettingsPage() {
                   <Wallet className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
                     {isLaunchWeekActive()
-                      ? t.paypalSubscribeTitle
-                          .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                          .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)
+                      ? t.paypalSubscribeTitle.replace(
+                          "{intro}",
+                          getProLifetimePriceLabel(),
+                        )
                       : t.paypalTitle}
                   </h3>
                 </div>
                 <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
-                  {(isLaunchWeekActive()
-                    ? t.paypalSubscribeDesc
-                    : t.paypalDesc
-                  )
-                    .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-                    .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+                  {(isLaunchWeekActive() ? t.paypalSubscribeDesc : t.paypalDesc)
+                    .replace("{intro}", getProLifetimePriceLabel())
+                    .replace("{regular}", PRO_LIFETIME_PRICE_LABEL)}
                 </p>
                 <div className="mb-4">
                   <ProPlanPrice size="sm" showBadge />
@@ -326,7 +318,7 @@ export default function SettingsPage() {
                 {isPro
                   ? t.settingsProPlanLine.replace(
                       "{price}",
-                      getProPlanPriceLabel(),
+                      getProLifetimePriceLabel(),
                     )
                   : t.settingsBasicPlan}
               </p>

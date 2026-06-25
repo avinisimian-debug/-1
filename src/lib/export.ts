@@ -25,6 +25,10 @@ export function buildFullReportText(
   result: TranscriptionResult,
   actionItems: ActionItem[],
 ): string {
+  if (result.summary.markdown?.trim()) {
+    return result.summary.markdown.trim();
+  }
+
   const lines = [
     `MEETSCRIBE REPORT — ${result.fileName}`,
     `Duration: ${result.duration} | Processed: ${result.processedAt}`,
@@ -138,6 +142,10 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 }
 
 export function buildSummaryText(result: TranscriptionResult): string {
+  if (result.summary.markdown?.trim()) {
+    return result.summary.markdown.trim();
+  }
+
   const lines: string[] = [];
 
   if (result.headline) {

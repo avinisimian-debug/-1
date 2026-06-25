@@ -1,4 +1,4 @@
-import { getProPlanPrice } from "@/lib/constants";
+import { getProLifetimePrice } from "@/lib/constants";
 
 export const PRO_PLAN_CURRENCY = "USD";
 
@@ -54,10 +54,10 @@ export async function createPayPalOrder(): Promise<string> {
       intent: "CAPTURE",
       purchase_units: [
         {
-          description: "Staz AI Pro Plan — Monthly",
+          description: "Staz AI Pro — Lifetime access (one-time payment)",
           amount: {
             currency_code: PRO_PLAN_CURRENCY,
-            value: getProPlanPrice(),
+            value: getProLifetimePrice(),
           },
         },
       ],

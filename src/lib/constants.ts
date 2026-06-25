@@ -31,20 +31,32 @@ export function isProSaleActive(now = Date.now()): boolean {
   return isLaunchWeekActive(now);
 }
 
-/** Price charged on the next PayPal billing cycle (not during free trial). */
+/** One-time lifetime Pro price (USD). */
+export const PRO_LIFETIME_PRICE = "19.00";
+export const PRO_LIFETIME_PRICE_LABEL = "$19";
+/** Launch-week lifetime price — pay once, Pro forever. */
+export const PRO_LIFETIME_LAUNCH_PRICE = "9.99";
+
+export function getProLifetimePrice(): string {
+  return isLaunchWeekActive() ? PRO_LIFETIME_LAUNCH_PRICE : PRO_LIFETIME_PRICE;
+}
+
+export function getProLifetimePriceLabel(): string {
+  return isLaunchWeekActive() ? PRO_PLAN_INTRO_PRICE_LABEL : PRO_LIFETIME_PRICE_LABEL;
+}
+
+/** @deprecated Use getProLifetimePrice — kept for legacy imports */
 export function getProPlanPrice(): string {
-  return isLaunchWeekActive() ? PRO_PLAN_INTRO_PRICE : PRO_PLAN_REGULAR_PRICE;
+  return getProLifetimePrice();
 }
 
 export function getProPlanPriceLabel(): string {
-  return isLaunchWeekActive() ? PRO_PLAN_INTRO_PRICE_LABEL : PRO_PLAN_REGULAR_PRICE_LABEL;
+  return getProLifetimePriceLabel();
 }
 
 /** Headline price shown in marketing UI during launch week. */
 export function getProPlanDisplayPriceLabel(): string {
-  return isLaunchWeekActive()
-    ? PRO_PLAN_INTRO_PRICE_LABEL
-    : PRO_PLAN_REGULAR_PRICE_LABEL;
+  return getProLifetimePriceLabel();
 }
 
 export const WHISPER_MAX_BYTES = 25 * 1024 * 1024;

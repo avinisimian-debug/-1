@@ -59,8 +59,22 @@ export class SummarizationEngine {
       transcript: input.transcript,
     });
 
-    const document = await this.processor.process(ingested, template);
-    const content = this.formatters[format].format(document);
+    const gptMarkdown = ingested.metadata.markdown?.trim();
+    let document: Awaited<ReturnType<SummaryProcessor["process"]>>;
+    let content: string;
+
+    if (format === "markdown" && gptMarkdown) {
+      document = {
+        templateId: input.templateId,
+        title: ingested.metadata.headline ?? ingested.fileName,
+        generatedAt: new Date().toISOString(),
+        sections: [],
+      };
+      content = gptMarkdown;
+    } else {
+      document = await this.processor.process(ingested, template);
+      content = this.formatters[format].format(document);
+    }
 
     const output: SummarizationOutput = {
       templateId: input.templateId,

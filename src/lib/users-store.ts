@@ -23,6 +23,8 @@ export interface StoredUser {
   proTrialUsed?: boolean;
   paypalSubscriptionId?: string;
   proSubscriptionStatus?: ProSubscriptionStatus;
+  /** One-time PayPal payment — Pro forever (no recurring billing). */
+  proLifetime?: boolean;
 }
 
 export interface UserPlanDetails {
@@ -30,6 +32,8 @@ export interface UserPlanDetails {
   trialEndsAt?: string;
   subscriptionStatus?: ProSubscriptionStatus;
   onIntroPricing?: boolean;
+  /** Pro via one-time lifetime purchase */
+  proLifetime?: boolean;
   /** Active PayPal subscription linked to the account. */
   hasSubscription: boolean;
   /** Pro via launch trial only — must add PayPal before trial ends. */
@@ -57,8 +61,17 @@ function hasActiveSubscription(user: StoredUser): boolean {
   );
 }
 
+function isLifetimePro(user: StoredUser): boolean {
+  return Boolean(user.proLifetime && user.paidAt);
+}
+
 function isPaidPro(user: StoredUser): boolean {
-  return user.plan === "pro" && Boolean(user.paidAt) && !user.proTrialEndsAt;
+  return (
+    user.plan === "pro" &&
+    Boolean(user.paidAt) &&
+    !user.proTrialEndsAt &&
+    (isLifetimePro(user) || !user.paypalSubscriptionId || user.proLifetime === true)
+  );
 }
 
 async function expireTrialIfNeeded(user: StoredUser): Promise<StoredUser> {
@@ -92,7 +105,8 @@ async function resolvePlanForUser(user: StoredUser): Promise<UserPlanDetails> {
   if (isPaidPro(expired)) {
     return {
       plan: "pro",
-      hasSubscription: Boolean(expired.paypalSubscriptionId),
+      proLifetime: isLifetimePro(expired) || expired.proLifetime === true,
+      hasSubscription: Boolean(expired.paypalSubscriptionId) && !expired.proLifetime,
       needsPayPalSetup: false,
     };
   }
@@ -271,7 +285,11 @@ export async function upgradeUserToPro(
 
   user.plan = "pro";
   user.paidAt = new Date().toISOString();
+  user.proLifetime = true;
   user.proTrialEndsAt = undefined;
+  user.proTrialUsed = undefined;
+  user.paypalSubscriptionId = undefined;
+  user.proSubscriptionStatus = undefined;
   if (transactionId) user.paypalTransactionId = transactionId;
 
   await writeUsers(users);

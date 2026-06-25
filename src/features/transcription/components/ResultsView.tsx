@@ -24,6 +24,7 @@ import { buildSummaryText, copyToClipboard } from "@/lib/export";
 import { hasFeature } from "@/lib/plan-features";
 import { cn } from "@/lib/utils";
 import { Button } from "@/shared/ui/button";
+import { MarkdownView } from "@/shared/ui/markdown-view";
 import type { ActionItem, TranscriptionResult } from "../types";
 import { ReportDownloadPicker } from "./ReportDownloadPicker";
 import { PushActionItemsButton } from "@/features/integrations/components/PushActionItemsButton";
@@ -277,9 +278,36 @@ function SummaryTab({
   plan: "free" | "pro";
 }) {
   const { t } = useLocale();
+  const [copied, setCopied] = useState(false);
   return (
     <div className="space-y-8">
       <SummaryTemplatePanel result={result} />
+      {result.summary.markdown && (
+        <section className="rounded-xl border border-accent/20 bg-card shadow-sm">
+          <div className="flex items-center justify-between gap-3 border-b border-border/70 px-5 py-3">
+            <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <FileText className="h-4 w-4 text-accent/80" />
+              {t.resMarkdownBrief}
+            </h3>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={async () => {
+                const ok = await copyToClipboard(result.summary.markdown!);
+                if (ok) setCopied(true);
+              }}
+            >
+              <Copy className="h-3.5 w-3.5" />
+              {copied ? t.resCopied : t.resCopySummary}
+            </Button>
+          </div>
+          <div className="px-5 py-5">
+            <MarkdownView content={result.summary.markdown} />
+          </div>
+        </section>
+      )}
       {result.headline && (
         <section className="rounded-md border border-accent/20 bg-accent-muted/30 px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

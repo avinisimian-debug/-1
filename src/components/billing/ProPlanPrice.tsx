@@ -3,11 +3,9 @@
 import { useEffect, useState } from "react";
 import { useLocale } from "@/context/LocaleContext";
 import {
-  PRO_PLAN_INTRO_PRICE_LABEL,
-  PRO_PLAN_REGULAR_PRICE_LABEL,
-  getProPlanDisplayPriceLabel,
-  getProPlanPriceLabel,
+  getProLifetimePriceLabel,
   isLaunchWeekActive,
+  PRO_LIFETIME_PRICE_LABEL,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +34,11 @@ export function ProPlanPrice({
   if (!launchWeek) {
     return (
       <p className={cn(priceClass, "text-zinc-900", className)}>
-        {getProPlanPriceLabel()}
-        <span className="text-sm font-normal text-zinc-500">/mo</span>
+        {getProLifetimePriceLabel()}
+        <span className="text-sm font-normal text-zinc-500">
+          {" "}
+          {t.proLifetimeOnce}
+        </span>
       </p>
     );
   }
@@ -46,8 +47,11 @@ export function ProPlanPrice({
     <div className={cn("space-y-2", className)}>
       <div className="flex flex-wrap items-baseline gap-2">
         <span className={cn(priceClass, "text-zinc-900")}>
-          {getProPlanDisplayPriceLabel()}
-          <span className="text-sm font-normal text-zinc-500">/mo</span>
+          {getProLifetimePriceLabel()}
+          <span className="text-sm font-normal text-zinc-500">
+            {" "}
+            {t.proLifetimeOnce}
+          </span>
         </span>
         <span
           className={cn(
@@ -55,21 +59,15 @@ export function ProPlanPrice({
             size === "lg" ? "text-sm" : "text-xs",
           )}
         >
-          {PRO_PLAN_REGULAR_PRICE_LABEL}
+          {PRO_LIFETIME_PRICE_LABEL}
         </span>
       </div>
       {showBadge && (
         <span className="inline-block rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-          {t.saleFirstMonth
-            .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-            .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
+          {t.proLifetimeBadge}
         </span>
       )}
-      <p className="text-[11px] text-zinc-500">
-        {t.salePricingNote
-          .replace("{intro}", PRO_PLAN_INTRO_PRICE_LABEL)
-          .replace("{regular}", PRO_PLAN_REGULAR_PRICE_LABEL)}
-      </p>
+      <p className="text-[11px] text-zinc-500">{t.proLifetimePricingNote}</p>
     </div>
   );
 }

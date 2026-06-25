@@ -10,7 +10,7 @@ export interface TierPricing {
 
 export const TIER_PRICING: Record<PricingTierId, TierPricing> = {
   basic: { monthly: 0, yearly: 0 },
-  pro: { monthly: 24.9, yearly: 239 },
+  pro: { monthly: 19, yearly: 19 },
   enterprise: { monthly: 99, yearly: 948 },
 };
 
