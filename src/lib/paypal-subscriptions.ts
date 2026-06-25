@@ -17,9 +17,9 @@ import {
 
 /**
  * PayPal allows at most 2 TRIAL cycles and 1 REGULAR cycle per plan.
- * v6: intro month as REGULAR (not TRIAL) — better preapproval compatibility.
+ * v7: intro month as TRIAL ($9.99) + one REGULAR ($24.90) — v6 used two REGULAR (rejected by API).
  */
-const LAUNCH_PLAN_SCHEMA_VERSION = 6;
+const LAUNCH_PLAN_SCHEMA_VERSION = 7;
 
 export { LAUNCH_PLAN_SCHEMA_VERSION };
 
@@ -110,7 +110,7 @@ async function createLaunchPlan(productId: string): Promise<string> {
       billing_cycles: [
         {
           frequency: { interval_unit: "MONTH", interval_count: 1 },
-          tenure_type: "REGULAR",
+          tenure_type: "TRIAL",
           sequence: 1,
           total_cycles: 1,
           pricing_scheme: {
