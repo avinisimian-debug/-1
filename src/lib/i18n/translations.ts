@@ -245,6 +245,8 @@ export interface Translations {
   transcriptionErrorSizePro: string;
   transcriptionErrorLimit: string;
   transcriptionErrorAuth: string;
+  transcriptionErrorConfigOpenai: string;
+  transcriptionErrorConfigBlob: string;
   transcriptionErrorProTitle: string;
   transcriptionErrorProDesc: string;
   transcriptionErrorProCta: string;
@@ -793,6 +795,10 @@ const en: Translations = {
   transcriptionErrorLimit:
     "You've reached your monthly transcription limit. Upgrade to Pro for more.",
   transcriptionErrorAuth: "Your session expired. Refresh the page and sign in again.",
+  transcriptionErrorConfigOpenai:
+    "Transcription is not configured on the server. Set a valid OPENAI_API_KEY in Vercel → Environment Variables, then redeploy.",
+  transcriptionErrorConfigBlob:
+    "Large uploads are not configured. In Vercel: Storage → Blob → Connect to project, then redeploy.",
   transcriptionErrorProTitle: "Pro processes longer videos reliably",
   transcriptionErrorProDesc:
     "Priority processing, 500 MB uploads, 3+ hour recordings, and advanced AI insights.",
@@ -1345,6 +1351,10 @@ const he: Translations = {
   transcriptionErrorLimit:
     "הגעתם למכסת התמלולים החודשית. שדרגו ל-Pro לעוד תמלולים.",
   transcriptionErrorAuth: "פג תוקף ההתחברות. רעננו את הדף והתחברו מחדש.",
+  transcriptionErrorConfigOpenai:
+    "שירות התמלול לא מוגדר בשרת. הגדירו OPENAI_API_KEY אמיתי ב-Vercel → Environment Variables ועשו Redeploy.",
+  transcriptionErrorConfigBlob:
+    "העלאות גדולות לא מוגדרות. ב-Vercel: Storage → Blob → Connect לפרויקט, ואז Redeploy.",
   transcriptionErrorProTitle: "ב-Pro וידאו ארוך עובד בצורה אמינה",
   transcriptionErrorProDesc:
     "עיבוד בעדיפות, העלאה עד 500 MB, הקלטות של 3+ שעות ותובנות AI מתקדמות.",

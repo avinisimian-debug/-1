@@ -9,10 +9,29 @@ type ErrorKind =
   | "size_free"
   | "size_pro"
   | "limit"
-  | "auth";
+  | "auth"
+  | "config_openai"
+  | "config_blob";
 
 function classifyTranscriptionError(message: string): ErrorKind {
   const lower = message.toLowerCase();
+
+  if (
+    lower.includes("config_openai_missing") ||
+    lower.includes("config_openai_invalid") ||
+    lower.includes("incorrect api key") ||
+    lower.includes("openai_api_key")
+  ) {
+    return "config_openai";
+  }
+
+  if (
+    lower.includes("config_blob_missing") ||
+    lower.includes("large file uploads are not configured") ||
+    lower.includes("blob_read_write_token")
+  ) {
+    return "config_blob";
+  }
 
   if (
     lower.includes("network error") ||
@@ -128,6 +147,8 @@ export function resolveTranscriptionErrorMessage(
     size_pro: t.transcriptionErrorSizePro,
     limit: t.transcriptionErrorLimit,
     auth: t.transcriptionErrorAuth,
+    config_openai: t.transcriptionErrorConfigOpenai,
+    config_blob: t.transcriptionErrorConfigBlob,
   };
 
   if (kind === "size_free" && isPro) {
@@ -146,6 +167,7 @@ export function resolveTranscriptionErrorMessage(
 
 export function shouldShowProUpsell(kind: ErrorKind, isPro: boolean): boolean {
   if (isPro) return false;
+  if (kind === "config_openai" || kind === "config_blob") return false;
   return (
     kind === "generic" ||
     kind === "video" ||

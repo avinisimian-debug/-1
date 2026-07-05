@@ -11,6 +11,9 @@ import {
   fileFromBlobUrl,
 } from "@/lib/blob-file";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
+import {
+  assertTranscriptionReady,
+} from "@/lib/transcription-ready";
 import { waitUntil } from "@/lib/wait-until";
 import { syncUserPlanOnAccess } from "@/lib/users-store";
 import { BadRequestError, UnauthorizedError, withApiHandler } from "@/shared/api";
@@ -64,11 +67,24 @@ async function resolveUploadFile(
   return { file, language };
 }
 
+function ensureTranscriptionReady(requireBlob: boolean): void {
+  try {
+    assertTranscriptionReady(requireBlob);
+  } catch (error) {
+    throw new BadRequestError(
+      error instanceof Error ? error.message : "CONFIG_ERROR: Transcription misconfigured.",
+    );
+  }
+}
+
 export const POST = withApiHandler(async (request: NextRequest) => {
   const session = await auth();
   if (!session?.user?.email) {
     throw new UnauthorizedError("Sign in required to transcribe.");
   }
+
+  const contentType = request.headers.get("content-type") ?? "";
+  ensureTranscriptionReady(contentType.includes("application/json"));
 
   const email = session.user.email.toLowerCase();
   const plan = await syncUserPlanOnAccess(

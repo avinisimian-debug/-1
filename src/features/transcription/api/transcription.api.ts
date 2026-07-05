@@ -28,7 +28,10 @@ function isProductionHost(): boolean {
 }
 
 function shouldUseBlobUpload(file: File): boolean {
-  return isProductionHost() && file.size > VERCEL_DIRECT_UPLOAD_BYTES;
+  if (!isProductionHost()) return false;
+  const isVideo =
+    file.type.startsWith("video/") || /\.(mp4|m4v)$/i.test(file.name);
+  return isVideo || file.size > VERCEL_DIRECT_UPLOAD_BYTES;
 }
 
 function parseErrorMessage(
