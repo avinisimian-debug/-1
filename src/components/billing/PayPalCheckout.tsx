@@ -21,7 +21,7 @@ interface PayPalCheckoutProps {
 
 function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
   const { t } = useLocale();
-  const { upgradeToPro } = usePlan();
+  const { upgradeToPro, syncPlan } = usePlan();
   const [status, setStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const launchWeek = isLaunchWeekActive();
@@ -61,6 +61,7 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
     }
 
     upgradeToPro();
+    await syncPlan();
     setStatus("success");
     onSuccess?.();
     return true;

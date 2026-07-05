@@ -6,7 +6,8 @@ type ErrorKind =
   | "timeout"
   | "empty"
   | "video"
-  | "size"
+  | "size_free"
+  | "size_pro"
   | "limit"
   | "auth";
 
@@ -46,13 +47,25 @@ function classifyTranscriptionError(message: string): ErrorKind {
   }
 
   if (
-    lower.includes("exceeds") ||
-    lower.includes("too large") ||
-    lower.includes("too long") ||
-    lower.includes("25 mb") ||
-    lower.includes("500 mb")
+    lower.includes("free tier limit") ||
+    lower.includes("require a pro plan") ||
+    lower.includes("upgrade to pro for files")
   ) {
-    return "size";
+    return "size_free";
+  }
+
+  if (
+    lower.includes("exceeds the 500 mb") ||
+    lower.includes("plan_limit_pro")
+  ) {
+    return "size_pro";
+  }
+
+  if (
+    lower.includes("too long even after compression") ||
+    lower.includes("split the file")
+  ) {
+    return "size_pro";
   }
 
   if (
@@ -61,7 +74,8 @@ function classifyTranscriptionError(message: string): ErrorKind {
     lower.includes("codec") ||
     lower.includes("ffmpeg") ||
     lower.includes("mp4") ||
-    lower.includes("process this recording")
+    lower.includes("process this recording") ||
+    lower.includes("could not process")
   ) {
     return "video";
   }
@@ -78,12 +92,22 @@ function classifyTranscriptionError(message: string): ErrorKind {
     return "generic";
   }
 
+  if (
+    lower.includes("exceeds") ||
+    lower.includes("too large") ||
+    lower.includes("too long") ||
+    lower.includes("25 mb")
+  ) {
+    return "size_free";
+  }
+
   return "generic";
 }
 
 export function resolveTranscriptionErrorMessage(
   message: string,
   t: Translations,
+  isPro = false,
 ): { text: string; kind: ErrorKind } {
   const kind = classifyTranscriptionError(message);
 
@@ -93,15 +117,32 @@ export function resolveTranscriptionErrorMessage(
     timeout: t.transcriptionErrorTimeout,
     empty: t.transcriptionErrorEmpty,
     video: t.transcriptionErrorVideo,
-    size: t.transcriptionErrorSize,
+    size_free: t.transcriptionErrorSizeFree,
+    size_pro: t.transcriptionErrorSizePro,
     limit: t.transcriptionErrorLimit,
     auth: t.transcriptionErrorAuth,
   };
+
+  if (kind === "size_free" && isPro) {
+    return { text: t.transcriptionErrorSizePro, kind: "size_pro" };
+  }
+
+  if (kind === "size_pro" || kind === "size_free") {
+    return {
+      text: kind === "size_pro" ? t.transcriptionErrorSizePro : byKind[kind],
+      kind,
+    };
+  }
 
   return { text: byKind[kind], kind };
 }
 
 export function shouldShowProUpsell(kind: ErrorKind, isPro: boolean): boolean {
   if (isPro) return false;
-  return kind === "generic" || kind === "video" || kind === "size" || kind === "timeout";
+  return (
+    kind === "generic" ||
+    kind === "video" ||
+    kind === "size_free" ||
+    kind === "timeout"
+  );
 }

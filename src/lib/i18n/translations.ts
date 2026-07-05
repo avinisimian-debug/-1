@@ -241,6 +241,8 @@ export interface Translations {
   transcriptionErrorEmpty: string;
   transcriptionErrorVideo: string;
   transcriptionErrorSize: string;
+  transcriptionErrorSizeFree: string;
+  transcriptionErrorSizePro: string;
   transcriptionErrorLimit: string;
   transcriptionErrorAuth: string;
   transcriptionErrorProTitle: string;
@@ -784,6 +786,10 @@ const en: Translations = {
     "We had trouble reading the audio track in this video. Try MP3/WAV or upgrade to Pro for advanced video processing.",
   transcriptionErrorSize:
     "This file exceeds your plan limit. Pro supports uploads up to 500 MB and longer recordings.",
+  transcriptionErrorSizeFree:
+    "This file exceeds the free tier limit (25 MB). Upgrade to Pro for files up to 500 MB.",
+  transcriptionErrorSizePro:
+    "This file exceeds the 500 MB Pro limit, or the recording is too long to process. Try a shorter clip or MP3/WAV.",
   transcriptionErrorLimit:
     "You've reached your monthly transcription limit. Upgrade to Pro for more.",
   transcriptionErrorAuth: "Your session expired. Refresh the page and sign in again.",
@@ -1332,6 +1338,10 @@ const he: Translations = {
     "לא הצלחנו לקרוא את ערוץ השמע בסרטון. נסו MP3/WAV, או שדרגו ל-Pro לעיבוד וידאו מתקדם.",
   transcriptionErrorSize:
     "הקובץ חורג ממגבלת החבילה. ב-Pro אפשר להעלות עד 500 MB והקלטות ארוכות יותר.",
+  transcriptionErrorSizeFree:
+    "הקובץ חורג ממגבלת החינם (25 MB). שדרגו ל-Pro להעלאות עד 500 MB.",
+  transcriptionErrorSizePro:
+    "הקובץ חורג ממגבלת ה-Pro (500 MB), או שההקלטה ארוכה מדי לעיבוד. נסו קטע קצר יותר או MP3/WAV.",
   transcriptionErrorLimit:
     "הגעתם למכסת התמלולים החודשית. שדרגו ל-Pro לעוד תמלולים.",
   transcriptionErrorAuth: "פג תוקף ההתחברות. רעננו את הדף והתחברו מחדש.",

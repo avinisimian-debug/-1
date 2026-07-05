@@ -27,7 +27,7 @@ interface ErrorStateProps {
 export function ErrorState({ message, fileName, onRetry }: ErrorStateProps) {
   const { t } = useLocale();
   const { isPro } = usePlan();
-  const { text, kind } = resolveTranscriptionErrorMessage(message, t);
+  const { text, kind } = resolveTranscriptionErrorMessage(message, t, isPro);
   const showPro = shouldShowProUpsell(kind, isPro);
 
   return (

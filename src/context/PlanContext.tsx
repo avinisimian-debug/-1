@@ -44,10 +44,7 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch {
-      const stored = localStorage.getItem(STORAGE_KEY) as PlanTier | null;
-      if (stored === "free" || stored === "pro") {
-        setPlanState(stored);
-      }
+      // Keep the last server-synced plan; don't trust stale localStorage.
     }
   }, [setPlan]);
 
@@ -59,7 +56,10 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     }
   }, [status, syncPlan]);
 
-  const upgradeToPro = useCallback(() => setPlan("pro"), [setPlan]);
+  const upgradeToPro = useCallback(() => {
+    setPlan("pro");
+    void syncPlan();
+  }, [setPlan, syncPlan]);
   const downgradeToFree = useCallback(() => setPlan("free"), [setPlan]);
 
   return (

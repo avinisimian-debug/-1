@@ -7,27 +7,42 @@ let cachedGrants: Set<string> | null = null;
 let cacheLoadedAt = 0;
 const CACHE_MS = 30_000;
 
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+function parseEnvGrants(): string[] {
+  const raw = process.env.PRO_GRANTED_EMAILS;
+  if (!raw?.trim()) return [];
+  return raw
+    .split(/[,;\s]+/)
+    .map(normalizeEmail)
+    .filter(Boolean);
+}
+
+async function readFileGrants(): Promise<string[]> {
+  try {
+    const raw = await readFile(GRANTS_FILE, "utf8");
+    const emails = JSON.parse(raw) as string[];
+    return emails.map(normalizeEmail).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 export async function getProGrantedEmails(): Promise<Set<string>> {
   const now = Date.now();
   if (cachedGrants && now - cacheLoadedAt < CACHE_MS) {
     return cachedGrants;
   }
 
-  try {
-    const raw = await readFile(GRANTS_FILE, "utf8");
-    const emails = JSON.parse(raw) as string[];
-    cachedGrants = new Set(
-      emails.map((e) => e.trim().toLowerCase()).filter(Boolean),
-    );
-  } catch {
-    cachedGrants = new Set();
-  }
-
+  const grants = new Set([...parseEnvGrants(), ...(await readFileGrants())]);
+  cachedGrants = grants;
   cacheLoadedAt = now;
   return cachedGrants;
 }
 
 export async function isProGranted(email: string): Promise<boolean> {
   const grants = await getProGrantedEmails();
-  return grants.has(email.trim().toLowerCase());
+  return grants.has(normalizeEmail(email));
 }

@@ -279,12 +279,30 @@ export async function upgradeUserToPro(
   transactionId?: string,
 ): Promise<void> {
   const users = await readUsers();
-  const user = users.find((u) => u.email === email.toLowerCase());
+  const normalized = email.toLowerCase();
+  const now = new Date().toISOString();
+  let user = users.find((u) => u.email === normalized);
 
-  if (!user) return;
+  if (!user) {
+    user = {
+      id: normalized,
+      name: normalized.split("@")[0] || "User",
+      email: normalized,
+      provider: "email",
+      plan: "pro",
+      registeredAt: now,
+      lastLoginAt: now,
+      paidAt: now,
+      proLifetime: true,
+      ...(transactionId ? { paypalTransactionId: transactionId } : {}),
+    };
+    users.unshift(user);
+    await writeUsers(users);
+    return;
+  }
 
   user.plan = "pro";
-  user.paidAt = new Date().toISOString();
+  user.paidAt = user.paidAt ?? now;
   user.proLifetime = true;
   user.proTrialEndsAt = undefined;
   user.proTrialUsed = undefined;

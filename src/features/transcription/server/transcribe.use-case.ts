@@ -99,7 +99,7 @@ export async function transcribeAudio({
         new BadRequestError(
           plan === "free"
             ? `File exceeds the ${limitLabel} free tier limit. Upgrade to Pro for files up to 500 MB.`
-            : `File exceeds the ${limitLabel} limit.`,
+            : `PLAN_LIMIT_PRO: File exceeds the ${limitLabel} limit.`,
         ),
       );
     }
