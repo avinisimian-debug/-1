@@ -25,7 +25,7 @@ export function AppHeader({
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
 
   return (
-    <header className="flex h-[var(--header-height)] shrink-0 items-center justify-between border-b border-border/80 bg-card/80 px-4 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-20 flex h-[var(--header-height)] shrink-0 items-center justify-between border-b border-border/60 bg-card/75 px-4 backdrop-blur-xl sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
         {showMenuButton && onMenuOpen && (
           <button
@@ -67,12 +67,12 @@ export function AppHeader({
         </div>
 
         {isPro && (
-          <span className="hidden rounded-md border border-accent/25 bg-accent-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent sm:inline-block">
+          <span className="hidden rounded-full border border-accent/30 bg-accent-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent sm:inline-block">
             Pro
           </span>
         )}
 
-        <div className="hidden items-center gap-2 rounded-md border border-border bg-muted/50 px-3 py-1.5 md:flex">
+        <div className="hidden items-center gap-2 rounded-xl border border-border/80 bg-muted/40 px-3 py-2 shadow-xs md:flex">
           <Search className="h-4 w-4 text-muted-foreground" aria-hidden />
           <input
             type="search"

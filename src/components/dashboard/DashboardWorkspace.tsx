@@ -63,7 +63,7 @@ export function DashboardWorkspace({
   ];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 page-enter">
       {onboarding?.show && onboarding.dismissed && (
         <OnboardingChecklist
           variant="card"
@@ -77,9 +77,13 @@ export function DashboardWorkspace({
         />
       )}
 
-      <section className="glass-card overflow-hidden rounded-2xl">
+      <section className="glass-card-premium overflow-hidden rounded-2xl">
         {showHero && (
-          <div className="border-b border-border/60 bg-gradient-to-b from-card to-muted/20 px-6 py-6 sm:px-8 sm:py-7">
+          <div className="relative border-b border-border/60 bg-gradient-to-b from-accent-muted/30 via-card to-card px-6 py-6 sm:px-8 sm:py-8">
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
+              aria-hidden
+            />
             <div className="flex items-start gap-4">
               <Logo size="md" />
               <div className="min-w-0 flex-1 text-start">
@@ -91,11 +95,11 @@ export function DashboardWorkspace({
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-wrap gap-2">
               {features.map(({ icon: Icon, label }) => (
                 <span
                   key={label}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-card/90 px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-xs transition-colors hover:border-accent/25 hover:bg-accent-muted/40"
                 >
                   <Icon className="h-3.5 w-3.5 text-accent" aria-hidden />
                   {label}

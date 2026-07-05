@@ -32,7 +32,7 @@ export function ErrorState({ message, fileName, onRetry }: ErrorStateProps) {
 
   return (
     <div className="mx-auto w-full max-w-2xl animate-fade-in-up">
-      <div className="glass-card overflow-hidden rounded-2xl border border-red-200/60">
+      <div className="glass-card-premium overflow-hidden rounded-2xl border border-red-200/60">
         <div className="border-b border-border/60 bg-gradient-to-b from-red-50/80 to-card px-6 py-8 text-center sm:px-10 sm:py-10">
           <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100/80 ring-1 ring-red-200/80">
             <AlertCircle className="h-8 w-8 text-red-600" strokeWidth={1.75} />

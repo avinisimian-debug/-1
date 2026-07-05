@@ -49,7 +49,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
             <h2 className="text-center text-xl font-semibold text-foreground sm:text-start">
               {t.authCardTitle}
             </h2>
-            <span className="mx-auto inline-flex w-fit shrink-0 whitespace-nowrap rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200/80 sm:mx-0">
+            <span className="mx-auto inline-flex w-fit shrink-0 whitespace-nowrap rounded-full bg-success/10 px-3 py-1 text-[11px] font-medium text-success ring-1 ring-success/20 sm:mx-0">
               {t.authFreeBadge}
             </span>
           </div>
@@ -65,7 +65,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
                 className="flex items-start gap-2 text-sm text-foreground/90"
               >
                 <CheckCircle2
-                  className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-success"
                   aria-hidden
                 />
                 {benefit}

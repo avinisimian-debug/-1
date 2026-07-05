@@ -32,7 +32,7 @@ export function ProcessingState({
 
   return (
     <div className="mx-auto w-full max-w-2xl animate-fade-in-up">
-      <div className="glass-card rounded-2xl p-8 sm:p-10">
+      <div className="glass-card-premium rounded-2xl p-8 sm:p-10">
         <div className="flex flex-col items-center text-center">
           <div className="relative mb-6">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-muted/50">
@@ -78,7 +78,7 @@ export function ProcessingState({
                   )}
                 >
                   {isComplete ? (
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
                   ) : isCurrent ? (
                     <Loader2 className="h-4 w-4 shrink-0 animate-spin text-accent" />
                   ) : (

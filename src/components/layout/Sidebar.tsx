@@ -70,7 +70,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "relative z-10 flex h-full w-[var(--sidebar-width)] min-h-0 flex-col overflow-y-auto border-r border-border bg-card/95 backdrop-blur-sm",
+        "relative z-10 flex h-full w-[var(--sidebar-width)] min-h-0 flex-col overflow-y-auto border-r border-border/80 bg-card/90 backdrop-blur-xl",
         className,
       )}
     >
@@ -132,7 +132,12 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       </div>
 
       <div className="space-y-3 border-t border-border p-4">
-        <div className="premium-card rounded-lg p-4">
+        <div
+          className={cn(
+            "rounded-xl p-4",
+            isPro ? "pro-plan-card" : "premium-card",
+          )}
+        >
           <div className="flex items-center gap-2">
             {isPro && <Crown className="h-3.5 w-3.5 text-accent" />}
             <p className="text-xs font-semibold text-foreground">

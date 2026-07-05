@@ -10,6 +10,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { deleteHistoryEntry, getHistory } from "@/lib/history-store";
 import { HISTORY_LIMITS } from "@/lib/plan-features";
+import { cn } from "@/lib/utils";
 
 export default function HistoryPage() {
   const { t } = useLocale();
@@ -56,7 +57,7 @@ export default function HistoryPage() {
 
   return (
     <DashboardShell title={t.historyTitle} description={t.historyDesc}>
-      <div className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="mx-auto w-full max-w-4xl space-y-6 page-enter">
         <HistorySmartSearch
           entries={items}
           query={query}
@@ -65,39 +66,41 @@ export default function HistoryPage() {
         />
 
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted-foreground">
             {filtered.length} / {limit} {t.historyRecordings}
           </p>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="glass-card rounded-lg px-6 py-16 text-center">
-            <FileAudio className="mx-auto h-10 w-10 text-zinc-300" />
-            <p className="mt-4 text-sm text-zinc-500">{t.historyEmpty}</p>
+          <div className="glass-card rounded-xl px-6 py-16 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+              <FileAudio className="h-7 w-7 text-muted-foreground/60" />
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">{t.historyEmpty}</p>
           </div>
         ) : (
-          <div className="glass-card overflow-hidden rounded-lg">
-            <ul className="divide-y divide-zinc-100">
+          <div className="glass-card overflow-hidden rounded-xl">
+            <ul className="divide-y divide-border">
               {filtered.map((item) => (
                 <li
                   key={item.id}
-                  className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-zinc-50"
+                  className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-indigo-50">
-                      <FileAudio className="h-4 w-4 text-indigo-600" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-muted ring-1 ring-accent/10">
+                      <FileAudio className="h-4 w-4 text-accent" />
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-800">
+                      <p className="truncate text-sm font-medium text-foreground">
                         {item.result.fileName}
                       </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-muted-foreground">
                         {new Date(item.savedAt).toLocaleDateString()} ·{" "}
                         {item.result.duration}
                       </p>
                     </div>
                   </div>
-                  <span className="hidden items-center gap-1 text-sm text-zinc-500 sm:inline-flex">
+                  <span className="hidden items-center gap-1 text-sm text-muted-foreground sm:inline-flex">
                     <Clock className="h-3.5 w-3.5" />
                     {item.result.duration}
                   </span>
@@ -112,7 +115,10 @@ export default function HistoryPage() {
                     type="button"
                     onClick={() => handleDelete(item.id)}
                     aria-label={t.historyDelete}
-                    className="rounded-md p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
+                    className={cn(
+                      "rounded-lg p-1.5 text-muted-foreground transition-colors",
+                      "hover:bg-destructive/10 hover:text-destructive",
+                    )}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -121,8 +127,6 @@ export default function HistoryPage() {
             </ul>
           </div>
         )}
-
-        <p className="text-center text-[11px] text-zinc-400">{t.historyLimitNote}</p>
       </div>
     </DashboardShell>
   );

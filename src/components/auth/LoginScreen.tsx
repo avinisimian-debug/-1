@@ -106,7 +106,7 @@ export function LoginScreen() {
       <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-16">
         <div className="mb-8 grid gap-4 lg:grid-cols-2">
           <SaleCountdown />
-          <div className="glass-card flex items-center rounded-2xl px-5 py-4">
+          <div className="glass-card flex items-center rounded-2xl px-5 py-4 shadow-sm">
             <LoginLiveStats />
           </div>
         </div>

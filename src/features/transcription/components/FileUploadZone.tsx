@@ -106,7 +106,7 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
 
         <div
           aria-hidden
-          className="pointer-events-none mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-muted/40"
+          className="pointer-events-none mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-muted ring-1 ring-accent/15 transition-transform duration-300 group-hover:scale-105"
         >
           <Upload className="h-7 w-7 text-accent" strokeWidth={1.75} />
         </div>
