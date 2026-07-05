@@ -61,6 +61,9 @@ export function getProPlanDisplayPriceLabel(): string {
 
 export const WHISPER_MAX_BYTES = 25 * 1024 * 1024;
 
+/** Vercel Functions reject request bodies above ~4.5 MB — use Blob upload above this. */
+export const VERCEL_DIRECT_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 export const PLAN_LIMITS = {
   free: {
     maxFileSizeBytes: WHISPER_MAX_BYTES,

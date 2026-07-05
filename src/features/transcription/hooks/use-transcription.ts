@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { usePlan } from "@/context/PlanContext";
 import { useUsage } from "@/hooks/useUsage";
 import { PROCESSING_STAGES } from "@/lib/constants";
@@ -16,6 +17,7 @@ import type {
 } from "../types";
 
 export function useTranscription() {
+  const { data: session } = useSession();
   const { plan } = usePlan();
   const { canTranscribe, recordUsage } = useUsage();
   const [status, setStatus] = useState<TranscriptionStatus>("idle");
@@ -78,6 +80,7 @@ export function useTranscription() {
       uploadTranscription({
         file,
         plan,
+        userEmail: session?.user?.email ?? null,
         language,
         onUploadComplete: () => setStage("transcribing"),
         onHeadersReceived: () => setStage("analyzing"),
@@ -94,7 +97,7 @@ export function useTranscription() {
         saveToHistory(uploadResult.data, HISTORY_LIMITS[plan]);
       });
     },
-    [plan, canTranscribe, recordUsage, revokeAudioUrl],
+    [plan, canTranscribe, recordUsage, revokeAudioUrl, session?.user?.email],
   );
 
   const stageIndex = PROCESSING_STAGES.findIndex((s) => s.key === stage);

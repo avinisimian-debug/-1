@@ -47,6 +47,13 @@ function classifyTranscriptionError(message: string): ErrorKind {
   }
 
   if (
+    lower.includes("upload_payload_too_large") ||
+    lower.includes("function_payload_too_large")
+  ) {
+    return "video";
+  }
+
+  if (
     lower.includes("free tier limit") ||
     lower.includes("require a pro plan") ||
     lower.includes("upgrade to pro for files")

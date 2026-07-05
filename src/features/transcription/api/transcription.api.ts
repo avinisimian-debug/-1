@@ -1,12 +1,19 @@
+import { upload } from "@vercel/blob/client";
 import type { PlanTier } from "@/lib/constants";
+import { VERCEL_DIRECT_UPLOAD_BYTES } from "@/lib/constants";
+import { buildTranscribeBlobPath } from "@/lib/blob-file";
 import type { ApiResponse } from "@/shared/api";
 import { failure, success, type Result } from "@/shared/lib/result";
-import { TRANSCRIPTION_API_PATH } from "../constants";
+import {
+  TRANSCRIPTION_API_PATH,
+  TRANSCRIPTION_UPLOAD_PATH,
+} from "../constants";
 import type { TranscriptionResult } from "../types";
 
 export interface UploadTranscriptionOptions {
   file: File;
   plan: PlanTier;
+  userEmail?: string | null;
   language?: string;
   onUploadComplete?: () => void;
   onHeadersReceived?: () => void;
@@ -14,8 +21,20 @@ export interface UploadTranscriptionOptions {
 
 const REQUEST_TIMEOUT_MS = 290_000;
 
+function isProductionHost(): boolean {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname;
+  return host !== "localhost" && !host.startsWith("127.");
+}
+
+function shouldUseBlobUpload(file: File): boolean {
+  return isProductionHost() && file.size > VERCEL_DIRECT_UPLOAD_BYTES;
+}
+
 function parseErrorMessage(
-  body: ApiResponse<TranscriptionResult> | { error?: string | { message?: string; code?: string } },
+  body:
+    | ApiResponse<TranscriptionResult>
+    | { error?: string | { message?: string; code?: string } },
   status: number,
 ): string {
   if ("error" in body && body.error) {
@@ -26,7 +45,9 @@ function parseErrorMessage(
   }
 
   if (status === 401) return "Sign in required to transcribe.";
-  if (status === 413) return "File too large for upload.";
+  if (status === 413) {
+    return "UPLOAD_PAYLOAD_TOO_LARGE: File is too large for direct upload. Retry — large files are routed through secure upload.";
+  }
   if (status === 504 || status === 408) {
     return "Processing timed out. Try a shorter recording.";
   }
@@ -34,8 +55,80 @@ function parseErrorMessage(
   return "Transcription failed. Please try again.";
 }
 
+async function transcribeFromBlob({
+  file,
+  plan,
+  userEmail,
+  language = "auto",
+  onUploadComplete,
+  onHeadersReceived,
+}: UploadTranscriptionOptions): Promise<Result<TranscriptionResult, Error>> {
+  if (!userEmail) {
+    return failure(
+      new Error("Sign in required to upload large files."),
+    );
+  }
+
+  const pathname = buildTranscribeBlobPath(userEmail, file.name);
+
+  try {
+    const blob = await upload(pathname, file, {
+      access: "private",
+      handleUploadUrl: TRANSCRIPTION_UPLOAD_PATH,
+      multipart: true,
+      contentType: file.type || undefined,
+    });
+
+    onUploadComplete?.();
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(TRANSCRIPTION_API_PATH, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        signal: controller.signal,
+        body: JSON.stringify({
+          blobUrl: blob.url,
+          pathname: blob.pathname,
+          fileName: file.name,
+          contentType: file.type || "application/octet-stream",
+          ...(plan === "pro" && language !== "auto" ? { language } : {}),
+        }),
+      });
+
+      onHeadersReceived?.();
+
+      const body = (await response.json()) as ApiResponse<TranscriptionResult>;
+      if (!response.ok || !body.data) {
+        return failure(new Error(parseErrorMessage(body, response.status)));
+      }
+
+      return success(body.data);
+    } finally {
+      clearTimeout(timeout);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      return failure(
+        new Error("Processing timed out. Try a shorter recording or upgrade to Pro."),
+      );
+    }
+
+    return failure(
+      new Error(
+        error instanceof Error
+          ? error.message
+          : "Large file upload failed. Please try again.",
+      ),
+    );
+  }
+}
+
 /** XHR upload preserves upload progress events for the processing UI. */
-export function uploadTranscription({
+function transcribeDirectUpload({
   file,
   plan,
   language = "auto",
@@ -105,4 +198,14 @@ export function uploadTranscription({
 
     xhr.send(formData);
   });
+}
+
+export function uploadTranscription(
+  options: UploadTranscriptionOptions,
+): Promise<Result<TranscriptionResult, Error>> {
+  if (shouldUseBlobUpload(options.file)) {
+    return transcribeFromBlob(options);
+  }
+
+  return transcribeDirectUpload(options);
 }

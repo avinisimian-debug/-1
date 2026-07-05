@@ -200,10 +200,52 @@ export async function getUserCount(): Promise<number> {
   return users.length;
 }
 
+async function persistProGrantForUser(email: string, name?: string): Promise<void> {
+  const users = await readUsers();
+  const now = new Date().toISOString();
+  const existing = users.find((u) => u.email === email);
+
+  if (existing) {
+    existing.plan = "pro";
+    existing.paidAt = existing.paidAt ?? now;
+    existing.proLifetime = existing.proLifetime ?? true;
+    existing.proTrialEndsAt = undefined;
+    existing.proTrialUsed = undefined;
+    await writeUsers(users);
+    return;
+  }
+
+  users.unshift({
+    id: email,
+    name: name?.trim() || email.split("@")[0] || "User",
+    email,
+    provider: "email",
+    plan: "pro",
+    registeredAt: now,
+    lastLoginAt: now,
+    paidAt: now,
+    proLifetime: true,
+  });
+  await writeUsers(users);
+}
+
+export async function syncUserPlanOnAccess(
+  email: string,
+  name?: string,
+): Promise<"free" | "pro"> {
+  const normalized = email.toLowerCase();
+  if (await isProGranted(normalized)) {
+    await persistProGrantForUser(normalized, name);
+    return "pro";
+  }
+  return getUserPlan(normalized);
+}
+
 export async function getUserPlanDetails(email: string): Promise<UserPlanDetails> {
   const normalized = email.toLowerCase();
 
   if (await isProGranted(normalized)) {
+    await persistProGrantForUser(normalized);
     return { plan: "pro", hasSubscription: false, needsPayPalSetup: false };
   }
 

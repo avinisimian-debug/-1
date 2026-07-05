@@ -1,3 +1,4 @@
+import bundledProGrants from "../../data/pro-grants.json";
 import { readFile } from "fs/promises";
 import { join } from "path";
 
@@ -20,6 +21,15 @@ function parseEnvGrants(): string[] {
     .filter(Boolean);
 }
 
+function parseBundledGrants(): string[] {
+  return (bundledProGrants as string[]).map(normalizeEmail).filter(Boolean);
+}
+
+function parseAdminGrant(): string[] {
+  const admin = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  return admin ? [admin] : [];
+}
+
 async function readFileGrants(): Promise<string[]> {
   try {
     const raw = await readFile(GRANTS_FILE, "utf8");
@@ -36,7 +46,12 @@ export async function getProGrantedEmails(): Promise<Set<string>> {
     return cachedGrants;
   }
 
-  const grants = new Set([...parseEnvGrants(), ...(await readFileGrants())]);
+  const grants = new Set([
+    ...parseEnvGrants(),
+    ...parseBundledGrants(),
+    ...parseAdminGrant(),
+    ...(await readFileGrants()),
+  ]);
   cachedGrants = grants;
   cacheLoadedAt = now;
   return cachedGrants;
