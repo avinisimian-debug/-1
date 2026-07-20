@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import type { Provider } from "next-auth/providers";
+import { isAdminEmail } from "@/lib/admin";
 import { getGoogleClientIdFromEnv } from "@/lib/auth-oauth";
 import { registerOrUpdateUser } from "@/lib/users-store";
 import { verifyGoogleIdToken } from "@/lib/verify-google-token";
@@ -61,11 +62,6 @@ providers.push(
     },
   }),
 );
-
-function isAdminEmail(email: string | null | undefined): boolean {
-  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
-  return Boolean(adminEmail && email?.toLowerCase() === adminEmail);
-}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,

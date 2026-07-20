@@ -1,6 +1,7 @@
 import bundledProGrants from "../../data/pro-grants.json";
 import { readFile } from "fs/promises";
 import { join } from "path";
+import { getAdminEmails } from "@/lib/admin";
 
 const GRANTS_FILE = join(process.cwd(), "data", "pro-grants.json");
 
@@ -26,8 +27,7 @@ function parseBundledGrants(): string[] {
 }
 
 function parseAdminGrant(): string[] {
-  const admin = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-  return admin ? [admin] : [];
+  return getAdminEmails();
 }
 
 async function readFileGrants(): Promise<string[]> {
