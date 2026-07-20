@@ -116,7 +116,9 @@ export async function transcribeAudio({
 
     if (!ACCEPTED_EXTENSIONS.includes(extension)) {
       return failure(
-        new BadRequestError("Unsupported file type. Use MP3, WAV, MP4, or M4A."),
+        new BadRequestError(
+          "Unsupported file type. Use MP3, WAV, M4A, AAC, FLAC, OGG, MP4, MOV, WEBM, MKV, or AVI.",
+        ),
       );
     }
 

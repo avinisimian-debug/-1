@@ -168,9 +168,10 @@ export function resolveTranscriptionErrorMessage(
 export function shouldShowProUpsell(kind: ErrorKind, isPro: boolean): boolean {
   if (isPro) return false;
   if (kind === "config_openai" || kind === "config_blob") return false;
+  // ffmpeg / codec issues are not solved by upgrading alone
+  if (kind === "video") return false;
   return (
     kind === "generic" ||
-    kind === "video" ||
     kind === "size_free" ||
     kind === "timeout"
   );

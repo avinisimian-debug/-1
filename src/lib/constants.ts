@@ -112,6 +112,7 @@ export const ACCEPTED_EXTENSIONS = [
   ".webm",
   ".mkv",
   ".avi",
+  ".m4v",
 ];
 
 /** HTML accept attribute for file inputs */
