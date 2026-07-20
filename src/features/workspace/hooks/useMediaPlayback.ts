@@ -12,6 +12,8 @@ export function useMediaPlayback(mediaSrc?: string) {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [ready, setReady] = useState(false);
+  const [playbackRate, setPlaybackRateState] = useState(1);
+  const [skipSilence, setSkipSilence] = useState(false);
   const rafRef = useRef(0);
 
   const cancelTick = useCallback(() => {
@@ -100,6 +102,21 @@ export function useMediaPlayback(mediaSrc?: string) {
     [mediaSrc],
   );
 
+  const setPlaybackRate = useCallback(
+    (rate: number) => {
+      const media = mediaRef.current;
+      const next = Math.min(2, Math.max(0.5, rate));
+      setPlaybackRateState(next);
+      if (media) media.playbackRate = next;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const media = mediaRef.current;
+    if (media) media.playbackRate = playbackRate;
+  }, [mediaSrc, playbackRate]);
+
   const togglePlay = useCallback(async () => {
     const media = mediaRef.current;
     if (!media || !mediaSrc) return;
@@ -118,6 +135,10 @@ export function useMediaPlayback(mediaSrc?: string) {
     duration,
     isPlaying,
     ready,
+    playbackRate,
+    setPlaybackRate,
+    skipSilence,
+    setSkipSilence,
     seekTo,
     togglePlay,
   };

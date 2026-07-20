@@ -427,6 +427,29 @@ export interface Translations {
   workspaceNoAudio: string;
   workspaceCopyTranscript: string;
   workspaceInteractivePlayer: string;
+  chatTitle: string;
+  chatSubtitle: string;
+  chatPlaceholder: string;
+  chatSend: string;
+  chatClear: string;
+  chatEmpty: string;
+  chatThinking: string;
+  chatPromptEmail: string;
+  chatPromptActions: string;
+  chatPromptSwot: string;
+  chatPromptLegal: string;
+  chatPromptTranslate: string;
+  analyticsTitle: string;
+  analyticsSpeakers: string;
+  analyticsWpm: string;
+  analyticsSentiment: string;
+  playbackSpeed: string;
+  playbackSkipSilence: string;
+  globalAiTitle: string;
+  globalAiSubtitle: string;
+  globalAiPlaceholder: string;
+  globalAiAsk: string;
+  globalAiEmptyHistory: string;
   workspaceEditableHint: string;
   workspaceSaveTranscript: string;
   workspaceTranscriptSaved: string;
@@ -1012,6 +1035,29 @@ const en: Translations = {
   workspaceNoAudio: "Audio playback is available for new uploads in this session. History items open without the original file.",
   workspaceCopyTranscript: "Copy transcript",
   workspaceInteractivePlayer: "Sync player",
+  chatTitle: "Talk to transcript",
+  chatSubtitle: "Ask anything · citations jump to audio",
+  chatPlaceholder: "What did they decide about budget?",
+  chatSend: "Send",
+  chatClear: "Clear chat",
+  chatEmpty: "Ask a question or tap a one-click prompt below.",
+  chatThinking: "Thinking with your transcript…",
+  chatPromptEmail: "Draft follow-up email",
+  chatPromptActions: "Extract action items",
+  chatPromptSwot: "SWOT analysis",
+  chatPromptLegal: "Takeaways & risks",
+  chatPromptTranslate: "Translate key points",
+  analyticsTitle: "Speaker analytics",
+  analyticsSpeakers: "speakers",
+  analyticsWpm: "WPM",
+  analyticsSentiment: "Tone",
+  playbackSpeed: "Playback speed",
+  playbackSkipSilence: "Skip silence",
+  globalAiTitle: "Ask across meetings",
+  globalAiSubtitle: "Search insights from your full history",
+  globalAiPlaceholder: "Find meetings about Q3 strategy…",
+  globalAiAsk: "Ask AI",
+  globalAiEmptyHistory: "No saved transcripts yet. Transcribe a meeting first.",
   workspaceEditableHint: "Click any line to edit — changes auto-save and apply to exports.",
   workspaceSaveTranscript: "Save changes",
   workspaceTranscriptSaved: "All changes saved",
@@ -1587,6 +1633,29 @@ const he: Translations = {
   workspaceNoAudio: "ניגון אודיו זמין להעלאות חדשות בסשן הנוכחי. פריטים מההיסטוריה נפתחים בלי קובץ המקור.",
   workspaceCopyTranscript: "העתק תמלול",
   workspaceInteractivePlayer: "נגן מסונכרן",
+  chatTitle: "שיחה עם התמלול",
+  chatSubtitle: "שאלו הכל · ציטוטים קופצים לאודיו",
+  chatPlaceholder: "מה הוחלט לגבי התקציב?",
+  chatSend: "שלח",
+  chatClear: "נקה שיחה",
+  chatEmpty: "שאלו שאלה או בחרו פרומפט מוכן.",
+  chatThinking: "חושב על בסיס התמלול…",
+  chatPromptEmail: "טיוטת מייל המשך",
+  chatPromptActions: "חלץ משימות",
+  chatPromptSwot: "ניתוח SWOT",
+  chatPromptLegal: "תובנות וסיכונים",
+  chatPromptTranslate: "תרגם נקודות מפתח",
+  analyticsTitle: "אנליטיקת דוברים",
+  analyticsSpeakers: "דוברים",
+  analyticsWpm: "מילים/דקה",
+  analyticsSentiment: "טון",
+  playbackSpeed: "מהירות נגינה",
+  playbackSkipSilence: "דלג על שקט",
+  globalAiTitle: "שאלו על כל הפגישות",
+  globalAiSubtitle: "חיפוש תובנות מכל ההיסטוריה",
+  globalAiPlaceholder: "מצא פגישות על אסטרטגיית Q3…",
+  globalAiAsk: "שאל את ה-AI",
+  globalAiEmptyHistory: "עדיין אין תמלולים. תמללו פגישה קודם.",
   workspaceEditableHint: "לחצו על שורה לעריכה — השינויים נשמרים אוטומטית ומשפיעים על הייצוא.",
   workspaceSaveTranscript: "שמור שינויים",
   workspaceTranscriptSaved: "כל השינויים נשמרו",

@@ -16,8 +16,10 @@ import { useMediaPlayback } from "../hooks/useMediaPlayback";
 import { timestampToSeconds } from "../lib/timestamp";
 import { ChapterNavigation } from "./ChapterNavigation";
 import { MeetingValueIndicator } from "./MeetingValueIndicator";
+import { SpeakerAnalyticsPanel } from "./SpeakerAnalyticsPanel";
 import { SpeakerRenamePanel } from "./SpeakerRenamePanel";
 import { SplitMediaTranscriptPlayer } from "./SplitMediaTranscriptPlayer";
+import { TranscriptChatPanel } from "@/features/chat/components/TranscriptChatPanel";
 
 type SaveStatus = "saved" | "saving" | "unsaved";
 
@@ -275,17 +277,34 @@ export function MeetingWorkspace({
             className="mb-4"
           />
 
-          <SplitMediaTranscriptPlayer
+          <SpeakerAnalyticsPanel
             entries={displayEntries}
             timedWords={displayTimedWords}
-            mediaSrc={mediaSrc}
-            mediaKind={mediaKind}
-            playback={playback}
-            query={query}
-            onQueryChange={setQuery}
-            editable
-            onEntryTextChange={handleEntryTextChange}
+            sentimentLabel={result.sentiment?.label}
+            sentimentOverall={result.sentiment?.overall}
+            className="mb-4"
           />
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
+            <SplitMediaTranscriptPlayer
+              entries={displayEntries}
+              timedWords={displayTimedWords}
+              mediaSrc={mediaSrc}
+              mediaKind={mediaKind}
+              playback={playback}
+              query={query}
+              onQueryChange={setQuery}
+              editable
+              onEntryTextChange={handleEntryTextChange}
+            />
+            <TranscriptChatPanel
+              result={resultForExport}
+              onCiteSeek={(timestamp) => {
+                playback.seekTo(timestampToSeconds(timestamp));
+                void playback.mediaRef.current?.play();
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>

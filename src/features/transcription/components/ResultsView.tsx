@@ -153,7 +153,7 @@ export function ResultsView({
   };
 
   return (
-    <div className={cn("mx-auto w-full", activeTab === "transcript" ? "max-w-6xl" : "max-w-4xl")}>
+    <div className={cn("mx-auto w-full", activeTab === "transcript" ? "max-w-7xl" : "max-w-4xl")}>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-accent">

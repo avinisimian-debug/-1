@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import type { TimedWord, TranscriptEntry } from "@/features/transcription/types";
 import type { useMediaPlayback } from "../hooks/useMediaPlayback";
 import { collectTimedWords } from "../lib/word-timing";
@@ -23,7 +24,6 @@ export interface SplitMediaTranscriptPlayerProps {
 
 /**
  * Split interactive player — media on the left, clickable word-level transcript on the right.
- * Words use standard JSON timing: { word, start_time, end_time }.
  */
 export function SplitMediaTranscriptPlayer({
   entries,
@@ -38,6 +38,37 @@ export function SplitMediaTranscriptPlayer({
   className,
 }: SplitMediaTranscriptPlayerProps) {
   const words = collectTimedWords(entries, timedWords);
+
+  const silenceGaps = useMemo(() => {
+    if (words.length < 2) return [] as Array<{ start: number; end: number }>;
+    const gaps: Array<{ start: number; end: number }> = [];
+    for (let i = 0; i < words.length - 1; i++) {
+      const end = words[i].end_time;
+      const next = words[i + 1].start_time;
+      if (next - end >= 0.85) {
+        gaps.push({ start: end, end: next });
+      }
+    }
+    return gaps;
+  }, [words]);
+
+  useEffect(() => {
+    if (!playback.skipSilence || !playback.isPlaying) return;
+    const gap = silenceGaps.find(
+      (g) =>
+        playback.currentTime >= g.start &&
+        playback.currentTime < g.end - 0.05,
+    );
+    if (gap) {
+      playback.seekTo(gap.end);
+    }
+  }, [
+    playback.skipSilence,
+    playback.isPlaying,
+    playback.currentTime,
+    playback.seekTo,
+    silenceGaps,
+  ]);
 
   const handleWordClick = (startTime: number) => {
     playback.seekTo(startTime);
@@ -56,6 +87,11 @@ export function SplitMediaTranscriptPlayer({
         duration={playback.duration}
         isPlaying={playback.isPlaying}
         ready={playback.ready}
+        playbackRate={playback.playbackRate}
+        onPlaybackRateChange={playback.setPlaybackRate}
+        skipSilence={playback.skipSilence}
+        onSkipSilenceChange={playback.setSkipSilence}
+        timedWords={words}
         onTogglePlay={playback.togglePlay}
         onSeek={playback.seekTo}
       />

@@ -7,4 +7,7 @@ export { MeetingValueIndicator } from "./components/MeetingValueIndicator";
 export { InteractiveTranscriptPlayer } from "./components/InteractiveTranscriptPlayer";
 export { ChapterNavigation } from "./components/ChapterNavigation";
 export { WorkspaceAudioPlayer } from "./components/WorkspaceAudioPlayer";
+export { SpeakerAnalyticsPanel } from "./components/SpeakerAnalyticsPanel";
+export { SpeakerTimelineScrubber } from "./components/SpeakerTimelineScrubber";
 export { useMediaPlayback, useAudioPlayback } from "./hooks/useMediaPlayback";
+export { computeSpeakerAirtime, estimateWpm } from "./lib/speaker-airtime";
