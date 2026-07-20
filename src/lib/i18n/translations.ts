@@ -104,6 +104,22 @@ export interface Translations {
   // Upload
   uploadDrop: string;
   uploadBrowse: string;
+  uploadRecordMic: string;
+  uploadStopRec: string;
+  uploadPasteLink: string;
+  uploadLinkPlaceholder: string;
+  uploadLinkSubmit: string;
+  uploadLinkSoonTitle: string;
+  uploadLinkSoonDesc: string;
+  uploadMicDenied: string;
+  commandPaletteTitle: string;
+  commandPalettePlaceholder: string;
+  commandPaletteEmpty: string;
+  commandPaletteHint: string;
+  inspectorQuota: string;
+  inspectorPlan: string;
+  inspectorRecent: string;
+  inspectorEmpty: string;
   uploadMax: string;
   uploadFileSizeNote: string;
   uploadDurationNote: string;
@@ -654,7 +670,24 @@ const en: Translations = {
   langFr: "French",
   langRu: "Russian",
   uploadDrop: "Drop your recording here",
-  uploadBrowse: "Studio-quality transcription with maximum accuracy · drag & drop or browse",
+  uploadBrowse: "Studio-quality transcription · drag & drop or browse",
+  uploadRecordMic: "Record microphone",
+  uploadStopRec: "Stop recording",
+  uploadPasteLink: "Paste web link",
+  uploadLinkPlaceholder: "YouTube, Drive, Dropbox, or Zoom URL…",
+  uploadLinkSubmit: "Import",
+  uploadLinkSoonTitle: "Link import coming soon",
+  uploadLinkSoonDesc:
+    "YouTube, Drive, and Zoom cloud imports are on the roadmap. Upload a file for now.",
+  uploadMicDenied: "Microphone access was denied. Check browser permissions.",
+  commandPaletteTitle: "Search workspace",
+  commandPalettePlaceholder: "Search transcripts, speakers, action items…",
+  commandPaletteEmpty: "No matches in your history.",
+  commandPaletteHint: "⌘K",
+  inspectorQuota: "Usage this month",
+  inspectorPlan: "Current plan",
+  inspectorRecent: "Recent",
+  inspectorEmpty: "No transcripts yet. Upload your first recording.",
   uploadMax: "Max",
   uploadFileSizeNote: "Up to {size} per file",
   uploadDurationNote: "Up to {duration} per recording · {plan}",
@@ -1218,7 +1251,24 @@ const he: Translations = {
   langFr: "צרפתית",
   langRu: "רוסית",
   uploadDrop: "גרור את ההקלטה לכאן",
-  uploadBrowse: "תמלול באיכות אולפן ומקסימום דיוק · גרירה או בחירת קובץ",
+  uploadBrowse: "תמלול באיכות אולפן · גרירה או בחירת קובץ",
+  uploadRecordMic: "הקלט ממיקרופון",
+  uploadStopRec: "עצור הקלטה",
+  uploadPasteLink: "הדבק קישור",
+  uploadLinkPlaceholder: "קישור ל-YouTube, Drive, Dropbox או Zoom…",
+  uploadLinkSubmit: "ייבוא",
+  uploadLinkSoonTitle: "ייבוא מקישור בקרוב",
+  uploadLinkSoonDesc:
+    "ייבוא מ-YouTube, Drive ו-Zoom בענן בדרך. בינתיים העלו קובץ.",
+  uploadMicDenied: "הגישה למיקרופון נדחתה. בדקו את הרשאות הדפדפן.",
+  commandPaletteTitle: "חיפוש בסביבת העבודה",
+  commandPalettePlaceholder: "חיפוש בתמלולים, דוברים ופריטי משימה…",
+  commandPaletteEmpty: "אין תוצאות בהיסטוריה.",
+  commandPaletteHint: "⌘K",
+  inspectorQuota: "שימוש החודש",
+  inspectorPlan: "החבילה הנוכחית",
+  inspectorRecent: "אחרונים",
+  inspectorEmpty: "עדיין אין תמלולים. העלו את ההקלטה הראשונה.",
   uploadMax: "מקסימום",
   uploadFileSizeNote: "עד {size} לקובץ",
   uploadDurationNote: "עד {duration} להקלטה · {plan}",

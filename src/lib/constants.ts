@@ -81,15 +81,43 @@ export const PLAN_LIMITS = {
 
 export const ACCEPTED_FILE_TYPES = [
   "audio/mpeg",
+  "audio/mp3",
   "audio/wav",
   "audio/x-wav",
+  "audio/wave",
   "audio/mp4",
   "audio/x-m4a",
   "audio/m4a",
+  "audio/aac",
+  "audio/flac",
+  "audio/ogg",
+  "audio/webm",
   "video/mp4",
+  "video/quicktime",
+  "video/webm",
+  "video/x-matroska",
+  "video/x-msvideo",
+  "video/avi",
 ];
 
-export const ACCEPTED_EXTENSIONS = [".mp3", ".wav", ".mp4", ".m4a"];
+export const ACCEPTED_EXTENSIONS = [
+  ".mp3",
+  ".wav",
+  ".m4a",
+  ".aac",
+  ".flac",
+  ".ogg",
+  ".mp4",
+  ".mov",
+  ".webm",
+  ".mkv",
+  ".avi",
+];
+
+/** HTML accept attribute for file inputs */
+export const ACCEPTED_FILE_INPUT =
+  ACCEPTED_EXTENSIONS.join(",") +
+  ",audio/*,video/mp4,video/quicktime,video/webm,video/x-matroska,video/x-msvideo";
 
 export const PROCESSING_STAGES = [
   { key: "uploading" as const },

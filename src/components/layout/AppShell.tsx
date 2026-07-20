@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "./AppHeader";
+import { CommandPalette } from "./CommandPalette";
 import { MobileSidebar, Sidebar } from "./Sidebar";
 
 interface AppShellProps {
@@ -55,6 +56,8 @@ export function AppShell({
           {children}
         </main>
       </div>
+
+      <CommandPalette />
     </div>
   );
 }

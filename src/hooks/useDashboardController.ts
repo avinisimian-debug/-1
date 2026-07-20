@@ -22,14 +22,21 @@ export function useDashboardController() {
   const transcription = useTranscription();
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(HISTORY_VIEW_KEY);
-    if (!stored) return;
-    try {
-      setHistoryResult(JSON.parse(stored) as TranscriptionResult);
-      sessionStorage.removeItem(HISTORY_VIEW_KEY);
-    } catch {
-      sessionStorage.removeItem(HISTORY_VIEW_KEY);
-    }
+    const loadFromStorage = () => {
+      const stored = sessionStorage.getItem(HISTORY_VIEW_KEY);
+      if (!stored) return;
+      try {
+        setHistoryResult(JSON.parse(stored) as TranscriptionResult);
+        sessionStorage.removeItem(HISTORY_VIEW_KEY);
+      } catch {
+        sessionStorage.removeItem(HISTORY_VIEW_KEY);
+      }
+    };
+
+    loadFromStorage();
+    window.addEventListener("stazai:open-history-result", loadFromStorage);
+    return () =>
+      window.removeEventListener("stazai:open-history-result", loadFromStorage);
   }, []);
 
   const displayResult = transcription.result ?? historyResult;
@@ -64,6 +71,7 @@ export function useDashboardController() {
     mediaKind: transcription.mediaKind,
     stage: transcription.stage,
     stageIndex: transcription.stageIndex,
+    uploadProgress: transcription.uploadProgress,
     error: transcription.error,
     canTranscribe,
     usageCount: count,

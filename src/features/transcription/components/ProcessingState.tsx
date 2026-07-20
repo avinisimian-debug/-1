@@ -5,10 +5,14 @@ import { useLocale } from "@/context/LocaleContext";
 import { PROCESSING_STAGES } from "@/lib/constants";
 import { Progress } from "@/shared/ui/progress";
 import { cn } from "@/lib/utils";
+import type { UploadProgressInfo } from "../api/transcription.api";
 import type { ProcessingStage } from "../types";
 import { SelectedFileBadge } from "./FileUploadZone";
 
-const STAGE_LABELS: Record<ProcessingStage, keyof ReturnType<typeof useLocale>["t"]> = {
+const STAGE_LABELS: Record<
+  ProcessingStage,
+  keyof ReturnType<typeof useLocale>["t"]
+> = {
   uploading: "procUploading",
   transcribing: "procTranscribing",
   analyzing: "procAnalyzing",
@@ -19,6 +23,26 @@ interface ProcessingStateProps {
   fileSize: number;
   stage: ProcessingStage;
   stageIndex: number;
+  uploadProgress?: UploadProgressInfo | null;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatSpeed(bps: number): string {
+  if (!bps || bps < 1) return "—";
+  const mbps = bps / (1024 * 1024);
+  if (mbps >= 0.1) return `${mbps.toFixed(1)} MB/s`;
+  return `${(bps / 1024).toFixed(0)} KB/s`;
+}
+
+function formatEta(loaded: number, total: number, bps: number): string {
+  if (!bps || loaded >= total) return "";
+  const remaining = (total - loaded) / bps;
+  if (remaining < 60) return `~${Math.ceil(remaining)}s left`;
+  return `~${Math.ceil(remaining / 60)}m left`;
 }
 
 export function ProcessingState({
@@ -26,10 +50,23 @@ export function ProcessingState({
   fileSize,
   stage,
   stageIndex,
+  uploadProgress,
 }: ProcessingStateProps) {
   const { t } = useLocale();
-  const progress = ((stageIndex + 1) / PROCESSING_STAGES.length) * 100;
   const currentLabel = t[STAGE_LABELS[stage]];
+
+  const stageBase = (stageIndex / PROCESSING_STAGES.length) * 100;
+  const stageSpan = 100 / PROCESSING_STAGES.length;
+  const uploadFraction =
+    stage === "uploading" && uploadProgress
+      ? uploadProgress.percent / 100
+      : stage === "uploading"
+        ? 0.15
+        : 1;
+  const progress = Math.min(
+    99,
+    Math.round(stageBase + stageSpan * uploadFraction),
+  );
 
   return (
     <div className="mx-auto w-full max-w-2xl animate-fade-in-up">
@@ -53,8 +90,29 @@ export function ProcessingState({
             <SelectedFileBadge name={fileName} size={fileSize} />
           </div>
 
-          <div className="mt-8 w-full">
+          <div className="mt-8 w-full space-y-2">
             <Progress value={progress} showLabel size="md" />
+            {stage === "uploading" && uploadProgress && (
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                <span>
+                  {formatBytes(uploadProgress.loadedBytes)} /{" "}
+                  {formatBytes(uploadProgress.totalBytes || fileSize)}
+                </span>
+                <span className="tabular-nums">
+                  {formatSpeed(uploadProgress.bytesPerSecond)}
+                  {uploadProgress.bytesPerSecond > 0 && (
+                    <>
+                      {" · "}
+                      {formatEta(
+                        uploadProgress.loadedBytes,
+                        uploadProgress.totalBytes || fileSize,
+                        uploadProgress.bytesPerSecond,
+                      )}
+                    </>
+                  )}
+                </span>
+              </div>
+            )}
           </div>
 
           <ul className="mt-8 w-full space-y-2 text-start">
@@ -68,7 +126,8 @@ export function ProcessingState({
                   key={s.key}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-all duration-200",
-                    isCurrent && "bg-accent-muted text-foreground ring-1 ring-accent/20",
+                    isCurrent &&
+                      "bg-accent-muted text-foreground ring-1 ring-accent/20",
                     isComplete && "text-muted-foreground",
                     !isCurrent && !isComplete && "text-muted-foreground/60",
                   )}

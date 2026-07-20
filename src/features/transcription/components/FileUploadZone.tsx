@@ -1,12 +1,26 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { FileAudio, FileVideo, Lock, Upload, X } from "lucide-react";
+import {
+  FileAudio,
+  FileVideo,
+  Link2,
+  Lock,
+  Mic,
+  Square,
+  Upload,
+  X,
+} from "lucide-react";
 import { useFeatureGate } from "@/context/FeatureGateContext";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import { ACCEPTED_EXTENSIONS, ACCEPTED_FILE_TYPES } from "@/lib/constants";
+import { useToast } from "@/context/ToastContext";
+import {
+  ACCEPTED_EXTENSIONS,
+  ACCEPTED_FILE_INPUT,
+  ACCEPTED_FILE_TYPES,
+} from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface FileUploadZoneProps {
@@ -20,7 +34,8 @@ function isAcceptedFile(file: File): boolean {
     .toLowerCase();
   return (
     ACCEPTED_FILE_TYPES.includes(file.type) ||
-    ACCEPTED_EXTENSIONS.includes(extension)
+    ACCEPTED_EXTENSIONS.includes(extension) ||
+    (!file.type && ACCEPTED_EXTENSIONS.includes(extension))
   );
 }
 
@@ -33,27 +48,39 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
   const { limits, isPro } = usePlan();
   const { promptUpgrade } = useFeatureGate();
   const { t } = useLocale();
+  const { toast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [showLink, setShowLink] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [recSeconds, setRecSeconds] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const handleFile = useCallback(
     (file: File) => {
       if (!isAcceptedFile(file)) {
         setError(t.uploadErrorType);
+        toast({ title: t.uploadErrorType, variant: "error" });
         return;
       }
       if (file.size > limits.maxFileSizeBytes) {
         if (!isPro) {
           promptUpgrade("largeFiles");
         }
-        setError(isPro ? t.uploadErrorSizePro : t.uploadErrorSize);
+        const msg = isPro ? t.uploadErrorSizePro : t.uploadErrorSize;
+        setError(msg);
+        toast({ title: msg, variant: "warning" });
         return;
       }
       setError(null);
       onFileSelect(file);
     },
-    [onFileSelect, limits, isPro, t, promptUpgrade],
+    [onFileSelect, limits, isPro, t, promptUpgrade, toast],
   );
 
   const handleDrop = useCallback(
@@ -67,8 +94,74 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
     [disabled, handleFile],
   );
 
+  const stopRecording = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    mediaRecorderRef.current?.stop();
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    setRecording(false);
+  }, []);
+
+  useEffect(() => () => stopRecording(), [stopRecording]);
+
+  const startRecording = async () => {
+    if (disabled || recording) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/mp4";
+      const recorder = new MediaRecorder(stream, { mimeType });
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        const ext = mimeType.includes("webm") ? "webm" : "m4a";
+        const file = new File(
+          [blob],
+          `recording-${new Date().toISOString().slice(0, 19)}.${ext}`,
+          { type: mimeType },
+        );
+        handleFile(file);
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start(250);
+      setRecording(true);
+      setRecSeconds(0);
+      timerRef.current = setInterval(() => setRecSeconds((s) => s + 1), 1000);
+    } catch {
+      toast({
+        title: t.uploadMicDenied,
+        variant: "error",
+      });
+    }
+  };
+
+  const submitLink = () => {
+    const url = linkUrl.trim();
+    if (!url) return;
+    toast({
+      title: t.uploadLinkSoonTitle,
+      description: t.uploadLinkSoonDesc,
+      variant: "default",
+    });
+    setLinkUrl("");
+    setShowLink(false);
+  };
+
+  const formatLabels = [
+    { icon: FileAudio, label: "MP3 · WAV · M4A · AAC · FLAC" },
+    { icon: FileVideo, label: "MP4 · MOV · WEBM · MKV" },
+  ];
+
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
       <div
         role="button"
         tabIndex={0}
@@ -94,7 +187,7 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         <input
           ref={inputRef}
           type="file"
-          accept=".mp3,.wav,.mp4,.m4a,audio/*,video/mp4"
+          accept={ACCEPTED_FILE_INPUT}
           className="hidden"
           disabled={disabled}
           onChange={(e) => {
@@ -119,10 +212,7 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         </p>
 
         <div className="relative mt-6 flex flex-wrap items-center justify-center gap-2">
-          {[
-            { icon: FileAudio, label: "MP3 / WAV" },
-            { icon: FileVideo, label: "MP4 / M4A" },
-          ].map(({ icon: Icon, label }) => (
+          {formatLabels.map(({ icon: Icon, label }) => (
             <span
               key={label}
               className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-xs"
@@ -148,7 +238,11 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         {!isPro && (
           <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-accent">
             <Lock className="h-3 w-3" />
-            <Link href="/settings#upgrade" className="underline-offset-2 hover:underline">
+            <Link
+              href="/settings#upgrade"
+              className="underline-offset-2 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
               {t.uploadUpgradeLink}
             </Link>
             {t.uploadUpgrade}
@@ -156,8 +250,66 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
         )}
       </div>
 
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => (recording ? stopRecording() : startRecording())}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-medium transition-colors",
+            recording
+              ? "border-destructive/40 bg-destructive/10 text-destructive"
+              : "border-border bg-card text-foreground hover:bg-muted",
+            disabled && "opacity-50",
+          )}
+        >
+          {recording ? (
+            <>
+              <Square className="h-3.5 w-3.5 fill-current" />
+              {t.uploadStopRec} ({recSeconds}s)
+            </>
+          ) : (
+            <>
+              <Mic className="h-3.5 w-3.5 text-accent" />
+              {t.uploadRecordMic}
+            </>
+          )}
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setShowLink((v) => !v)}
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+        >
+          <Link2 className="h-3.5 w-3.5 text-accent" />
+          {t.uploadPasteLink}
+        </button>
+      </div>
+
+      {showLink && (
+        <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center">
+          <input
+            type="url"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            placeholder={t.uploadLinkPlaceholder}
+            className="ds-input min-h-9 flex-1 text-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submitLink();
+            }}
+          />
+          <button
+            type="button"
+            onClick={submitLink}
+            className="ds-btn-primary min-h-9 px-4 text-xs"
+          >
+            {t.uploadLinkSubmit}
+          </button>
+        </div>
+      )}
+
       {error && (
-        <div className="mt-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <X className="h-4 w-4 shrink-0" />
           {error}
         </div>

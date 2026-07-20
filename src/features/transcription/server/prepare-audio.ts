@@ -10,7 +10,17 @@ import { failure, success, type Result } from "@/shared/lib/result";
 
 const require = createRequire(import.meta.url);
 
-const VIDEO_EXTENSIONS = new Set([".mp4", ".m4a"]);
+const VIDEO_EXTENSIONS = new Set([
+  ".mp4",
+  ".m4a",
+  ".mov",
+  ".webm",
+  ".mkv",
+  ".avi",
+  ".aac",
+  ".flac",
+  ".ogg",
+]);
 
 function resolveFfmpegPath(): string | null {
   const envPath = process.env.FFMPEG_BIN;

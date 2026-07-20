@@ -2,6 +2,7 @@
 
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { DashboardWorkspace } from "@/components/dashboard/DashboardWorkspace";
+import { DashboardInspector } from "@/components/dashboard/DashboardInspector";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import {
   ErrorState,
@@ -29,26 +30,31 @@ export function DashboardContent() {
       )}
 
       {dash.phase === "idle" && (
-        <DashboardWorkspace
-          language={dash.language}
-          onLanguageChange={dash.setLanguage}
-          onPromptLanguageUpgrade={dash.promptLanguageUpgrade}
-          usageCount={dash.usageCount}
-          usageLimit={dash.usageLimit}
-          canTranscribe={dash.canTranscribe}
-          onFileSelect={dash.processFile}
-          showHero={!dash.showCompactHero}
-          onboarding={{
-            show: dash.onboarding.showOnboarding,
-            dismissed: dash.onboarding.dismissed,
-            progress: dash.onboarding.progress,
-            completed: dash.onboarding.completed,
-            isStepComplete: dash.onboarding.isStepComplete,
-            onDismiss: dash.onboarding.dismiss,
-            onGoToStep: dash.onboarding.goToStep,
-            onOpenModal: dash.onboarding.openModal,
-          }}
-        />
+        <div className="flex items-start gap-6">
+          <div className="min-w-0 flex-1">
+            <DashboardWorkspace
+              language={dash.language}
+              onLanguageChange={dash.setLanguage}
+              onPromptLanguageUpgrade={dash.promptLanguageUpgrade}
+              usageCount={dash.usageCount}
+              usageLimit={dash.usageLimit}
+              canTranscribe={dash.canTranscribe}
+              onFileSelect={dash.processFile}
+              showHero={!dash.showCompactHero}
+              onboarding={{
+                show: dash.onboarding.showOnboarding,
+                dismissed: dash.onboarding.dismissed,
+                progress: dash.onboarding.progress,
+                completed: dash.onboarding.completed,
+                isStepComplete: dash.onboarding.isStepComplete,
+                onDismiss: dash.onboarding.dismiss,
+                onGoToStep: dash.onboarding.goToStep,
+                onOpenModal: dash.onboarding.openModal,
+              }}
+            />
+          </div>
+          <DashboardInspector />
+        </div>
       )}
 
       {dash.phase === "processing" && dash.uploadedFile && (
@@ -57,6 +63,7 @@ export function DashboardContent() {
           fileSize={dash.uploadedFile.size}
           stage={dash.stage}
           stageIndex={dash.stageIndex}
+          uploadProgress={dash.uploadProgress}
         />
       )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Globe, Menu, Search } from "lucide-react";
+import { Globe, Menu, Search } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -13,6 +13,10 @@ interface AppHeaderProps {
   onMenuOpen?: () => void;
   showMenuButton?: boolean;
   userInitials?: string;
+}
+
+function openCommandPalette() {
+  window.dispatchEvent(new CustomEvent("stazai:open-command-palette"));
 }
 
 export function AppHeader({
@@ -75,21 +79,25 @@ export function AppHeader({
           </span>
         )}
 
-        <div className="hidden items-center gap-2 rounded-xl border border-border/80 bg-muted/40 px-3 py-2 shadow-xs md:flex">
-          <Search className="h-4 w-4 text-muted-foreground" aria-hidden />
-          <input
-            type="search"
-            placeholder={t.searchPlaceholder}
-            className="w-36 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none lg:w-40"
-          />
-        </div>
+        <button
+          type="button"
+          onClick={openCommandPalette}
+          className="hidden items-center gap-2 rounded-xl border border-border/80 bg-muted/40 px-3 py-2 text-sm text-muted-foreground shadow-xs transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
+        >
+          <Search className="h-4 w-4" aria-hidden />
+          <span className="w-28 text-start lg:w-36">{t.searchPlaceholder}</span>
+          <kbd className="rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            {t.commandPaletteHint}
+          </kbd>
+        </button>
 
         <button
           type="button"
-          aria-label="Notifications"
-          className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          onClick={openCommandPalette}
+          aria-label={t.commandPaletteTitle}
+          className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
         >
-          <Bell className="h-5 w-5" />
+          <Search className="h-5 w-5" />
         </button>
 
         <div

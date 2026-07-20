@@ -3,35 +3,53 @@ import type { PlanTier } from "@/lib/constants";
 import { VERCEL_DIRECT_UPLOAD_BYTES } from "@/lib/constants";
 import { buildTranscribeBlobPath } from "@/lib/blob-file";
 import type { ApiResponse } from "@/shared/api";
-import { failure, success, type Result } from "@/shared/lib/result";
+import { failure, isFailure, success, type Result } from "@/shared/lib/result";
 import {
   TRANSCRIPTION_API_PATH,
   TRANSCRIPTION_UPLOAD_PATH,
 } from "../constants";
 import type { TranscriptionResult } from "../types";
 
+export interface UploadProgressInfo {
+  /** 0–100 during file transfer */
+  percent: number;
+  loadedBytes: number;
+  totalBytes: number;
+  /** Estimated bytes per second (0 if unknown) */
+  bytesPerSecond: number;
+}
+
 export interface UploadTranscriptionOptions {
   file: File;
   plan: PlanTier;
   userEmail?: string | null;
   language?: string;
+  /** Prefer Blob multipart when available (large files / videos). */
+  forceBlob?: boolean;
+  signal?: AbortSignal;
+  onUploadProgress?: (info: UploadProgressInfo) => void;
   onUploadComplete?: () => void;
   onHeadersReceived?: () => void;
 }
 
 const REQUEST_TIMEOUT_MS = 290_000;
 
-function isProductionHost(): boolean {
-  if (typeof window === "undefined") return false;
-  const host = window.location.hostname;
-  return host !== "localhost" && !host.startsWith("127.");
+function isVideoFile(file: File): boolean {
+  return (
+    file.type.startsWith("video/") ||
+    /\.(mp4|m4v|mov|webm|mkv|avi)$/i.test(file.name)
+  );
 }
 
-function shouldUseBlobUpload(file: File): boolean {
-  if (!isProductionHost()) return false;
-  const isVideo =
-    file.type.startsWith("video/") || /\.(mp4|m4v)$/i.test(file.name);
-  return isVideo || file.size > VERCEL_DIRECT_UPLOAD_BYTES;
+/** Use Blob for large payloads / video when we have a signed-in user. */
+function shouldUseBlobUpload(
+  file: File,
+  userEmail?: string | null,
+  forceBlob?: boolean,
+): boolean {
+  if (forceBlob) return Boolean(userEmail);
+  if (!userEmail) return false;
+  return isVideoFile(file) || file.size > VERCEL_DIRECT_UPLOAD_BYTES;
 }
 
 function parseErrorMessage(
@@ -49,7 +67,7 @@ function parseErrorMessage(
 
   if (status === 401) return "Sign in required to transcribe.";
   if (status === 413) {
-    return "UPLOAD_PAYLOAD_TOO_LARGE: File is too large for direct upload. Retry — large files are routed through secure upload.";
+    return "UPLOAD_PAYLOAD_TOO_LARGE";
   }
   if (status === 504 || status === 408) {
     return "Processing timed out. Try a shorter recording.";
@@ -58,21 +76,50 @@ function parseErrorMessage(
   return "Transcription failed. Please try again.";
 }
 
+function createProgressTracker(
+  totalBytes: number,
+  onUploadProgress?: (info: UploadProgressInfo) => void,
+) {
+  const startedAt = Date.now();
+  let lastLoaded = 0;
+  let lastAt = startedAt;
+
+  return (loaded: number, total = totalBytes) => {
+    const now = Date.now();
+    const dt = Math.max(1, now - lastAt);
+    const dl = Math.max(0, loaded - lastLoaded);
+    const instantBps = (dl / dt) * 1000;
+    const overallBps = (loaded / Math.max(1, now - startedAt)) * 1000;
+    const bytesPerSecond = instantBps > 0 ? instantBps : overallBps;
+    lastLoaded = loaded;
+    lastAt = now;
+
+    const safeTotal = total > 0 ? total : totalBytes;
+    onUploadProgress?.({
+      percent: safeTotal > 0 ? Math.min(100, Math.round((loaded / safeTotal) * 100)) : 0,
+      loadedBytes: loaded,
+      totalBytes: safeTotal,
+      bytesPerSecond,
+    });
+  };
+}
+
 async function transcribeFromBlob({
   file,
   plan,
   userEmail,
   language = "auto",
+  signal,
+  onUploadProgress,
   onUploadComplete,
   onHeadersReceived,
 }: UploadTranscriptionOptions): Promise<Result<TranscriptionResult, Error>> {
   if (!userEmail) {
-    return failure(
-      new Error("Sign in required to upload large files."),
-    );
+    return failure(new Error("Sign in required to upload large files."));
   }
 
   const pathname = buildTranscribeBlobPath(userEmail, file.name);
+  const track = createProgressTracker(file.size, onUploadProgress);
 
   try {
     const blob = await upload(pathname, file, {
@@ -80,11 +127,18 @@ async function transcribeFromBlob({
       handleUploadUrl: TRANSCRIPTION_UPLOAD_PATH,
       multipart: true,
       contentType: file.type || undefined,
+      abortSignal: signal,
+      onUploadProgress: (event) => {
+        track(event.loaded, event.total || file.size);
+      },
     });
 
+    track(file.size, file.size);
     onUploadComplete?.();
 
     const controller = new AbortController();
+    const onAbort = () => controller.abort();
+    signal?.addEventListener("abort", onAbort);
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
@@ -112,12 +166,11 @@ async function transcribeFromBlob({
       return success(body.data);
     } finally {
       clearTimeout(timeout);
+      signal?.removeEventListener("abort", onAbort);
     }
   } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return failure(
-        new Error("Processing timed out. Try a shorter recording or upgrade to Pro."),
-      );
+    if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
+      return failure(new Error("Upload cancelled."));
     }
 
     return failure(
@@ -130,11 +183,13 @@ async function transcribeFromBlob({
   }
 }
 
-/** XHR upload preserves upload progress events for the processing UI. */
+/** XHR upload with real byte progress for small direct uploads. */
 function transcribeDirectUpload({
   file,
   plan,
   language = "auto",
+  signal,
+  onUploadProgress,
   onUploadComplete,
   onHeadersReceived,
 }: UploadTranscriptionOptions): Promise<Result<TranscriptionResult, Error>> {
@@ -150,7 +205,20 @@ function transcribeDirectUpload({
     xhr.withCredentials = true;
     xhr.timeout = REQUEST_TIMEOUT_MS;
 
+    const track = createProgressTracker(file.size, onUploadProgress);
+
+    const onAbort = () => {
+      xhr.abort();
+    };
+    signal?.addEventListener("abort", onAbort);
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (!event.lengthComputable) return;
+      track(event.loaded, event.total);
+    });
+
     xhr.upload.addEventListener("load", () => {
+      track(file.size, file.size);
       onUploadComplete?.();
     });
 
@@ -161,6 +229,7 @@ function transcribeDirectUpload({
     });
 
     xhr.addEventListener("load", () => {
+      signal?.removeEventListener("abort", onAbort);
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const body = JSON.parse(xhr.responseText) as ApiResponse<TranscriptionResult>;
@@ -179,19 +248,24 @@ function transcribeDirectUpload({
         const body = JSON.parse(xhr.responseText) as ApiResponse<TranscriptionResult>;
         resolve(failure(new Error(parseErrorMessage(body, xhr.status))));
       } catch {
-        resolve(
-          failure(new Error(parseErrorMessage({}, xhr.status))),
-        );
+        resolve(failure(new Error(parseErrorMessage({}, xhr.status))));
       }
     });
 
     xhr.addEventListener("error", () => {
+      signal?.removeEventListener("abort", onAbort);
       resolve(
         failure(new Error("Network error. Check your connection and try again.")),
       );
     });
 
+    xhr.addEventListener("abort", () => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve(failure(new Error("Upload cancelled.")));
+    });
+
     xhr.addEventListener("timeout", () => {
+      signal?.removeEventListener("abort", onAbort);
       resolve(
         failure(
           new Error("Processing timed out. Try a shorter recording or upgrade to Pro."),
@@ -203,12 +277,39 @@ function transcribeDirectUpload({
   });
 }
 
-export function uploadTranscription(
+/**
+ * Upload + transcribe with automatic Blob fallback on payload-too-large (413).
+ */
+export async function uploadTranscription(
   options: UploadTranscriptionOptions,
 ): Promise<Result<TranscriptionResult, Error>> {
-  if (shouldUseBlobUpload(options.file)) {
+  const preferBlob = shouldUseBlobUpload(
+    options.file,
+    options.userEmail,
+    options.forceBlob,
+  );
+
+  if (preferBlob) {
     return transcribeFromBlob(options);
   }
 
-  return transcribeDirectUpload(options);
+  const direct = await transcribeDirectUpload(options);
+  if (
+    isFailureWithPayloadTooLarge(direct) &&
+    options.userEmail
+  ) {
+    return transcribeFromBlob({ ...options, forceBlob: true });
+  }
+
+  return direct;
+}
+
+function isFailureWithPayloadTooLarge(
+  result: Result<TranscriptionResult, Error>,
+): boolean {
+  return (
+    isFailure(result) &&
+    (result.error.message.includes("UPLOAD_PAYLOAD_TOO_LARGE") ||
+      result.error.message.toLowerCase().includes("too large"))
+  );
 }
