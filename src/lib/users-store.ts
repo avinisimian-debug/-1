@@ -65,13 +65,21 @@ function isLifetimePro(user: StoredUser): boolean {
   return Boolean(user.proLifetime && user.paidAt);
 }
 
+/** Paid Pro: lifetime purchase OR paid row without a cancelled-only subscription. */
 function isPaidPro(user: StoredUser): boolean {
-  return (
+  if (!user.paidAt) return false;
+  if (isLifetimePro(user) || user.proLifetime === true) return true;
+  if (hasActiveSubscription(user)) return true;
+  // Lifetime-style one-time payment (paidAt set, no active cancel)
+  if (user.plan === "pro" && !user.paypalSubscriptionId) return true;
+  if (
     user.plan === "pro" &&
-    Boolean(user.paidAt) &&
-    !user.proTrialEndsAt &&
-    (isLifetimePro(user) || !user.paypalSubscriptionId || user.proLifetime === true)
-  );
+    user.paypalSubscriptionId &&
+    user.proSubscriptionStatus === "cancelled"
+  ) {
+    return false;
+  }
+  return user.plan === "pro";
 }
 
 async function expireTrialIfNeeded(user: StoredUser): Promise<StoredUser> {
@@ -80,6 +88,7 @@ async function expireTrialIfNeeded(user: StoredUser): Promise<StoredUser> {
   if (await isProGranted(user.email)) return user;
 
   user.plan = "free";
+  user.proTrialEndsAt = undefined;
   return user;
 }
 
@@ -87,7 +96,12 @@ async function resolvePlanForUser(user: StoredUser): Promise<UserPlanDetails> {
   const expired = await expireTrialIfNeeded(user);
 
   if (await isProGranted(expired.email)) {
-    return { plan: "pro", hasSubscription: false, needsPayPalSetup: false };
+    return {
+      plan: "pro",
+      proLifetime: true,
+      hasSubscription: false,
+      needsPayPalSetup: false,
+    };
   }
 
   if (hasActiveSubscription(expired)) {
@@ -106,7 +120,8 @@ async function resolvePlanForUser(user: StoredUser): Promise<UserPlanDetails> {
     return {
       plan: "pro",
       proLifetime: isLifetimePro(expired) || expired.proLifetime === true,
-      hasSubscription: Boolean(expired.paypalSubscriptionId) && !expired.proLifetime,
+      hasSubscription:
+        Boolean(expired.paypalSubscriptionId) && !expired.proLifetime,
       needsPayPalSetup: false,
     };
   }
@@ -120,8 +135,9 @@ async function resolvePlanForUser(user: StoredUser): Promise<UserPlanDetails> {
     };
   }
 
+  // Never demote an explicit paid row to free here — paidAt already handled above.
   return {
-    plan: expired.plan === "pro" ? "free" : (expired.plan ?? "free"),
+    plan: "free",
     hasSubscription: false,
     needsPayPalSetup: false,
   };
@@ -149,6 +165,8 @@ export async function registerOrUpdateUser(input: {
     if (await isProGranted(email)) {
       existing.plan = "pro";
       existing.paidAt = existing.paidAt ?? now;
+      existing.proLifetime = existing.proLifetime ?? true;
+      existing.proTrialEndsAt = undefined;
     }
     const resolved = await expireTrialIfNeeded(existing);
     await writeUsers(users);
@@ -165,7 +183,9 @@ export async function registerOrUpdateUser(input: {
     plan: grantedPro ? "pro" : "free",
     registeredAt: now,
     lastLoginAt: now,
-    ...(grantedPro ? { paidAt: now } : {}),
+    ...(grantedPro
+      ? { paidAt: now, proLifetime: true }
+      : {}),
   };
 
   users.unshift(user);
@@ -208,9 +228,11 @@ async function persistProGrantForUser(email: string, name?: string): Promise<voi
   if (existing) {
     existing.plan = "pro";
     existing.paidAt = existing.paidAt ?? now;
-    existing.proLifetime = existing.proLifetime ?? true;
+    existing.proLifetime = true;
     existing.proTrialEndsAt = undefined;
     existing.proTrialUsed = undefined;
+    if (name?.trim()) existing.name = name.trim();
+    existing.lastLoginAt = now;
     await writeUsers(users);
     return;
   }
@@ -235,7 +257,11 @@ export async function syncUserPlanOnAccess(
 ): Promise<"free" | "pro"> {
   const normalized = email.toLowerCase();
   if (await isProGranted(normalized)) {
-    await persistProGrantForUser(normalized, name);
+    try {
+      await persistProGrantForUser(normalized, name);
+    } catch (error) {
+      console.error("[users-store] Failed to persist Pro grant:", error);
+    }
     return "pro";
   }
   return getUserPlan(normalized);
@@ -244,9 +270,19 @@ export async function syncUserPlanOnAccess(
 export async function getUserPlanDetails(email: string): Promise<UserPlanDetails> {
   const normalized = email.toLowerCase();
 
+  // Grants always win — never block Pro on a failed Blob write.
   if (await isProGranted(normalized)) {
-    await persistProGrantForUser(normalized);
-    return { plan: "pro", hasSubscription: false, needsPayPalSetup: false };
+    try {
+      await persistProGrantForUser(normalized);
+    } catch (error) {
+      console.error("[users-store] Failed to persist Pro grant:", error);
+    }
+    return {
+      plan: "pro",
+      proLifetime: true,
+      hasSubscription: false,
+      needsPayPalSetup: false,
+    };
   }
 
   const users = await readUsers();
@@ -261,7 +297,11 @@ export async function getUserPlanDetails(email: string): Promise<UserPlanDetails
 
   if (details.plan !== users[index].plan) {
     users[index].plan = details.plan;
-    await writeUsers(users);
+    try {
+      await writeUsers(users);
+    } catch (error) {
+      console.error("[users-store] Failed to persist plan sync:", error);
+    }
   }
 
   return details;
@@ -285,9 +325,27 @@ export async function setUserSubscription(
   status: ProSubscriptionStatus,
 ): Promise<boolean> {
   const users = await readUsers();
-  const user = users.find((u) => u.email === email.toLowerCase());
+  const normalized = email.toLowerCase();
+  let user = users.find((u) => u.email === normalized);
+  const now = new Date().toISOString();
 
-  if (!user) return false;
+  if (!user) {
+    user = {
+      id: normalized,
+      name: normalized.split("@")[0] || "User",
+      email: normalized,
+      provider: "email",
+      plan: status === "cancelled" ? "free" : "pro",
+      registeredAt: now,
+      lastLoginAt: now,
+      paypalSubscriptionId: subscriptionId,
+      proSubscriptionStatus: status,
+      ...(status !== "cancelled" ? { paidAt: now } : {}),
+    };
+    users.unshift(user);
+    await writeUsers(users);
+    return true;
+  }
 
   user.paypalSubscriptionId = subscriptionId;
   user.proSubscriptionStatus = status;
@@ -295,7 +353,7 @@ export async function setUserSubscription(
   user.proTrialEndsAt = undefined;
   user.proTrialUsed = undefined;
   if (status !== "cancelled" && !user.paidAt) {
-    user.paidAt = new Date().toISOString();
+    user.paidAt = now;
   }
 
   await writeUsers(users);
@@ -312,6 +370,9 @@ export async function updateSubscriptionByPayPalId(
 
   user.proSubscriptionStatus = status;
   user.plan = status === "cancelled" ? "free" : "pro";
+  if (status !== "cancelled" && !user.paidAt) {
+    user.paidAt = new Date().toISOString();
+  }
   await writeUsers(users);
   return true;
 }
@@ -344,7 +405,7 @@ export async function upgradeUserToPro(
   }
 
   user.plan = "pro";
-  user.paidAt = user.paidAt ?? now;
+  user.paidAt = now;
   user.proLifetime = true;
   user.proTrialEndsAt = undefined;
   user.proTrialUsed = undefined;

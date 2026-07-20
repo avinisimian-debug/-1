@@ -34,13 +34,13 @@ async function writeToLocalFile(content: string): Promise<void> {
 }
 
 async function readFromBlob(): Promise<string | null> {
-  try {
-    const result = await get(BLOB_PATH, { access: "private" });
-    if (!result || result.statusCode !== 200) return null;
-    return await new Response(result.stream).text();
-  } catch {
-    return null;
-  }
+  const result = await get(BLOB_PATH, {
+    access: "private",
+    // Critical: default CDN cache returns stale Free after Pro upgrades.
+    useCache: false,
+  });
+  if (!result || result.statusCode !== 200) return null;
+  return await new Response(result.stream).text();
 }
 
 async function writeToBlob(content: string): Promise<void> {
@@ -52,19 +52,41 @@ async function writeToBlob(content: string): Promise<void> {
   });
 }
 
+/**
+ * Read persisted JSON.
+ * On Vercel with Blob configured: never fall back to empty /tmp and then
+ * overwrite Blob — that wiped Pro purchases for everyone.
+ */
 export async function readPersistedJson<T>(fallback: T): Promise<T> {
-  let raw: string | null = null;
-
   if (useBlobStorage()) {
-    raw = await readFromBlob();
+    try {
+      const raw = await readFromBlob();
+      if (!raw) return fallback;
+      try {
+        return JSON.parse(raw) as T;
+      } catch {
+        console.error("[user-persistence] Invalid JSON in Blob; using fallback");
+        return fallback;
+      }
+    } catch (error) {
+      console.error("[user-persistence] Blob read failed:", error);
+      // Prefer local cache if present, but do NOT treat miss as authoritative empty.
+      const local = await readFromLocalFile();
+      if (local) {
+        try {
+          return JSON.parse(local) as T;
+        } catch {
+          /* ignore */
+        }
+      }
+      throw error instanceof Error
+        ? error
+        : new Error("Failed to read user persistence from Blob");
+    }
   }
 
-  if (!raw) {
-    raw = await readFromLocalFile();
-  }
-
+  const raw = await readFromLocalFile();
   if (!raw) return fallback;
-
   try {
     return JSON.parse(raw) as T;
   } catch {
@@ -76,8 +98,31 @@ export async function writePersistedJson<T>(data: T): Promise<void> {
   const content = JSON.stringify(data, null, 2);
 
   if (useBlobStorage()) {
+    // Guard: never overwrite Blob with an empty users array unless intentional.
+    if (Array.isArray(data) && data.length === 0) {
+      try {
+        const existing = await readFromBlob();
+        if (existing) {
+          const parsed = JSON.parse(existing) as unknown;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            console.error(
+              "[user-persistence] Refusing to overwrite Blob users.json with empty array",
+            );
+            return;
+          }
+        }
+      } catch {
+        // If we cannot verify, still write — first bootstrap.
+      }
+    }
     await writeToBlob(content);
   }
 
-  await writeToLocalFile(content);
+  try {
+    await writeToLocalFile(content);
+  } catch (error) {
+    // Local /tmp write is best-effort on Vercel.
+    if (!useBlobStorage()) throw error;
+    console.warn("[user-persistence] Local cache write failed:", error);
+  }
 }
