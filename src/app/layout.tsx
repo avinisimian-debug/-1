@@ -3,7 +3,6 @@ import Script from "next/script";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppProviders } from "@/components/providers/AppProviders";
-import { AdSenseMarketing } from "@/components/marketing/AdSenseMarketing";
 import { buildSiteMetadata } from "@/lib/seo";
 import { I18N_BOOTSTRAP_SCRIPT } from "@/lib/i18n/bootstrap-script";
 import "./globals.css";
@@ -57,11 +56,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-foreground">
-        <AppProviders>
-          {children}
-          <AdSenseMarketing />
-        </AppProviders>
+        <AppProviders>{children}</AppProviders>
         <Analytics />
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1517251000751283"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <Script
           src="https://code.tidio.co/rxthk18hhvew8n55ixhfsgutafyhwwyc.js"
           strategy="afterInteractive"
