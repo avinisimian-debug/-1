@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppProviders } from "@/components/providers/AppProviders";
+import { TidioMarketingChat } from "@/components/marketing/TidioMarketingChat";
 import { buildSiteMetadata } from "@/lib/seo";
 import { I18N_BOOTSTRAP_SCRIPT } from "@/lib/i18n/bootstrap-script";
 import "./globals.css";
@@ -52,12 +52,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-foreground">
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          {children}
+          <TidioMarketingChat />
+        </AppProviders>
         <Analytics />
-        <Script
-          src="https://code.tidio.co/rxthk18hhvew8n55ixhfsgutafyhwwyc.js"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );
