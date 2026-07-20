@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppProviders } from "@/components/providers/AppProviders";
@@ -53,6 +54,10 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>{children}</AppProviders>
         <Analytics />
+        <Script
+          src="https://code.tidio.co/rxthk18hhvew8n55ixhfsgutafyhwwyc.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
