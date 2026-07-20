@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { buildSiteMetadata } from "@/lib/seo";
+import { I18N_BOOTSTRAP_SCRIPT } from "@/lib/i18n/bootstrap-script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,7 +27,10 @@ const inter = Inter({
 export const metadata: Metadata = buildSiteMetadata();
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
 };
 
 export default function RootLayout({
@@ -36,10 +40,16 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="he"
-      dir="rtl"
+      lang="en"
+      dir="ltr"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: I18N_BOOTSTRAP_SCRIPT }}
+        />
+      </head>
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>{children}</AppProviders>
         <Analytics />

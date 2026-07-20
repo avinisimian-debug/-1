@@ -3,6 +3,7 @@
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { PROCESSING_STAGES } from "@/lib/constants";
+import { Progress } from "@/shared/ui/progress";
 import { cn } from "@/lib/utils";
 import type { ProcessingStage } from "../types";
 import { SelectedFileBadge } from "./FileUploadZone";
@@ -53,12 +54,7 @@ export function ProcessingState({
           </div>
 
           <div className="mt-8 w-full">
-            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-              <div
-                className="usage-bar-fill h-full transition-all duration-700 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            <Progress value={progress} showLabel size="md" />
           </div>
 
           <ul className="mt-8 w-full space-y-2 text-start">

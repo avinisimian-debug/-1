@@ -3,6 +3,7 @@
 import { Bell, Globe, Menu, Search } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import type { Locale } from "@/lib/i18n/translations";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,8 @@ export function AppHeader({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
+        <ThemeToggle className="hidden sm:flex" />
+
         <div className="hidden items-center gap-1.5 sm:flex">
           <Globe className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
           <select

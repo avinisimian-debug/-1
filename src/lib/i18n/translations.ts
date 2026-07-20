@@ -254,6 +254,13 @@ export interface Translations {
   transcriptionErrorTip1: string;
   transcriptionErrorTip2: string;
   langLabel: string;
+  themeLabel: string;
+  themeLight: string;
+  themeDark: string;
+  themeSystem: string;
+  errorBoundaryTitle: string;
+  errorBoundaryMessage: string;
+  errorBoundaryRetry: string;
   // Admin
   adminTitle: string;
   adminDesc: string;
@@ -807,6 +814,13 @@ const en: Translations = {
   transcriptionErrorTip1: "MP3 and WAV files transcribe fastest",
   transcriptionErrorTip2: "Clear speech near the microphone improves accuracy",
   langLabel: "Language",
+  themeLabel: "Theme",
+  themeLight: "Light",
+  themeDark: "Dark",
+  themeSystem: "System",
+  errorBoundaryTitle: "Something went wrong",
+  errorBoundaryMessage: "An unexpected error occurred. Please try again.",
+  errorBoundaryRetry: "Try again",
   adminTitle: "Registered Users",
   adminDesc: "Everyone who signed up to Staz AI",
   adminTotal: "total registered",
@@ -1363,6 +1377,13 @@ const he: Translations = {
   transcriptionErrorTip1: "קבצי MP3 ו-WAV מתמללים הכי מהר",
   transcriptionErrorTip2: "דיבור ברור ליד המיקרופון משפר את הדיוק",
   langLabel: "שפה",
+  themeLabel: "ערכת נושא",
+  themeLight: "בהיר",
+  themeDark: "כהה",
+  themeSystem: "מערכת",
+  errorBoundaryTitle: "משהו השתבש",
+  errorBoundaryMessage: "אירעה שגיאה בלתי צפויה. נסו שוב.",
+  errorBoundaryRetry: "נסו שוב",
   adminTitle: "משתמשים רשומים",
   adminDesc: "כל מי שנרשם ל-Staz AI",
   adminTotal: "נרשמו בסך הכל",
