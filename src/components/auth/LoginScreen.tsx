@@ -10,6 +10,7 @@ import { LandingPricing } from "@/components/auth/LandingPricing";
 import { LoginLiveStats } from "@/components/auth/LoginLiveStats";
 import { SignupCard } from "@/components/auth/SignupCard";
 import { SaleCountdown } from "@/components/billing/SaleCountdown";
+import { AdSenseUnit } from "@/components/marketing/AdSenseUnit";
 import { useLocale } from "@/context/LocaleContext";
 import type { Locale } from "@/lib/i18n/translations";
 
@@ -113,9 +114,17 @@ export function LoginScreen() {
 
         <LandingHero onGetStarted={scrollToSignup} />
 
+        <div className="my-8">
+          <AdSenseUnit format="horizontal" className="min-h-[90px]" />
+        </div>
+
         <LandingTrustStrip className="-mx-4 sm:-mx-6 lg:-mx-8" />
 
         <LandingBenefits />
+
+        <div className="my-8">
+          <AdSenseUnit format="rectangle" className="min-h-[250px]" />
+        </div>
 
         <div className="py-12 sm:py-16">
           <SignupCard
@@ -131,6 +140,10 @@ export function LoginScreen() {
         </div>
 
         <LandingPricing onFreeSignup={scrollToSignup} className="-mx-4 rounded-none sm:-mx-6 lg:-mx-8" />
+
+        <div className="my-8">
+          <AdSenseUnit format="auto" className="min-h-[100px]" />
+        </div>
 
         <div className="mt-16 border-t border-border/80 pt-12">
           <TrustSection variant="landing" />

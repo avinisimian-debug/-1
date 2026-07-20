@@ -54,16 +54,17 @@ export default function RootLayout({
           name="google-adsense-account"
           content="ca-pub-1517251000751283"
         />
+        <Script
+          id="adsense-loader"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1517251000751283"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
       </head>
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>{children}</AppProviders>
         <Analytics />
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1517251000751283"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         <Script
           src="https://code.tidio.co/rxthk18hhvew8n55ixhfsgutafyhwwyc.js"
           strategy="afterInteractive"
