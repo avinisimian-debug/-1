@@ -1,2 +1,14 @@
 export { LiveHub } from "./components/LiveHub";
-export type { LiveSession, LiveSessionInput, LivePlatform } from "./types";
+export { LiveSessionViewer } from "./components/LiveSessionViewer";
+export type {
+  LiveSession,
+  LiveSessionInput,
+  LiveSessionPublic,
+  LivePlatform,
+  BotStatus,
+} from "./types";
+export {
+  detectPlatform,
+  isValidMeetingUrl,
+  isDueForBotDispatch,
+} from "./lib/platform";

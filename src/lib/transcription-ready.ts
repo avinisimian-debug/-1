@@ -1,3 +1,8 @@
+/**
+ * Central provider readiness for the media → STT → insights pipeline.
+ * Keys: BLOB_READ_WRITE_TOKEN, ASSEMBLYAI_API_KEY, OPENAI_API_KEY
+ */
+
 const PLACEHOLDER_OPENAI_PATTERNS = [
   "sk-your",
   "your-openai",
@@ -14,6 +19,16 @@ export function isOpenAiKeyConfigured(): boolean {
 
 export function isBlobStorageConfigured(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+}
+
+/** AssemblyAI powers primary STT (when set), diarization, and YouTube/platform URLs. */
+export function isAssemblyAIConfigured(): boolean {
+  return Boolean(process.env.ASSEMBLYAI_API_KEY?.trim());
+}
+
+/** @deprecated Use isAssemblyAIConfigured */
+export function isDiarizationConfigured(): boolean {
+  return isAssemblyAIConfigured();
 }
 
 export function isVercelRuntime(): boolean {
@@ -66,4 +81,14 @@ export function assertTranscriptionReady(requireBlob = false): void {
   if (relevant.length > 0) {
     throw new Error(getTranscriptionReadinessMessage(relevant[0]));
   }
+}
+
+export function getPipelineProviderStatus() {
+  return {
+    openai: isOpenAiKeyConfigured(),
+    blob: isBlobStorageConfigured(),
+    assemblyai: isAssemblyAIConfigured(),
+    /** Prefer AssemblyAI for STT when key is present; Whisper is fallback. */
+    sttPrimary: isAssemblyAIConfigured() ? ("assemblyai" as const) : ("whisper" as const),
+  };
 }

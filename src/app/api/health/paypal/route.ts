@@ -38,6 +38,8 @@ export async function GET() {
     authOk,
     baseUrl,
     blobStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+    assemblyai: Boolean(process.env.ASSEMBLYAI_API_KEY?.trim()),
+    openai: Boolean(process.env.OPENAI_API_KEY?.trim()),
     billing: billing
       ? {
           planOk: billing.planOk,

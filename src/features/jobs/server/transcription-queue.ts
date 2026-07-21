@@ -1,13 +1,14 @@
 import { randomUUID } from "crypto";
+import { get, put } from "@vercel/blob";
 import type { EnqueueTranscriptionInput, TranscriptionJob } from "../types";
 
 /**
- * Job queue abstraction — swap `InMemoryJobQueue` for Upstash QStash / Inngest in production.
+ * Job queue — in-memory + Vercel Blob when BLOB_READ_WRITE_TOKEN is set
+ * so polling works across serverless instances.
  *
- * Pseudocode flow:
- *   POST /api/transcribe → store blob → enqueue(jobId) → 202 { jobId }
- *   QStash POST /api/jobs/process?jobId=… → transcribeAudio(blob) → save result
- *   Client polls GET /api/jobs/:id every 2s
+ * Flow:
+ *   POST /api/transcribe/jobs → enqueue → waitUntil(process) → 202 { jobId }
+ *   Client polls GET /api/transcribe/jobs/:id every 2s
  */
 
 export interface JobQueue {
@@ -16,26 +17,64 @@ export interface JobQueue {
   update(job: TranscriptionJob): Promise<void>;
 }
 
-const store = new Map<string, TranscriptionJob>();
+const memory = new Map<string, TranscriptionJob>();
 
-export class InMemoryJobQueue implements JobQueue {
-  async enqueue(job: TranscriptionJob): Promise<void> {
-    store.set(job.id, job);
-  }
+function useBlobStorage(): boolean {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+}
 
-  async get(jobId: string): Promise<TranscriptionJob | null> {
-    return store.get(jobId) ?? null;
-  }
+function jobBlobPath(jobId: string): string {
+  return `meetscribe/jobs/${jobId}.json`;
+}
 
-  async update(job: TranscriptionJob): Promise<void> {
-    store.set(job.id, job);
+async function persistJob(job: TranscriptionJob): Promise<void> {
+  memory.set(job.id, job);
+  if (!useBlobStorage()) return;
+
+  await put(jobBlobPath(job.id), JSON.stringify(job), {
+    access: "private",
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: "application/json",
+  });
+}
+
+async function loadJob(jobId: string): Promise<TranscriptionJob | null> {
+  const cached = memory.get(jobId);
+  if (cached) return cached;
+
+  if (!useBlobStorage()) return null;
+
+  try {
+    const result = await get(jobBlobPath(jobId), { access: "private" });
+    if (!result || result.statusCode !== 200) return null;
+    const raw = await new Response(result.stream).text();
+    const job = JSON.parse(raw) as TranscriptionJob;
+    memory.set(job.id, job);
+    return job;
+  } catch {
+    return null;
   }
 }
 
-export const jobQueue = new InMemoryJobQueue();
+export class PersistentJobQueue implements JobQueue {
+  async enqueue(job: TranscriptionJob): Promise<void> {
+    await persistJob(job);
+  }
+
+  async get(jobId: string): Promise<TranscriptionJob | null> {
+    return loadJob(jobId);
+  }
+
+  async update(job: TranscriptionJob): Promise<void> {
+    await persistJob({ ...job, updatedAt: new Date().toISOString() });
+  }
+}
+
+export const jobQueue = new PersistentJobQueue();
 
 const MAX_ATTEMPTS = 3;
-const RETRY_DELAYS_MS = [0, 30_000, 120_000];
+const RETRY_DELAYS_MS = [0, 5_000, 15_000];
 
 export async function enqueueTranscriptionJob(
   input: EnqueueTranscriptionInput,
@@ -50,6 +89,9 @@ export async function enqueueTranscriptionJob(
     plan: input.plan,
     language: input.language,
     audioBlobUrl: input.audioBlobUrl,
+    pathname: input.pathname,
+    contentType: input.contentType,
+    meetingId: input.meetingId,
     attempts: 0,
     maxAttempts: MAX_ATTEMPTS,
     createdAt: now,
@@ -57,18 +99,6 @@ export async function enqueueTranscriptionJob(
   };
 
   await jobQueue.enqueue(job);
-
-  /*
-   * Production (QStash pseudocode):
-   *
-   * await qstash.publishJSON({
-   *   url: `${APP_URL}/api/jobs/process`,
-   *   body: { jobId: job.id },
-   *   retries: MAX_ATTEMPTS - 1,
-   *   delay: 0,
-   * });
-   */
-
   return job;
 }
 
@@ -80,25 +110,15 @@ export async function markJobFailed(
   job: TranscriptionJob,
   error: string,
 ): Promise<TranscriptionJob> {
+  const attempts = job.attempts + 1;
   const next: TranscriptionJob = {
     ...job,
-    attempts: job.attempts + 1,
+    attempts,
     error,
     updatedAt: new Date().toISOString(),
-    status: job.attempts + 1 >= job.maxAttempts ? "failed" : "queued",
+    status: attempts >= job.maxAttempts ? "failed" : "queued",
   };
   await jobQueue.update(next);
-
-  /*
-   * If status === "queued" after failure, re-enqueue with backoff:
-   *
-   * await qstash.publishJSON({
-   *   url: `${APP_URL}/api/jobs/process`,
-   *   body: { jobId: job.id },
-   *   delay: getRetryDelayMs(next.attempts),
-   * });
-   */
-
   return next;
 }
 

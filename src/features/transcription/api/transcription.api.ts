@@ -13,6 +13,7 @@ import {
 import {
   TRANSCRIPTION_API_PATH,
   TRANSCRIPTION_FROM_URL_PATH,
+  TRANSCRIPTION_JOBS_PATH,
   TRANSCRIPTION_STATUS_PATH,
   TRANSCRIPTION_UPLOAD_PATH,
 } from "../constants";
@@ -41,11 +42,68 @@ export interface UploadTranscriptionOptions {
 }
 
 const REQUEST_TIMEOUT_MS = 290_000;
+const JOB_POLL_INTERVAL_MS = 2_000;
+const JOB_POLL_MAX_MS = 280_000;
+const RETRY_ATTEMPTS = 3;
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: {
+    attempts?: number;
+    signal?: AbortSignal;
+    label?: string;
+  } = {},
+): Promise<T> {
+  const attempts = options.attempts ?? RETRY_ATTEMPTS;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    if (options.signal?.aborted) {
+      throw new DOMException("Aborted", "AbortError");
+    }
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (error instanceof Error && error.name === "AbortError") throw error;
+      const retryableFlag = (error as Error & { retryable?: boolean }).retryable;
+      if (retryableFlag === false) throw error;
+      const message = error instanceof Error ? error.message : "";
+      if (message.startsWith("CONFIG_") || message.includes("Sign in required")) {
+        throw error;
+      }
+      if (attempt >= attempts - 1) break;
+      const delay = 500 * 2 ** attempt;
+      console.warn(
+        `[transcription] ${options.label ?? "request"} failed (attempt ${attempt + 1}/${attempts}), retrying in ${delay}ms`,
+        message || error,
+      );
+      await sleep(delay, options.signal);
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Request failed after retries.");
+}
 
 /**
  * Use Blob only when the payload exceeds Vercel's serverless body limit.
- * (Previously every video used Blob — that hard-failed when BLOB_READ_WRITE_TOKEN
- * was missing, even for tiny MP4s that could upload directly.)
  */
 function shouldUseBlobUpload(
   file: File,
@@ -60,6 +118,7 @@ function shouldUseBlobUpload(
 async function fetchUploadReadiness(): Promise<{
   blob: boolean;
   openai: boolean;
+  assemblyai: boolean;
   hint: string;
 }> {
   try {
@@ -71,11 +130,13 @@ async function fetchUploadReadiness(): Promise<{
     const body = (await res.json()) as {
       blob?: boolean;
       openai?: boolean;
+      assemblyai?: boolean;
       hint?: string;
     };
     return {
       blob: Boolean(body.blob),
       openai: Boolean(body.openai),
+      assemblyai: Boolean(body.assemblyai),
       hint:
         typeof body.hint === "string"
           ? body.hint
@@ -85,6 +146,7 @@ async function fetchUploadReadiness(): Promise<{
     return {
       blob: false,
       openai: true,
+      assemblyai: false,
       hint: "Could not reach upload readiness probe.",
     };
   }
@@ -94,9 +156,9 @@ const BLOB_MISSING_ERROR =
   "CONFIG_BLOB_MISSING: Large video/meeting uploads require Vercel Blob. In Vercel Dashboard: Storage → Create/Connect Blob → ensure BLOB_READ_WRITE_TOKEN is set for Production → Redeploy. Files under ~4 MB can still upload without Blob.";
 
 function parseErrorMessage(
-  body:
-    | ApiResponse<TranscriptionResult>
-    | { error?: string | { message?: string; code?: string } },
+  body: {
+    error?: string | { message?: string; code?: string } | null;
+  },
   status: number,
 ): string {
   if ("error" in body && body.error) {
@@ -150,55 +212,64 @@ async function fetchBlobClientToken(
   multipart: boolean,
   signal?: AbortSignal,
 ): Promise<string> {
-  const res = await fetch(TRANSCRIPTION_UPLOAD_PATH, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    signal,
-    body: JSON.stringify({
-      type: "blob.generate-client-token",
-      payload: {
-        pathname,
-        multipart,
-        clientPayload: null,
-      },
-    }),
-  });
+  return withRetry(
+    async () => {
+      const res = await fetch(TRANSCRIPTION_UPLOAD_PATH, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        signal,
+        body: JSON.stringify({
+          type: "blob.generate-client-token",
+          payload: {
+            pathname,
+            multipart,
+            clientPayload: null,
+          },
+        }),
+      });
 
-  let body: { clientToken?: string; error?: string } = {};
-  try {
-    body = (await res.json()) as { clientToken?: string; error?: string };
-  } catch {
-    /* ignore parse errors */
-  }
+      let body: { clientToken?: string; error?: string } = {};
+      try {
+        body = (await res.json()) as { clientToken?: string; error?: string };
+      } catch {
+        /* ignore parse errors */
+      }
 
-  if (!res.ok) {
-    const detail =
-      typeof body.error === "string" && body.error.trim()
-        ? body.error
-        : `Upload authorization failed (${res.status}).`;
+      if (!res.ok) {
+        const detail =
+          typeof body.error === "string" && body.error.trim()
+            ? body.error
+            : `Upload authorization failed (${res.status}).`;
 
-    // Only label true config/blob failures — not auth or validation errors.
-    if (detail.includes("CONFIG_") || res.status === 503) {
-      throw new Error(
-        detail.includes("CONFIG_")
-          ? detail
-          : `CONFIG_BLOB_TOKEN: ${detail}`,
-      );
-    }
-    if (res.status === 401) {
-      throw new Error(detail || "Sign in required to upload large files.");
-    }
-    throw new Error(detail);
-  }
+        if (detail.includes("CONFIG_") || res.status === 503) {
+          throw new Error(
+            detail.includes("CONFIG_")
+              ? detail
+              : `CONFIG_BLOB_TOKEN: ${detail}`,
+          );
+        }
+        if (res.status === 401) {
+          throw new Error(detail || "Sign in required to upload large files.");
+        }
+        if (res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429) {
+          const err = new Error(detail) as Error & { retryable?: boolean };
+          err.retryable = false;
+          throw err;
+        }
+        throw new Error(detail);
+      }
 
-  if (!body.clientToken) {
-    throw new Error(
-      "CONFIG_BLOB_TOKEN: Server did not return a Blob client token. Check BLOB_READ_WRITE_TOKEN in Vercel → Storage → Blob.",
-    );
-  }
+      if (!body.clientToken) {
+        throw new Error(
+          "CONFIG_BLOB_TOKEN: Server did not return a Blob client token. Check BLOB_READ_WRITE_TOKEN in Vercel → Storage → Blob.",
+        );
+      }
 
-  return body.clientToken;
+      return body.clientToken;
+    },
+    { signal, label: "blob-token", attempts: RETRY_ATTEMPTS },
+  );
 }
 
 function inferUploadContentType(file: File): string {
@@ -210,6 +281,61 @@ function inferUploadContentType(file: File): string {
   if (/\.wav$/i.test(file.name)) return "audio/wav";
   if (/\.m4a$/i.test(file.name)) return "audio/mp4";
   return "application/octet-stream";
+}
+
+async function pollTranscriptionJob(
+  jobId: string,
+  signal?: AbortSignal,
+  onHeadersReceived?: () => void,
+): Promise<Result<TranscriptionResult, Error>> {
+  const started = Date.now();
+  let notified = false;
+
+  while (Date.now() - started < JOB_POLL_MAX_MS) {
+    if (signal?.aborted) {
+      return failure(new Error("Upload cancelled."));
+    }
+
+    const response = await fetch(`${TRANSCRIPTION_JOBS_PATH}/${jobId}`, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      signal,
+    });
+
+    const body = (await response.json()) as ApiResponse<{
+      id: string;
+      status: string;
+      error?: string;
+      result?: TranscriptionResult;
+    }>;
+
+    if (!response.ok || !body.data) {
+      return failure(new Error(parseErrorMessage(body, response.status)));
+    }
+
+    const job = body.data;
+    if (!notified && (job.status === "processing" || job.status === "transcribing")) {
+      onHeadersReceived?.();
+      notified = true;
+    }
+
+    if (job.status === "completed" && job.result) {
+      return success(job.result);
+    }
+
+    if (job.status === "failed") {
+      return failure(
+        new Error(job.error || "Transcription job failed. Please try again."),
+      );
+    }
+
+    await sleep(JOB_POLL_INTERVAL_MS, signal);
+  }
+
+  return failure(
+    new Error("Processing timed out. Try a shorter recording or upgrade to Pro."),
+  );
 }
 
 async function transcribeFromBlob({
@@ -231,56 +357,54 @@ async function transcribeFromBlob({
   const contentType = inferUploadContentType(file);
 
   try {
-    // Fetch the token ourselves so real server errors surface (the Blob SDK
-    // otherwise collapses every non-OK response into "Failed to retrieve the client token").
     const clientToken = await fetchBlobClientToken(pathname, true, signal);
 
-    const blob = await put(pathname, file, {
-      access: "private",
-      token: clientToken,
-      multipart: true,
-      contentType,
-      abortSignal: signal,
-      onUploadProgress: (event) => {
-        track(event.loaded, event.total || file.size);
-      },
-    });
+    const blob = await withRetry(
+      () =>
+        put(pathname, file, {
+          access: "private",
+          token: clientToken,
+          multipart: true,
+          contentType,
+          abortSignal: signal,
+          onUploadProgress: (event) => {
+            track(event.loaded, event.total || file.size);
+          },
+        }),
+      { signal, label: "blob-put", attempts: 2 },
+    );
 
     track(file.size, file.size);
     onUploadComplete?.();
 
-    const controller = new AbortController();
-    const onAbort = () => controller.abort();
-    signal?.addEventListener("abort", onAbort);
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    // Async job path avoids gateway timeouts on long STT + GPT analysis.
+    const enqueue = await withRetry(
+      async () => {
+        const response = await fetch(TRANSCRIPTION_JOBS_PATH, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          signal,
+          body: JSON.stringify({
+            blobUrl: blob.url,
+            pathname: blob.pathname,
+            fileName: file.name,
+            contentType,
+            fileSize: file.size,
+            ...(language !== "auto" ? { language } : {}),
+          }),
+        });
 
-    try {
-      const response = await fetch(TRANSCRIPTION_API_PATH, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        signal: controller.signal,
-        body: JSON.stringify({
-          blobUrl: blob.url,
-          pathname: blob.pathname,
-          fileName: file.name,
-          contentType,
-          ...(language !== "auto" ? { language } : {}),
-        }),
-      });
+        const body = (await response.json()) as ApiResponse<{ id: string }>;
+        if ((!response.ok && response.status !== 202) || !body.data?.id) {
+          throw new Error(parseErrorMessage(body, response.status));
+        }
+        return body.data.id;
+      },
+      { signal, label: "enqueue-job", attempts: 2 },
+    );
 
-      onHeadersReceived?.();
-
-      const body = (await response.json()) as ApiResponse<TranscriptionResult>;
-      if (!response.ok || !body.data) {
-        return failure(new Error(parseErrorMessage(body, response.status)));
-      }
-
-      return success(body.data);
-    } finally {
-      clearTimeout(timeout);
-      signal?.removeEventListener("abort", onAbort);
-    }
+    return pollTranscriptionJob(enqueue, signal, onHeadersReceived);
   } catch (error) {
     if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
       return failure(new Error("Upload cancelled."));
@@ -403,8 +527,7 @@ function transcribeDirectUpload({
 }
 
 /**
- * Upload + transcribe. Uses direct upload under ~4 MB; Blob for larger files.
- * Preflights Blob readiness so missing BLOB_READ_WRITE_TOKEN fails with a clear message.
+ * Upload + transcribe. Uses direct upload under ~4 MB; Blob + async job for larger files.
  */
 export async function uploadTranscription(
   options: UploadTranscriptionOptions,
@@ -423,7 +546,6 @@ export async function uploadTranscription(
       );
     }
     if (!readiness.blob) {
-      // Try direct only if the file might still fit serverless limits.
       if (options.file.size <= VERCEL_DIRECT_UPLOAD_BYTES) {
         return transcribeDirectUpload(options);
       }

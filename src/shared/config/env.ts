@@ -2,12 +2,14 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 /**
- * Validated environment variables.
+ * Validated environment variables for the media pipeline.
  *
- * Mirrors `.env.example` / `.env.local` keys. Import from server code only.
- * Existing code may continue using `process.env` until migration is complete.
+ * Required for full integration:
+ * - OPENAI_API_KEY — GPT insights & chat (Whisper fallback STT)
+ * - BLOB_READ_WRITE_TOKEN — large direct-to-storage uploads
+ * - ASSEMBLYAI_API_KEY — primary STT, diarization, YouTube/platform URLs
  *
- * Set `SKIP_ENV_VALIDATION=1` in CI/Docker when secrets are unavailable.
+ * Set `SKIP_ENV_VALIDATION=1` in CI when secrets are unavailable.
  */
 export const env = createEnv({
   server: {
@@ -15,38 +17,47 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
 
-    /** OpenAI — transcription & analysis */
     OPENAI_API_KEY: z.string().min(1),
-
-    /** NextAuth — required */
     AUTH_SECRET: z.string().min(1),
-
-    /** Production URL (no trailing slash). Required on Vercel. */
     AUTH_URL: z.string().url().optional(),
 
-    /** Google OAuth — use GOOGLE_CLIENT_ID/SECRET or AUTH_GOOGLE_ID/SECRET */
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
     AUTH_GOOGLE_ID: z.string().min(1).optional(),
     AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
 
-    /** Admin panel access at /admin/users */
     ADMIN_EMAIL: z.string().email().optional(),
 
-    /** PayPal server credentials */
     PAYPAL_CLIENT_ID: z.string().min(1).optional(),
     PAYPAL_CLIENT_SECRET: z.string().min(1).optional(),
     PAYPAL_MODE: z.enum(["sandbox", "live"]).optional(),
 
-    /** Override path to ffmpeg binary (large-file processing) */
     FFMPEG_BIN: z.string().optional(),
+
+    /** Vercel Blob — large Zoom/lecture uploads (multipart client upload). */
+    BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
+
+    /** AssemblyAI — primary STT, speaker diarization, remote URL transcription. */
+    ASSEMBLYAI_API_KEY: z.string().min(1).optional(),
+
+    /**
+     * Shared secret for AssemblyAI → `/api/webhooks/assemblyai`.
+     * Falls back to AUTH_SECRET when unset.
+     */
+    ASSEMBLYAI_WEBHOOK_SECRET: z.string().min(1).optional(),
+
+    /** Recall.ai — autonomous meeting bot join + recording */
+    RECALL_AI_API_KEY: z.string().min(1).optional(),
+
+    /** Protects GET /api/cron/live-bots */
+    CRON_SECRET: z.string().min(1).optional(),
+
+    /** Dev: force simulated bot adapter */
+    MEETING_BOT_SIMULATE: z.string().optional(),
   },
 
   client: {
-    /** PayPal button — must match PAYPAL_CLIENT_ID in sandbox/live */
     NEXT_PUBLIC_PAYPAL_CLIENT_ID: z.string().min(1).optional(),
-
-    /** Google Sign-In button (GIS) — same value as GOOGLE_CLIENT_ID */
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   },
 
@@ -64,6 +75,12 @@ export const env = createEnv({
     PAYPAL_CLIENT_SECRET: process.env.PAYPAL_CLIENT_SECRET,
     PAYPAL_MODE: process.env.PAYPAL_MODE,
     FFMPEG_BIN: process.env.FFMPEG_BIN,
+    BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
+    ASSEMBLYAI_API_KEY: process.env.ASSEMBLYAI_API_KEY,
+    ASSEMBLYAI_WEBHOOK_SECRET: process.env.ASSEMBLYAI_WEBHOOK_SECRET,
+    RECALL_AI_API_KEY: process.env.RECALL_AI_API_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
+    MEETING_BOT_SIMULATE: process.env.MEETING_BOT_SIMULATE,
     NEXT_PUBLIC_PAYPAL_CLIENT_ID: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   },

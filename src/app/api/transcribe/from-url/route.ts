@@ -6,7 +6,7 @@ import {
   normalizeMediaUrl,
 } from "@/features/transcription/server/fetch-media-from-url";
 import { transcribeAudio } from "@/features/transcription/server/transcribe.use-case";
-import { isDiarizationConfigured } from "@/features/transcription/server/diarize-audio";
+import { isAssemblyAIConfigured } from "@/features/transcription/server/diarize-audio";
 import { transcribeRemoteUrlWithAssemblyAI } from "@/features/transcription/server/transcribe-from-url";
 import { isWhisperLanguageCode } from "@/lib/whisper-languages";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
@@ -79,16 +79,32 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       : new BadRequestError("Invalid URL.");
   }
 
-  // Platform page links (YouTube etc.) → AssemblyAI when configured.
-  if (isPlatformPageUrl(parsedUrl) && isDiarizationConfigured()) {
+  // Prefer AssemblyAI for any remote URL (YouTube/platforms + direct media).
+  // AssemblyAI fetches audio remotely — no full download on our serverless.
+  if (isAssemblyAIConfigured()) {
     const remote = await transcribeRemoteUrlWithAssemblyAI({
       url: parsedUrl.toString(),
       plan,
       language,
     });
-    if (isFailure(remote)) throw remote.error;
-    await incrementTranscriptionsToday();
-    return remote.data;
+    if (!isFailure(remote)) {
+      await incrementTranscriptionsToday();
+      return remote.data;
+    }
+
+    // Platform pages cannot fall back to app-server download.
+    if (isPlatformPageUrl(parsedUrl)) {
+      throw remote.error;
+    }
+
+    console.warn(
+      "[transcribe-from-url] AssemblyAI failed; falling back to download + STT:",
+      remote.error.message,
+    );
+  } else if (isPlatformPageUrl(parsedUrl)) {
+    throw new BadRequestError(
+      "PLATFORM_URL: Set ASSEMBLYAI_API_KEY in Vercel to transcribe YouTube/Zoom page links, or paste a direct .mp3/.mp4 URL.",
+    );
   }
 
   let file: File;
@@ -99,7 +115,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     if (message.startsWith("PLATFORM_URL:")) {
       throw new BadRequestError(
         `${message}${
-          isDiarizationConfigured()
+          isAssemblyAIConfigured()
             ? ""
             : " Or set ASSEMBLYAI_API_KEY in Vercel for YouTube/platform links."
         }`,
