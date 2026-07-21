@@ -12,7 +12,7 @@ export type {
 } from "./types";
 
 export { useTranscription } from "./hooks/use-transcription";
-export { uploadTranscription } from "./api/transcription.api";
+export { uploadTranscription, transcribeFromUrl } from "./api/transcription.api";
 export { transcriptionKeys } from "./api/transcription.keys";
 
 export { FileUploadZone, SelectedFileBadge } from "./components/FileUploadZone";

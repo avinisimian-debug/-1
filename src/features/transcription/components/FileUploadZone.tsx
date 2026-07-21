@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 
 interface FileUploadZoneProps {
   onFileSelect: (file: File) => void;
+  onUrlSubmit?: (url: string) => void;
   disabled?: boolean;
 }
 
@@ -44,7 +45,11 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) {
+export function FileUploadZone({
+  onFileSelect,
+  onUrlSubmit,
+  disabled,
+}: FileUploadZoneProps) {
   const { limits, isPro } = usePlan();
   const { promptUpgrade } = useFeatureGate();
   const { t } = useLocale();
@@ -146,11 +151,27 @@ export function FileUploadZone({ onFileSelect, disabled }: FileUploadZoneProps) 
   const submitLink = () => {
     const url = linkUrl.trim();
     if (!url) return;
-    toast({
-      title: t.uploadLinkSoonTitle,
-      description: t.uploadLinkSoonDesc,
-      variant: "default",
-    });
+    try {
+      // Basic client validation — server re-validates.
+      // eslint-disable-next-line no-new
+      new URL(url);
+    } catch {
+      toast({
+        title: t.uploadLinkInvalid,
+        variant: "error",
+      });
+      return;
+    }
+    if (!onUrlSubmit) {
+      toast({
+        title: t.uploadLinkSoonTitle,
+        description: t.uploadLinkSoonDesc,
+        variant: "warning",
+      });
+      return;
+    }
+    setError(null);
+    onUrlSubmit(url);
     setLinkUrl("");
     setShowLink(false);
   };

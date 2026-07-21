@@ -166,7 +166,7 @@ export async function transcribeAudio({
         model: "whisper-1",
         response_format: "verbose_json",
         timestamp_granularities: ["word", "segment"],
-        ...(isPro && language && language !== "auto" ? { language } : {}),
+        ...(language && language !== "auto" ? { language } : {}),
       });
 
       const segments = transcription.segments ?? [];

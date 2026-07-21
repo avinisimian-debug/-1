@@ -56,6 +56,13 @@ export function useDashboardController() {
     [transcription, language],
   );
 
+  const processUrl = useCallback(
+    (url: string) => {
+      transcription.processUrl(url, language);
+    },
+    [transcription, language],
+  );
+
   const resetAll = useCallback(() => {
     transcription.reset();
     setHistoryResult(null);
@@ -79,6 +86,7 @@ export function useDashboardController() {
     showCompactHero,
     onboarding,
     processFile,
+    processUrl,
     resetAll,
     promptLanguageUpgrade: () => promptUpgrade("languageSelect"),
   };

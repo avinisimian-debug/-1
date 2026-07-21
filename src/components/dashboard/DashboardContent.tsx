@@ -55,6 +55,7 @@ export function DashboardContent() {
               usageLimit={dash.usageLimit}
               canTranscribe={dash.canTranscribe}
               onFileSelect={dash.processFile}
+              onUrlSubmit={dash.processUrl}
               showHero={!dash.showCompactHero}
               onboarding={{
                 show: dash.onboarding.showOnboarding,

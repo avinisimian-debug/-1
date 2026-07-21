@@ -112,7 +112,10 @@ export interface Translations {
   uploadLinkSubmit: string;
   uploadLinkSoonTitle: string;
   uploadLinkSoonDesc: string;
+  uploadLinkInvalid: string;
   uploadMicDenied: string;
+  langSearchPlaceholder: string;
+  langWorldHint: string;
   commandPaletteTitle: string;
   commandPalettePlaceholder: string;
   commandPaletteEmpty: string;
@@ -750,12 +753,15 @@ const en: Translations = {
   uploadRecordMic: "Record microphone",
   uploadStopRec: "Stop recording",
   uploadPasteLink: "Paste web link",
-  uploadLinkPlaceholder: "YouTube, Drive, Dropbox, or Zoom URL…",
-  uploadLinkSubmit: "Import",
-  uploadLinkSoonTitle: "Link import coming soon",
+  uploadLinkPlaceholder: "https://… direct MP3/MP4, Dropbox, Drive, or YouTube URL",
+  uploadLinkSubmit: "Transcribe link",
+  uploadLinkSoonTitle: "Link import",
   uploadLinkSoonDesc:
-    "Cloud Zoom/Meet link import is coming soon. For Zoom lessons: download the recording as MP4 (H.264) or M4A, then upload here. Schedule live sessions in Live Hub.",
+    "Paste a direct media URL (.mp3/.mp4) or a YouTube link (requires ASSEMBLYAI_API_KEY).",
+  uploadLinkInvalid: "Please paste a valid https:// URL.",
   uploadMicDenied: "Microphone access was denied. Check browser permissions.",
+  langSearchPlaceholder: "Search languages…",
+  langWorldHint: "{count} languages supported via Whisper",
   commandPaletteTitle: "Search workspace",
   commandPalettePlaceholder: "Search transcripts, speakers, action items…",
   commandPaletteEmpty: "No matches in your history.",
@@ -1410,12 +1416,15 @@ const he: Translations = {
   uploadRecordMic: "הקלט ממיקרופון",
   uploadStopRec: "עצור הקלטה",
   uploadPasteLink: "הדבק קישור",
-  uploadLinkPlaceholder: "קישור ל-YouTube, Drive, Dropbox או Zoom…",
-  uploadLinkSubmit: "ייבוא",
-  uploadLinkSoonTitle: "ייבוא מקישור בקרוב",
+  uploadLinkPlaceholder: "https://… קישור ישיר ל-MP3/MP4, Dropbox, Drive או YouTube",
+  uploadLinkSubmit: "תמלול מהקישור",
+  uploadLinkSoonTitle: "ייבוא מקישור",
   uploadLinkSoonDesc:
-    "ייבוא קישורי Zoom/Meet בענן בקרוב. לשיעורי זום: הורידו הקלטה כ-MP4 (H.264) או M4A והעלו כאן. לתזמון שיעורים חיים — היכנסו למרכז השיעורים החיים.",
+    "הדביקו קישור מדיה ישיר (.mp3/.mp4) או YouTube (דורש ASSEMBLYAI_API_KEY).",
+  uploadLinkInvalid: "נא להדביק כתובת https:// תקינה.",
   uploadMicDenied: "הגישה למיקרופון נדחתה. בדקו את הרשאות הדפדפן.",
+  langSearchPlaceholder: "חיפוש שפות…",
+  langWorldHint: "{count} שפות נתמכות דרך Whisper",
   commandPaletteTitle: "חיפוש בסביבת העבודה",
   commandPalettePlaceholder: "חיפוש בתמלולים, דוברים ופריטי משימה…",
   commandPaletteEmpty: "אין תוצאות בהיסטוריה.",

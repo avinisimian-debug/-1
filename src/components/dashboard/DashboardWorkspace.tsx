@@ -18,6 +18,7 @@ interface DashboardWorkspaceProps {
   usageLimit: number;
   canTranscribe: boolean;
   onFileSelect: (file: File) => void;
+  onUrlSubmit?: (url: string) => void;
   showHero?: boolean;
   onboarding?: {
     show: boolean;
@@ -39,6 +40,7 @@ export function DashboardWorkspace({
   usageLimit,
   canTranscribe,
   onFileSelect,
+  onUrlSubmit,
   showHero = true,
   onboarding,
 }: DashboardWorkspaceProps) {
@@ -94,6 +96,7 @@ export function DashboardWorkspace({
 
           <FileUploadZone
             onFileSelect={onFileSelect}
+            onUrlSubmit={onUrlSubmit}
             disabled={!canTranscribe}
           />
         </div>

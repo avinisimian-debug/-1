@@ -10,6 +10,7 @@ import { saveToHistory } from "@/lib/history-store";
 import { HISTORY_LIMITS } from "@/lib/plan-features";
 import { isFailure } from "@/shared/lib/result";
 import {
+  transcribeFromUrl,
   uploadTranscription,
   type UploadProgressInfo,
 } from "../api/transcription.api";
@@ -172,6 +173,96 @@ export function useTranscription() {
     ],
   );
 
+  const processUrl = useCallback(
+    (url: string, language = "auto") => {
+      if (!canTranscribe) {
+        const message =
+          "Monthly transcription limit reached. Upgrade to Pro for more.";
+        setError(message);
+        setStatus("error");
+        toast({ title: message, variant: "warning" });
+        return;
+      }
+
+      const trimmed = url.trim();
+      if (!trimmed) return;
+
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      revokeAudioUrl();
+      setUploadedFile({
+        name: trimmed,
+        size: 0,
+        type: "text/uri-list",
+      });
+      setMediaKind("audio");
+      setStatus("processing");
+      setStage("uploading");
+      setResult(null);
+      setError(null);
+      setUploadProgress({
+        percent: 5,
+        loadedBytes: 5,
+        totalBytes: 100,
+        bytesPerSecond: 0,
+      });
+
+      transcribeFromUrl({
+        url: trimmed,
+        plan,
+        language,
+        signal: controller.signal,
+        onUploadProgress: (info) => {
+          setUploadProgress(info);
+          setStage("uploading");
+        },
+        onUploadComplete: () => {
+          setUploadProgress((prev) =>
+            prev
+              ? { ...prev, percent: 100, loadedBytes: prev.totalBytes }
+              : prev,
+          );
+          setStage("transcribing");
+        },
+        onHeadersReceived: () => setStage("analyzing"),
+      }).then((uploadResult) => {
+        if (abortRef.current !== controller) return;
+
+        if (isFailure(uploadResult)) {
+          const message = uploadResult.error.message;
+          if (message === "Upload cancelled.") {
+            setStatus("idle");
+            setError(null);
+            setUploadProgress(null);
+            return;
+          }
+          setError(message);
+          setStatus("error");
+          toast({
+            title: "Transcription failed",
+            description: message,
+            variant: "error",
+          });
+          return;
+        }
+
+        setResult(uploadResult.data);
+        setStatus("complete");
+        setUploadProgress(null);
+        recordUsage();
+        saveToHistory(uploadResult.data, HISTORY_LIMITS[plan]);
+        toast({
+          title: "Transcription complete",
+          description: uploadResult.data.fileName,
+          variant: "success",
+        });
+      });
+    },
+    [plan, canTranscribe, recordUsage, revokeAudioUrl, toast],
+  );
+
   const stageIndex = PROCESSING_STAGES.findIndex((s) => s.key === stage);
 
   return {
@@ -185,6 +276,7 @@ export function useTranscription() {
     error,
     uploadProgress,
     processFile,
+    processUrl,
     reset,
     canTranscribe,
   };

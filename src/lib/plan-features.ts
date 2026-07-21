@@ -43,7 +43,7 @@ export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   risksBlockers: "pro",
   followUpEmail: "pro",
   largeFiles: "pro",
-  languageSelect: "pro",
+  languageSelect: "both",
   priorityProcessing: "pro",
   integrationsPush: "pro",
   transcriptionWebhooks: "pro",

@@ -12,6 +12,7 @@ import {
 } from "@/shared/lib/result";
 import {
   TRANSCRIPTION_API_PATH,
+  TRANSCRIPTION_FROM_URL_PATH,
   TRANSCRIPTION_STATUS_PATH,
   TRANSCRIPTION_UPLOAD_PATH,
 } from "../constants";
@@ -264,7 +265,7 @@ async function transcribeFromBlob({
           pathname: blob.pathname,
           fileName: file.name,
           contentType,
-          ...(plan === "pro" && language !== "auto" ? { language } : {}),
+          ...(language !== "auto" ? { language } : {}),
         }),
       });
 
@@ -320,7 +321,7 @@ function transcribeDirectUpload({
   return new Promise((resolve) => {
     const formData = new FormData();
     formData.append("file", file);
-    if (plan === "pro" && language !== "auto") {
+    if (language !== "auto") {
       formData.append("language", language);
     }
 
@@ -495,4 +496,74 @@ function isFailureWithPayloadTooLarge(
     (result.error.message.includes("UPLOAD_PAYLOAD_TOO_LARGE") ||
       result.error.message.toLowerCase().includes("too large"))
   );
+}
+
+export interface TranscribeFromUrlOptions {
+  url: string;
+  plan: PlanTier;
+  language?: string;
+  signal?: AbortSignal;
+  onUploadProgress?: (info: UploadProgressInfo) => void;
+  onUploadComplete?: () => void;
+  onHeadersReceived?: () => void;
+}
+
+/** Transcribe a public media / platform URL. */
+export async function transcribeFromUrl({
+  url,
+  plan,
+  language = "auto",
+  signal,
+  onUploadProgress,
+  onUploadComplete,
+  onHeadersReceived,
+}: TranscribeFromUrlOptions): Promise<Result<TranscriptionResult, Error>> {
+  const track = createProgressTracker(100, onUploadProgress);
+  track(10, 100);
+
+  const controller = new AbortController();
+  const onAbort = () => controller.abort();
+  signal?.addEventListener("abort", onAbort);
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    track(35, 100);
+    const response = await fetch(TRANSCRIPTION_FROM_URL_PATH, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      signal: controller.signal,
+      body: JSON.stringify({
+        url,
+        ...(language !== "auto" ? { language } : {}),
+        plan,
+      }),
+    });
+
+    track(90, 100);
+    onUploadComplete?.();
+    onHeadersReceived?.();
+
+    const body = (await response.json()) as ApiResponse<TranscriptionResult>;
+    if (!response.ok || !body.data) {
+      return failure(new Error(parseErrorMessage(body, response.status)));
+    }
+
+    track(100, 100);
+    return success(body.data);
+  } catch (error) {
+    if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
+      return failure(new Error("Upload cancelled."));
+    }
+    return failure(
+      new Error(
+        error instanceof Error
+          ? error.message
+          : "Link transcription failed. Please try again.",
+      ),
+    );
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", onAbort);
+  }
 }
