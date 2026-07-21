@@ -6,13 +6,21 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/login"],
+        allow: ["/", "/login", "/ads.txt"],
         disallow: [
           "/api/",
           "/admin/",
           "/settings",
           "/history",
         ],
+      },
+      {
+        userAgent: "Mediapartners-Google",
+        allow: "/",
+      },
+      {
+        userAgent: "AdsBot-Google",
+        allow: "/",
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

@@ -50,16 +50,15 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{ __html: I18N_BOOTSTRAP_SCRIPT }}
         />
+        {/* Plain tags so AdSense crawler can verify without waiting for Next.js Script hydration */}
         <meta
           name="google-adsense-account"
           content="ca-pub-1517251000751283"
         />
-        <Script
-          id="adsense-loader"
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1517251000751283"
           crossOrigin="anonymous"
-          strategy="beforeInteractive"
         />
       </head>
       <body className="min-h-full bg-background text-foreground">
