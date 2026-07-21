@@ -1,9 +1,15 @@
-import { upload } from "@vercel/blob/client";
+import { put } from "@vercel/blob/client";
 import type { PlanTier } from "@/lib/constants";
 import { VERCEL_DIRECT_UPLOAD_BYTES } from "@/lib/constants";
 import { buildTranscribeBlobPath } from "@/lib/blob-file";
 import type { ApiResponse } from "@/shared/api";
-import { failure, isFailure, success, type Result } from "@/shared/lib/result";
+import {
+  failure,
+  isFailure,
+  isSuccess,
+  success,
+  type Result,
+} from "@/shared/lib/result";
 import {
   TRANSCRIPTION_API_PATH,
   TRANSCRIPTION_UPLOAD_PATH,
@@ -104,6 +110,65 @@ function createProgressTracker(
   };
 }
 
+async function fetchBlobClientToken(
+  pathname: string,
+  multipart: boolean,
+  signal?: AbortSignal,
+): Promise<string> {
+  const res = await fetch(TRANSCRIPTION_UPLOAD_PATH, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    signal,
+    body: JSON.stringify({
+      type: "blob.generate-client-token",
+      payload: {
+        pathname,
+        multipart,
+        clientPayload: null,
+      },
+    }),
+  });
+
+  let body: { clientToken?: string; error?: string } = {};
+  try {
+    body = (await res.json()) as { clientToken?: string; error?: string };
+  } catch {
+    /* ignore parse errors */
+  }
+
+  if (!res.ok) {
+    const detail =
+      typeof body.error === "string" && body.error.trim()
+        ? body.error
+        : `Upload authorization failed (${res.status}).`;
+    throw new Error(
+      detail.includes("CONFIG_")
+        ? detail
+        : `CONFIG_BLOB_TOKEN: ${detail}`,
+    );
+  }
+
+  if (!body.clientToken) {
+    throw new Error(
+      "CONFIG_BLOB_TOKEN: Server did not return a Blob client token. Check BLOB_READ_WRITE_TOKEN in Vercel → Storage → Blob.",
+    );
+  }
+
+  return body.clientToken;
+}
+
+function inferUploadContentType(file: File): string {
+  if (file.type?.trim()) return file.type.trim();
+  if (/\.mp4$/i.test(file.name)) return "video/mp4";
+  if (/\.webm$/i.test(file.name)) return "video/webm";
+  if (/\.mov$/i.test(file.name)) return "video/quicktime";
+  if (/\.mp3$/i.test(file.name)) return "audio/mpeg";
+  if (/\.wav$/i.test(file.name)) return "audio/wav";
+  if (/\.m4a$/i.test(file.name)) return "audio/mp4";
+  return "application/octet-stream";
+}
+
 async function transcribeFromBlob({
   file,
   plan,
@@ -120,13 +185,18 @@ async function transcribeFromBlob({
 
   const pathname = buildTranscribeBlobPath(userEmail, file.name);
   const track = createProgressTracker(file.size, onUploadProgress);
+  const contentType = inferUploadContentType(file);
 
   try {
-    const blob = await upload(pathname, file, {
+    // Fetch the token ourselves so real server errors surface (the Blob SDK
+    // otherwise collapses every non-OK response into "Failed to retrieve the client token").
+    const clientToken = await fetchBlobClientToken(pathname, true, signal);
+
+    const blob = await put(pathname, file, {
       access: "private",
-      handleUploadUrl: TRANSCRIPTION_UPLOAD_PATH,
+      token: clientToken,
       multipart: true,
-      contentType: file.type || undefined,
+      contentType,
       abortSignal: signal,
       onUploadProgress: (event) => {
         track(event.loaded, event.total || file.size);
@@ -151,7 +221,7 @@ async function transcribeFromBlob({
           blobUrl: blob.url,
           pathname: blob.pathname,
           fileName: file.name,
-          contentType: file.type || "application/octet-stream",
+          contentType,
           ...(plan === "pro" && language !== "auto" ? { language } : {}),
         }),
       });
@@ -173,13 +243,25 @@ async function transcribeFromBlob({
       return failure(new Error("Upload cancelled."));
     }
 
-    return failure(
-      new Error(
-        error instanceof Error
-          ? error.message
-          : "Large file upload failed. Please try again.",
-      ),
-    );
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Large file upload failed. Please try again.";
+
+    if (
+      message.toLowerCase().includes("failed to retrieve the client token") ||
+      message.toLowerCase().includes("config_blob")
+    ) {
+      return failure(
+        new Error(
+          message.startsWith("CONFIG_")
+            ? message
+            : `CONFIG_BLOB_TOKEN: ${message}. In Vercel: Storage → Blob → Connect to this project, ensure BLOB_READ_WRITE_TOKEN is set, then Redeploy.`,
+        ),
+      );
+    }
+
+    return failure(new Error(message));
   }
 }
 
@@ -278,7 +360,7 @@ function transcribeDirectUpload({
 }
 
 /**
- * Upload + transcribe with automatic Blob fallback on payload-too-large (413).
+ * Upload + transcribe with Blob for video/large files, and safe fallbacks.
  */
 export async function uploadTranscription(
   options: UploadTranscriptionOptions,
@@ -290,18 +372,41 @@ export async function uploadTranscription(
   );
 
   if (preferBlob) {
-    return transcribeFromBlob(options);
+    const blobResult = await transcribeFromBlob(options);
+    if (isSuccess(blobResult)) return blobResult;
+
+    // Small files can fall back to direct upload if Blob token route is broken.
+    if (
+      options.file.size <= VERCEL_DIRECT_UPLOAD_BYTES &&
+      isBlobTokenFailure(blobResult)
+    ) {
+      console.warn(
+        "[transcription] Blob token failed; falling back to direct upload",
+        blobResult.error.message,
+      );
+      return transcribeDirectUpload(options);
+    }
+
+    return blobResult;
   }
 
   const direct = await transcribeDirectUpload(options);
-  if (
-    isFailureWithPayloadTooLarge(direct) &&
-    options.userEmail
-  ) {
+  if (isFailureWithPayloadTooLarge(direct) && options.userEmail) {
     return transcribeFromBlob({ ...options, forceBlob: true });
   }
 
   return direct;
+}
+
+function isBlobTokenFailure(
+  result: Result<TranscriptionResult, Error>,
+): boolean {
+  if (!isFailure(result)) return false;
+  const msg = result.error.message.toLowerCase();
+  return (
+    msg.includes("failed to retrieve the client token") ||
+    msg.includes("config_blob")
+  );
 }
 
 function isFailureWithPayloadTooLarge(

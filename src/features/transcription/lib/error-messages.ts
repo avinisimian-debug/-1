@@ -27,6 +27,8 @@ function classifyTranscriptionError(message: string): ErrorKind {
 
   if (
     lower.includes("config_blob_missing") ||
+    lower.includes("config_blob_token") ||
+    lower.includes("failed to retrieve the client token") ||
     lower.includes("large file uploads are not configured") ||
     lower.includes("blob_read_write_token")
   ) {
