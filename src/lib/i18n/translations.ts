@@ -129,6 +129,9 @@ export interface Translations {
   uploadErrorType: string;
   uploadErrorSize: string;
   uploadErrorSizePro: string;
+  blobBannerTitle: string;
+  blobBannerBody: string;
+  blobBannerCta: string;
   // Processing
   procWait: string;
   procUploading: string;
@@ -769,6 +772,10 @@ const en: Translations = {
   uploadErrorType: "Please upload an MP3, WAV, MP4, or M4A file.",
   uploadErrorSize: "File exceeds the free tier limit. Upgrade to Pro for files up to 500 MB.",
   uploadErrorSizePro: "File exceeds the limit.",
+  blobBannerTitle: "Video uploads need Vercel Blob",
+  blobBannerBody:
+    "Production is missing BLOB_READ_WRITE_TOKEN. Connect Blob in Vercel (Storage → Blob → Connect to this project), then Redeploy. Until then only files under ~4 MB will work.",
+  blobBannerCta: "Open Vercel Dashboard",
   procWait: "Processing your recording — longer files may take a few minutes.",
   procUploading: "Uploading...",
   procTranscribing: "Transcribing audio using AI...",
@@ -911,7 +918,7 @@ const en: Translations = {
   transcriptionErrorConfigOpenai:
     "Transcription is not configured on the server. Set a valid OPENAI_API_KEY in Vercel → Environment Variables, then redeploy.",
   transcriptionErrorConfigBlob:
-    "Large uploads are not configured. In Vercel: Storage → Blob → Connect to project, then redeploy.",
+    "Large uploads are not configured. In Vercel: Storage → Blob → Connect to this project (sets BLOB_READ_WRITE_TOKEN) → Redeploy. Files under ~4 MB still work without Blob.",
   transcriptionErrorProTitle: "Pro processes longer videos reliably",
   transcriptionErrorProDesc:
     "Priority processing, 500 MB uploads, 3+ hour recordings, and advanced AI insights.",
@@ -1425,6 +1432,10 @@ const he: Translations = {
   uploadErrorType: "נא להעלות MP3, WAV, MP4 או M4A.",
   uploadErrorSize: "הקובץ חורג ממגבלת החינם. שדרג ל-Pro עד 500 MB.",
   uploadErrorSizePro: "הקובץ חורג מהמגבלה.",
+  blobBannerTitle: "העלאת וידאו דורשת Vercel Blob",
+  blobBannerBody:
+    "בפרודקשן חסר BLOB_READ_WRITE_TOKEN. חברו Blob ב-Vercel (Storage → Blob → Connect לפרויקט) ואז Redeploy. עד אז יעבדו רק קבצים מתחת ל־4 MB בערך.",
+  blobBannerCta: "פתיחת Vercel Dashboard",
   procWait: "מעבד את ההקלטה — קבצים ארוכים עשויים לקחת כמה דקות.",
   procUploading: "מעלה...",
   procTranscribing: "מתמלל באמצעות AI...",
@@ -1566,7 +1577,7 @@ const he: Translations = {
   transcriptionErrorConfigOpenai:
     "שירות התמלול לא מוגדר בשרת. הגדירו OPENAI_API_KEY אמיתי ב-Vercel → Environment Variables ועשו Redeploy.",
   transcriptionErrorConfigBlob:
-    "העלאות גדולות לא מוגדרות. ב-Vercel: Storage → Blob → Connect לפרויקט, ואז Redeploy.",
+    "העלאות גדולות לא מוגדרות. ב-Vercel: Storage → Blob → Connect לפרויקט (יוצר BLOB_READ_WRITE_TOKEN) → Redeploy. קבצים מתחת ל־4 MB עדיין עובדים בלי Blob.",
   transcriptionErrorProTitle: "ב-Pro וידאו ארוך עובד בצורה אמינה",
   transcriptionErrorProDesc:
     "עיבוד בעדיפות, העלאה עד 500 MB, הקלטות של 3+ שעות ותובנות AI מתקדמות.",

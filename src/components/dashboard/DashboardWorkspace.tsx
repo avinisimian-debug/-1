@@ -2,6 +2,7 @@
 
 import { Upload } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { BlobConfigBanner } from "@/components/dashboard/BlobConfigBanner";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { UploadToolbar } from "@/components/dashboard/UploadToolbar";
 import { FileUploadZone } from "@/features/transcription";
@@ -45,6 +46,8 @@ export function DashboardWorkspace({
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 page-enter">
+      <BlobConfigBanner />
+
       {onboarding?.show && onboarding.dismissed && (
         <OnboardingChecklist
           variant="card"

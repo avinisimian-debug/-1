@@ -12,6 +12,7 @@ import {
 } from "@/shared/lib/result";
 import {
   TRANSCRIPTION_API_PATH,
+  TRANSCRIPTION_STATUS_PATH,
   TRANSCRIPTION_UPLOAD_PATH,
 } from "../constants";
 import type { TranscriptionResult } from "../types";
@@ -40,14 +41,11 @@ export interface UploadTranscriptionOptions {
 
 const REQUEST_TIMEOUT_MS = 290_000;
 
-function isVideoFile(file: File): boolean {
-  return (
-    file.type.startsWith("video/") ||
-    /\.(mp4|m4v|mov|webm|mkv|avi)$/i.test(file.name)
-  );
-}
-
-/** Use Blob for large payloads / video when we have a signed-in user. */
+/**
+ * Use Blob only when the payload exceeds Vercel's serverless body limit.
+ * (Previously every video used Blob — that hard-failed when BLOB_READ_WRITE_TOKEN
+ * was missing, even for tiny MP4s that could upload directly.)
+ */
 function shouldUseBlobUpload(
   file: File,
   userEmail?: string | null,
@@ -55,8 +53,44 @@ function shouldUseBlobUpload(
 ): boolean {
   if (forceBlob) return Boolean(userEmail);
   if (!userEmail) return false;
-  return isVideoFile(file) || file.size > VERCEL_DIRECT_UPLOAD_BYTES;
+  return file.size > VERCEL_DIRECT_UPLOAD_BYTES;
 }
+
+async function fetchUploadReadiness(): Promise<{
+  blob: boolean;
+  openai: boolean;
+  hint: string;
+}> {
+  try {
+    const res = await fetch(TRANSCRIPTION_STATUS_PATH, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+    const body = (await res.json()) as {
+      blob?: boolean;
+      openai?: boolean;
+      hint?: string;
+    };
+    return {
+      blob: Boolean(body.blob),
+      openai: Boolean(body.openai),
+      hint:
+        typeof body.hint === "string"
+          ? body.hint
+          : "Check Vercel environment variables.",
+    };
+  } catch {
+    return {
+      blob: false,
+      openai: true,
+      hint: "Could not reach upload readiness probe.",
+    };
+  }
+}
+
+const BLOB_MISSING_ERROR =
+  "CONFIG_BLOB_MISSING: Large video/meeting uploads require Vercel Blob. In Vercel Dashboard: Storage → Create/Connect Blob → ensure BLOB_READ_WRITE_TOKEN is set for Production → Redeploy. Files under ~4 MB can still upload without Blob.";
 
 function parseErrorMessage(
   body:
@@ -368,11 +402,34 @@ function transcribeDirectUpload({
 }
 
 /**
- * Upload + transcribe with Blob for video/large files, and safe fallbacks.
+ * Upload + transcribe. Uses direct upload under ~4 MB; Blob for larger files.
+ * Preflights Blob readiness so missing BLOB_READ_WRITE_TOKEN fails with a clear message.
  */
 export async function uploadTranscription(
   options: UploadTranscriptionOptions,
 ): Promise<Result<TranscriptionResult, Error>> {
+  const needsBlob =
+    options.forceBlob ||
+    options.file.size > VERCEL_DIRECT_UPLOAD_BYTES;
+
+  if (needsBlob) {
+    const readiness = await fetchUploadReadiness();
+    if (!readiness.openai) {
+      return failure(
+        new Error(
+          "CONFIG_OPENAI_MISSING: Transcription is not configured (OPENAI_API_KEY). Set it in Vercel → Environment Variables, then Redeploy.",
+        ),
+      );
+    }
+    if (!readiness.blob) {
+      // Try direct only if the file might still fit serverless limits.
+      if (options.file.size <= VERCEL_DIRECT_UPLOAD_BYTES) {
+        return transcribeDirectUpload(options);
+      }
+      return failure(new Error(`${BLOB_MISSING_ERROR} ${readiness.hint}`));
+    }
+  }
+
   const preferBlob = shouldUseBlobUpload(
     options.file,
     options.userEmail,
@@ -383,7 +440,6 @@ export async function uploadTranscription(
     const blobResult = await transcribeFromBlob(options);
     if (isSuccess(blobResult)) return blobResult;
 
-    // Small files can fall back to direct upload if Blob token route is broken.
     if (
       options.file.size <= VERCEL_DIRECT_UPLOAD_BYTES &&
       isBlobTokenFailure(blobResult)
@@ -395,11 +451,25 @@ export async function uploadTranscription(
       return transcribeDirectUpload(options);
     }
 
+    if (isBlobTokenFailure(blobResult)) {
+      return failure(
+        new Error(
+          blobResult.error.message.includes("CONFIG_")
+            ? blobResult.error.message
+            : `${BLOB_MISSING_ERROR} (${blobResult.error.message})`,
+        ),
+      );
+    }
+
     return blobResult;
   }
 
   const direct = await transcribeDirectUpload(options);
   if (isFailureWithPayloadTooLarge(direct) && options.userEmail) {
+    const readiness = await fetchUploadReadiness();
+    if (!readiness.blob) {
+      return failure(new Error(BLOB_MISSING_ERROR));
+    }
     return transcribeFromBlob({ ...options, forceBlob: true });
   }
 
