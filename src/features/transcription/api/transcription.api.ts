@@ -168,7 +168,7 @@ async function fetchBlobClientToken(
 
 function inferUploadContentType(file: File): string {
   if (file.type?.trim()) return file.type.trim();
-  if (/\.mp4$/i.test(file.name)) return "video/mp4";
+  if (/\.mp4$/i.test(file.name) || /\.m4v$/i.test(file.name)) return "video/mp4";
   if (/\.webm$/i.test(file.name)) return "video/webm";
   if (/\.mov$/i.test(file.name)) return "video/quicktime";
   if (/\.mp3$/i.test(file.name)) return "audio/mpeg";

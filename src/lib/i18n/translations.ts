@@ -77,6 +77,7 @@ export interface Translations {
   navDashboard: string;
   navHistory: string;
   navSettings: string;
+  navLive: string;
   navSignOut: string;
   navUsers: string;
   // Dashboard
@@ -425,6 +426,8 @@ export interface Translations {
   workspacePlay: string;
   workspacePause: string;
   workspaceNoAudio: string;
+  workspacePlaybackTip: string;
+  workspaceVideoFallback: string;
   workspaceCopyTranscript: string;
   workspaceInteractivePlayer: string;
   chatTitle: string;
@@ -457,6 +460,52 @@ export interface Translations {
   workspaceTranscriptUnsaved: string;
   workspaceAudioMode: string;
   workspaceSeek: string;
+  // Live lectures hub
+  liveHubBadge: string;
+  liveHubTitle: string;
+  liveHubDesc: string;
+  liveHubUpcoming: string;
+  liveHubSessions: string;
+  liveHubEmpty: string;
+  liveHubScheduleTitle: string;
+  liveHubScheduleDesc: string;
+  liveHubNewSession: string;
+  liveHubCancel: string;
+  liveHubSave: string;
+  liveHubJoin: string;
+  liveHubAddCalendar: string;
+  liveHubSetReminder: string;
+  liveHubExtras: string;
+  liveHubDelete: string;
+  liveHubLiveNow: string;
+  liveHubEnded: string;
+  liveHubMinutes: string;
+  liveHubAgenda: string;
+  liveHubAgendaEmpty: string;
+  liveHubMaterials: string;
+  liveHubMaterialsEmpty: string;
+  liveHubQa: string;
+  liveHubQaEmpty: string;
+  liveHubQaPlaceholder: string;
+  liveHubQaSend: string;
+  liveHubFieldTitle: string;
+  liveHubFieldUrl: string;
+  liveHubFieldStarts: string;
+  liveHubFieldDuration: string;
+  liveHubFieldDesc: string;
+  liveHubFieldAgenda: string;
+  liveHubAgendaPlaceholder: string;
+  liveHubFieldMaterialTitle: string;
+  liveHubFieldMaterialUrl: string;
+  liveHubErrorTitle: string;
+  liveHubErrorUrl: string;
+  liveHubErrorTime: string;
+  liveHubReminderSet: string;
+  liveHubReminderDenied: string;
+  liveHubReminderUnsupported: string;
+  liveHubReminderNow: string;
+  liveHubConfigTitle: string;
+  liveHubConfigBody: string;
   aiInsightsLoading: string;
   aiInsightsLoadingHint: string;
   aiInsightsError: string;
@@ -667,6 +716,7 @@ const en: Translations = {
   navDashboard: "Dashboard",
   navHistory: "History",
   navSettings: "Settings",
+  navLive: "Live",
   navSignOut: "Sign out",
   navUsers: "Registered Users",
   dashTitle: "Dashboard",
@@ -701,7 +751,7 @@ const en: Translations = {
   uploadLinkSubmit: "Import",
   uploadLinkSoonTitle: "Link import coming soon",
   uploadLinkSoonDesc:
-    "YouTube, Drive, and Zoom cloud imports are on the roadmap. Upload a file for now.",
+    "Cloud Zoom/Meet link import is coming soon. For Zoom lessons: download the recording as MP4 (H.264) or M4A, then upload here. Schedule live sessions in Live Hub.",
   uploadMicDenied: "Microphone access was denied. Check browser permissions.",
   commandPaletteTitle: "Search workspace",
   commandPalettePlaceholder: "Search transcripts, speakers, action items…",
@@ -1033,6 +1083,8 @@ const en: Translations = {
   workspacePlay: "Play",
   workspacePause: "Pause",
   workspaceNoAudio: "Audio playback is available for new uploads in this session. History items open without the original file.",
+  workspacePlaybackTip: "For Zoom: download the MP4 (H.264) or M4A locally, then upload. Cloud Zoom links are not playable in-browser.",
+  workspaceVideoFallback: "Video codec not supported in this browser — playing audio track only (common with Zoom HEVC/MOV).",
   workspaceCopyTranscript: "Copy transcript",
   workspaceInteractivePlayer: "Sync player",
   chatTitle: "Talk to transcript",
@@ -1065,6 +1117,55 @@ const en: Translations = {
   workspaceTranscriptUnsaved: "Unsaved changes",
   workspaceAudioMode: "Audio recording — use the controls below to play",
   workspaceSeek: "Seek",
+  liveHubBadge: "Live lectures",
+  liveHubTitle: "Live Hub",
+  liveHubDesc:
+    "Schedule Zoom and Google Meet lectures, join in one click, and keep agendas, materials, and Q&A in one place.",
+  liveHubUpcoming: "Upcoming sessions",
+  liveHubSessions: "sessions",
+  liveHubEmpty: "No live sessions yet. Schedule your first lecture above.",
+  liveHubScheduleTitle: "Schedule a live session",
+  liveHubScheduleDesc:
+    "Paste a Zoom or Google Meet link, set the time, and share materials with your audience.",
+  liveHubNewSession: "New session",
+  liveHubCancel: "Cancel",
+  liveHubSave: "Save session",
+  liveHubJoin: "Join meeting",
+  liveHubAddCalendar: "Add to Google Calendar",
+  liveHubSetReminder: "Set reminder",
+  liveHubExtras: "Agenda & Q&A",
+  liveHubDelete: "Delete session",
+  liveHubLiveNow: "Live now",
+  liveHubEnded: "Ended",
+  liveHubMinutes: "min",
+  liveHubAgenda: "Agenda",
+  liveHubAgendaEmpty: "No agenda items yet.",
+  liveHubMaterials: "Materials",
+  liveHubMaterialsEmpty: "No downloadable materials attached.",
+  liveHubQa: "Live Q&A",
+  liveHubQaEmpty: "Ask the first question to start the thread.",
+  liveHubQaPlaceholder: "Type a question…",
+  liveHubQaSend: "Send",
+  liveHubFieldTitle: "Session title",
+  liveHubFieldUrl: "Zoom / Meet URL",
+  liveHubFieldStarts: "Starts at",
+  liveHubFieldDuration: "Duration (minutes)",
+  liveHubFieldDesc: "Description",
+  liveHubFieldAgenda: "Agenda (one item per line)",
+  liveHubAgendaPlaceholder: "Welcome\nDeep dive\nQ&A",
+  liveHubFieldMaterialTitle: "Material title",
+  liveHubFieldMaterialUrl: "Material URL",
+  liveHubErrorTitle: "Please enter a session title.",
+  liveHubErrorUrl:
+    "Enter a valid https Zoom, Google Meet, Teams, or Webex link.",
+  liveHubErrorTime: "Choose a start date and time.",
+  liveHubReminderSet: "Reminder set (5 minutes before start).",
+  liveHubReminderDenied: "Notification permission denied.",
+  liveHubReminderUnsupported: "Browser notifications are not supported.",
+  liveHubReminderNow: "Starting soon — join: {url}",
+  liveHubConfigTitle: "Configuration notes",
+  liveHubConfigBody:
+    "No Zoom/Meet API keys are required for join links and calendars. Sessions are stored in your browser for this account. For cloud Zoom recording download + transcribe, use the Dashboard upload (MP4/M4A). Large files need BLOB_READ_WRITE_TOKEN on Vercel.",
   aiInsightsLoading: "Generating AI insights…",
   aiInsightsLoadingHint: "GPT-4o mini is analyzing your transcript",
   aiInsightsError: "Could not generate insights",
@@ -1271,6 +1372,7 @@ const he: Translations = {
   navDashboard: "לוח בקרה",
   navHistory: "היסטוריה",
   navSettings: "הגדרות",
+  navLive: "שיעורים חיים",
   navSignOut: "התנתק",
   navUsers: "משתמשים רשומים",
   dashTitle: "לוח בקרה",
@@ -1305,7 +1407,7 @@ const he: Translations = {
   uploadLinkSubmit: "ייבוא",
   uploadLinkSoonTitle: "ייבוא מקישור בקרוב",
   uploadLinkSoonDesc:
-    "ייבוא מ-YouTube, Drive ו-Zoom בענן בדרך. בינתיים העלו קובץ.",
+    "ייבוא קישורי Zoom/Meet בענן בקרוב. לשיעורי זום: הורידו הקלטה כ-MP4 (H.264) או M4A והעלו כאן. לתזמון שיעורים חיים — היכנסו למרכז השיעורים החיים.",
   uploadMicDenied: "הגישה למיקרופון נדחתה. בדקו את הרשאות הדפדפן.",
   commandPaletteTitle: "חיפוש בסביבת העבודה",
   commandPalettePlaceholder: "חיפוש בתמלולים, דוברים ופריטי משימה…",
@@ -1631,6 +1733,8 @@ const he: Translations = {
   workspacePlay: "נגן",
   workspacePause: "השהה",
   workspaceNoAudio: "ניגון אודיו זמין להעלאות חדשות בסשן הנוכחי. פריטים מההיסטוריה נפתחים בלי קובץ המקור.",
+  workspacePlaybackTip: "לזום: הורידו MP4 (H.264) או M4A למחשב והעלו. קישורי Zoom בענן לא ניתנים לניגון בדפדפן.",
+  workspaceVideoFallback: "קודק הווידאו לא נתמך בדפדפן — מנגנים אודיו בלבד (נפוץ ב-Zoom HEVC/MOV).",
   workspaceCopyTranscript: "העתק תמלול",
   workspaceInteractivePlayer: "נגן מסונכרן",
   chatTitle: "שיחה עם התמלול",
@@ -1663,6 +1767,54 @@ const he: Translations = {
   workspaceTranscriptUnsaved: "שינויים שלא נשמרו",
   workspaceAudioMode: "הקלטת אודיו — השתמשו בפקדים למטה לניגון",
   workspaceSeek: "גלילה",
+  liveHubBadge: "שיעורים חיים",
+  liveHubTitle: "מרכז שיעורים חיים",
+  liveHubDesc:
+    "תזמנו שיעורי Zoom ו-Google Meet, הצטרפו בלחיצה, ושמרו אג'נדה, חומרים ושאלות במקום אחד.",
+  liveHubUpcoming: "מפגשים קרובים",
+  liveHubSessions: "מפגשים",
+  liveHubEmpty: "אין עדיין מפגשים. תזמנו שיעור ראשון למעלה.",
+  liveHubScheduleTitle: "תזמון מפגש חי",
+  liveHubScheduleDesc:
+    "הדביקו קישור Zoom או Google Meet, בחרו שעה, וצרפו חומרים לקהל.",
+  liveHubNewSession: "מפגש חדש",
+  liveHubCancel: "ביטול",
+  liveHubSave: "שמירת מפגש",
+  liveHubJoin: "הצטרפות לפגישה",
+  liveHubAddCalendar: "הוספה ליומן Google",
+  liveHubSetReminder: "תזכורת",
+  liveHubExtras: "אג'נדה ושאלות",
+  liveHubDelete: "מחיקת מפגש",
+  liveHubLiveNow: "בשידור חי",
+  liveHubEnded: "הסתיים",
+  liveHubMinutes: "דק׳",
+  liveHubAgenda: "אג'נדה",
+  liveHubAgendaEmpty: "אין פריטי אג'נדה עדיין.",
+  liveHubMaterials: "חומרים",
+  liveHubMaterialsEmpty: "לא צורפו חומרים להורדה.",
+  liveHubQa: "שאלות ותשובות",
+  liveHubQaEmpty: "שאלו את השאלה הראשונה כדי להתחיל.",
+  liveHubQaPlaceholder: "כתבו שאלה…",
+  liveHubQaSend: "שליחה",
+  liveHubFieldTitle: "כותרת המפגש",
+  liveHubFieldUrl: "קישור Zoom / Meet",
+  liveHubFieldStarts: "שעת התחלה",
+  liveHubFieldDuration: "משך (דקות)",
+  liveHubFieldDesc: "תיאור",
+  liveHubFieldAgenda: "אג'נדה (שורה לכל פריט)",
+  liveHubAgendaPlaceholder: "פתיחה\nהעמקה\nשאלות",
+  liveHubFieldMaterialTitle: "שם חומר",
+  liveHubFieldMaterialUrl: "קישור לחומר",
+  liveHubErrorTitle: "נא להזין כותרת למפגש.",
+  liveHubErrorUrl: "הזינו קישור https תקין של Zoom, Google Meet, Teams או Webex.",
+  liveHubErrorTime: "בחרו תאריך ושעת התחלה.",
+  liveHubReminderSet: "התזכורת נקבעה (5 דקות לפני ההתחלה).",
+  liveHubReminderDenied: "הרשאת התראות נדחתה.",
+  liveHubReminderUnsupported: "הדפדפן לא תומך בהתראות.",
+  liveHubReminderNow: "מתחיל בקרוב — הצטרפו: {url}",
+  liveHubConfigTitle: "הערות הגדרה",
+  liveHubConfigBody:
+    "לא נדרשים מפתחות API של Zoom/Meet לקישורי הצטרפות ויומן. המפגשים נשמרים בדפדפן עבור החשבון. להקלטות Zoom — הורידו MP4/M4A והעלו בלוח הבקרה. קבצים גדולים דורשים BLOB_READ_WRITE_TOKEN ב-Vercel.",
   aiInsightsLoading: "מייצר תובנות AI…",
   aiInsightsLoadingHint: "GPT-4o mini מנתח את התמלול",
   aiInsightsError: "לא ניתן לייצר תובנות",

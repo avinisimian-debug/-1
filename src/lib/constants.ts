@@ -98,6 +98,10 @@ export const ACCEPTED_FILE_TYPES = [
   "video/x-matroska",
   "video/x-msvideo",
   "video/avi",
+  // Zoom / browser variants
+  "application/mp4",
+  "video/x-m4v",
+  "video/mpeg",
 ];
 
 export const ACCEPTED_EXTENSIONS = [
@@ -118,7 +122,7 @@ export const ACCEPTED_EXTENSIONS = [
 /** HTML accept attribute for file inputs */
 export const ACCEPTED_FILE_INPUT =
   ACCEPTED_EXTENSIONS.join(",") +
-  ",audio/*,video/mp4,video/quicktime,video/webm,video/x-matroska,video/x-msvideo";
+  ",audio/*,video/mp4,video/quicktime,video/webm,video/x-matroska,video/x-msvideo,video/x-m4v,application/mp4";
 
 export const PROCESSING_STAGES = [
   { key: "uploading" as const },
@@ -128,6 +132,7 @@ export const PROCESSING_STAGES = [
 
 export const NAV_ITEMS = [
   { href: "/", labelKey: "navDashboard" as const, icon: "LayoutDashboard" as const },
+  { href: "/live", labelKey: "navLive" as const, icon: "Video" as const },
   { href: "/history", labelKey: "navHistory" as const, icon: "History" as const },
   { href: "/settings", labelKey: "navSettings" as const, icon: "Settings" as const },
 ] as const;

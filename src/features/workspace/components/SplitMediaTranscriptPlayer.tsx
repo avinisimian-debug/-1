@@ -19,6 +19,7 @@ export interface SplitMediaTranscriptPlayerProps {
   onQueryChange?: (query: string) => void;
   editable?: boolean;
   onEntryTextChange?: (index: number, text: string) => void;
+  fallbackNotice?: string | null;
   className?: string;
 }
 
@@ -35,6 +36,7 @@ export function SplitMediaTranscriptPlayer({
   onQueryChange,
   editable,
   onEntryTextChange,
+  fallbackNotice,
   className,
 }: SplitMediaTranscriptPlayerProps) {
   const words = collectTimedWords(entries, timedWords);
@@ -87,6 +89,8 @@ export function SplitMediaTranscriptPlayer({
         duration={playback.duration}
         isPlaying={playback.isPlaying}
         ready={playback.ready}
+        errorMessage={playback.error ? playback.errorMessage : null}
+        fallbackNotice={fallbackNotice}
         playbackRate={playback.playbackRate}
         onPlaybackRateChange={playback.setPlaybackRate}
         skipSilence={playback.skipSilence}

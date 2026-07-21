@@ -112,7 +112,37 @@ export function MeetingWorkspace({
     [result, speakerLabels],
   );
 
-  const playback = useMediaPlayback(mediaSrc);
+  const [playKind, setPlayKind] = useState<"audio" | "video">(mediaKind);
+  const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
+  const playback = useMediaPlayback(mediaSrc, playKind);
+
+  useEffect(() => {
+    setPlayKind(mediaKind);
+    setFallbackNotice(null);
+  }, [mediaSrc, mediaKind]);
+
+  useEffect(() => {
+    if (!playback.error || !mediaSrc) return;
+
+    // Zoom/MOV/HEVC often fail as <video> but the AAC track plays as <audio>.
+    if (
+      playKind === "video" &&
+      (playback.error === "unsupported" ||
+        playback.error === "decode" ||
+        playback.error === "unknown")
+    ) {
+      setPlayKind("audio");
+      setFallbackNotice(t.workspaceVideoFallback);
+      playback.clearError();
+    }
+  }, [
+    playback.error,
+    playback.clearError,
+    playKind,
+    mediaSrc,
+    t.workspaceVideoFallback,
+  ]);
+
   const chapters = useMemo(
     () => resolveChapters(result.chapters, result.transcript),
     [result.chapters, result.transcript],
@@ -290,12 +320,13 @@ export function MeetingWorkspace({
               entries={displayEntries}
               timedWords={displayTimedWords}
               mediaSrc={mediaSrc}
-              mediaKind={mediaKind}
+              mediaKind={playKind}
               playback={playback}
               query={query}
               onQueryChange={setQuery}
               editable
               onEntryTextChange={handleEntryTextChange}
+              fallbackNotice={fallbackNotice}
             />
             <TranscriptChatPanel
               result={resultForExport}

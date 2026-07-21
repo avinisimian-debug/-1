@@ -11,6 +11,7 @@ import {
   LogOut,
   Settings,
   Users,
+  Video,
   X,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
@@ -29,6 +30,7 @@ const iconMap = {
   LayoutDashboard,
   History,
   Settings,
+  Video,
 } as const;
 
 interface SidebarProps {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { Pause, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertTriangle, Pause, Play } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { cn } from "@/lib/utils";
 import { secondsToTimestamp } from "../lib/timestamp";
@@ -18,6 +18,8 @@ interface MediaPlayerPaneProps {
   duration: number;
   isPlaying: boolean;
   ready: boolean;
+  errorMessage?: string | null;
+  fallbackNotice?: string | null;
   playbackRate?: number;
   onPlaybackRateChange?: (rate: number) => void;
   skipSilence?: boolean;
@@ -36,6 +38,8 @@ export function MediaPlayerPane({
   duration,
   isPlaying,
   ready,
+  errorMessage,
+  fallbackNotice,
   playbackRate = 1,
   onPlaybackRateChange,
   skipSilence = false,
@@ -48,6 +52,7 @@ export function MediaPlayerPane({
   const { t } = useLocale();
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
   const isVideo = mediaKind === "video";
+  const [showNativeControls, setShowNativeControls] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -76,20 +81,24 @@ export function MediaPlayerPane({
         className,
       )}
     >
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-t-xl bg-black/95">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-t-xl bg-zinc-950">
         {mediaSrc ? (
           isVideo ? (
             <video
+              key={`video-${mediaSrc}`}
               ref={mediaRef as React.RefObject<HTMLVideoElement>}
               src={mediaSrc}
               preload="metadata"
               playsInline
+              controls={showNativeControls}
               className="max-h-[min(50vh,420px)] w-full object-contain"
               onClick={onTogglePlay}
+              onContextMenu={() => setShowNativeControls(true)}
             />
           ) : (
             <>
               <audio
+                key={`audio-${mediaSrc}`}
                 ref={mediaRef as React.RefObject<HTMLAudioElement>}
                 src={mediaSrc}
                 preload="metadata"
@@ -99,12 +108,26 @@ export function MediaPlayerPane({
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 shadow-[0_0_40px_rgba(99,102,241,0.25)]">
                   <span className="text-2xl font-semibold text-white/90">♪</span>
                 </div>
-                <p className="max-w-xs text-xs text-white/60">{t.workspaceAudioMode}</p>
+                <p className="max-w-xs text-xs text-white/60">
+                  {fallbackNotice || t.workspaceAudioMode}
+                </p>
               </div>
             </>
           )
         ) : (
-          <p className="px-6 text-center text-sm text-white/50">{t.workspaceNoAudio}</p>
+          <div className="max-w-sm space-y-2 px-6 text-center">
+            <p className="text-sm text-white/50">{t.workspaceNoAudio}</p>
+            <p className="text-xs text-white/35">{t.workspacePlaybackTip}</p>
+          </div>
+        )}
+
+        {errorMessage && mediaSrc && (
+          <div className="absolute inset-x-3 bottom-3 rounded-lg border border-amber-500/40 bg-amber-950/90 px-3 py-2 text-start text-xs text-amber-100 shadow-lg backdrop-blur-sm">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+              <p>{errorMessage}</p>
+            </div>
+          </div>
         )}
       </div>
 
@@ -122,12 +145,14 @@ export function MediaPlayerPane({
           <button
             type="button"
             onClick={onTogglePlay}
-            disabled={!mediaSrc}
+            disabled={!mediaSrc || Boolean(errorMessage && !ready)}
             className={cn(
               "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors",
-              mediaSrc
+              mediaSrc && !errorMessage
                 ? "bg-foreground text-background hover:bg-foreground/90"
-                : "bg-muted text-muted-foreground",
+                : mediaSrc && ready
+                  ? "bg-foreground text-background hover:bg-foreground/90"
+                  : "bg-muted text-muted-foreground",
             )}
             aria-label={isPlaying ? t.workspacePause : t.workspacePlay}
           >
