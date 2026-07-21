@@ -87,10 +87,15 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   ensureTranscriptionReady(contentType.includes("application/json"));
 
   const email = session.user.email.toLowerCase();
-  const plan = await syncUserPlanOnAccess(
-    email,
-    session.user.name ?? undefined,
-  );
+  let plan: Awaited<ReturnType<typeof syncUserPlanOnAccess>> = "free";
+  try {
+    plan = await syncUserPlanOnAccess(
+      email,
+      session.user.name ?? undefined,
+    );
+  } catch (error) {
+    console.error("[transcribe] plan sync failed, continuing as free:", error);
+  }
   const { file, language, blobUrl } = await resolveUploadFile(request, email);
 
   const result = await transcribeAudio({ file, plan, language });

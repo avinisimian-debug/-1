@@ -23,14 +23,18 @@ export const SITE_KEYWORDS = [
   "AI transcription Hebrew",
   "Staz AI",
   "1stazai",
+  "סיכום פגישות AI",
+  "תמלול אוטומטי",
+  "speech to text Hebrew",
 ];
 
 const ogImage = `${SITE_URL}/icon-512.png`;
+const ogLogo = `${SITE_URL}/logo.png`;
 
 export function buildSiteMetadata(overrides?: Partial<Metadata>): Metadata {
   const googleVerification = process.env.GOOGLE_SITE_VERIFICATION;
 
-  return {
+  const base: Metadata = {
     metadataBase: new URL(SITE_URL),
     applicationName: BRAND_NAME,
     title: {
@@ -43,8 +47,18 @@ export function buildSiteMetadata(overrides?: Partial<Metadata>): Metadata {
     creator: BRAND_NAME,
     publisher: BRAND_NAME,
     category: "technology",
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
     alternates: {
       canonical: SITE_URL,
+      languages: {
+        "he-IL": SITE_URL,
+        "en-US": SITE_URL,
+        "x-default": SITE_URL,
+      },
     },
     robots: {
       index: true,
@@ -72,6 +86,12 @@ export function buildSiteMetadata(overrides?: Partial<Metadata>): Metadata {
           height: 512,
           alt: SITE_TITLE,
         },
+        {
+          url: ogLogo,
+          width: 512,
+          height: 512,
+          alt: BRAND_NAME,
+        },
       ],
     },
     twitter: {
@@ -80,10 +100,52 @@ export function buildSiteMetadata(overrides?: Partial<Metadata>): Metadata {
       description: SITE_DESCRIPTION,
       images: [ogImage],
     },
+    other: {
+      "theme-color": "#09090b",
+    },
     ...(googleVerification
       ? { verification: { google: googleVerification } }
       : {}),
+  };
+
+  return deepMergeMetadata(base, overrides);
+}
+
+function deepMergeMetadata(
+  base: Metadata,
+  overrides?: Partial<Metadata>,
+): Metadata {
+  if (!overrides) return base;
+  return {
+    ...base,
     ...overrides,
+    title: overrides.title ?? base.title,
+    openGraph: {
+      ...base.openGraph,
+      ...overrides.openGraph,
+      images: overrides.openGraph?.images ?? base.openGraph?.images,
+    },
+    twitter: {
+      ...base.twitter,
+      ...overrides.twitter,
+      images: overrides.twitter?.images ?? base.twitter?.images,
+    },
+    robots: overrides.robots ?? base.robots,
+    alternates: {
+      ...base.alternates,
+      ...overrides.alternates,
+    },
+  };
+}
+
+export function buildPrivatePageMetadata(
+  title: string,
+  description?: string,
+): Metadata {
+  return {
+    title,
+    description: description ?? `${title} — ${BRAND_NAME}`,
+    robots: { index: false, follow: false },
   };
 }
 

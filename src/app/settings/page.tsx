@@ -35,7 +35,7 @@ export default function SettingsPage() {
   const pathname = usePathname();
   const { t } = useLocale();
   const { plan, isPro, syncPlan } = usePlan();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [planDetails, setPlanDetails] = useState<PlanApiResponse | null>(null);
   const [subMessage, setSubMessage] = useState<{
     type: "success" | "error";
@@ -80,6 +80,8 @@ export default function SettingsPage() {
   }, []);
 
   useEffect(() => {
+    if (status === "loading") return;
+
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("subscription") === "cancel") {
@@ -90,6 +92,9 @@ export default function SettingsPage() {
 
     const subscriptionId = params.get("subscription_id");
     if (!subscriptionId) return;
+
+    // Wait for auth — activating before session is ready causes 401 toasts.
+    if (status !== "authenticated" || !session?.user?.email) return;
 
     const activationKey = `paypal-activated:${subscriptionId}`;
     if (sessionStorage.getItem(activationKey)) {
@@ -125,6 +130,8 @@ export default function SettingsPage() {
         window.history.replaceState({}, "", "/settings#upgrade");
       });
   }, [
+    status,
+    session?.user?.email,
     syncPlan,
     loadPlanDetails,
     t.paypalCancelled,

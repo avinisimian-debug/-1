@@ -1,8 +1,11 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { privatePageRobots } from "@/lib/seo";
+import { buildPrivatePageMetadata } from "@/lib/seo";
 
-export const metadata = privatePageRobots;
+export const metadata = buildPrivatePageMetadata(
+  "Settings",
+  "Manage your Staz AI plan, billing, and integrations.",
+);
 
 export default async function SettingsLayout({
   children,

@@ -1,7 +1,8 @@
 "use client";
 
-import { Sparkles, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { BRAND_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 interface LandingHeroProps {
@@ -20,20 +21,48 @@ export function LandingHero({ onGetStarted, className }: LandingHeroProps) {
       )}
     >
       <div className="relative z-10">
-        <span className="badge-accent mx-auto mb-6 inline-flex animate-fade-in-up">
-          <Sparkles className="h-3.5 w-3.5" aria-hidden />
-          AI Transcription
-        </span>
+        <p
+          className={cn(
+            "animate-fade-in-up mb-5 text-3xl font-extrabold tracking-tight text-foreground",
+            "sm:text-4xl md:text-5xl",
+          )}
+        >
+          {BRAND_NAME}
+        </p>
 
-        <h1 className="animate-fade-in-up text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground md:text-5xl lg:text-6xl">
+        <h1 className="animate-fade-in-up text-balance text-2xl font-bold leading-snug tracking-tight text-foreground md:text-3xl lg:text-4xl">
           {t.authTitle}
           <br />
           <span className="text-gradient-accent">{t.authTitleAccent}</span>
         </h1>
 
-        <p className="animate-fade-in-up animate-fade-in-up-delay-1 mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl">
+        <p className="animate-fade-in-up animate-fade-in-up-delay-1 mx-auto mt-6 max-w-2xl text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
           {t.authSubtitle}
         </p>
+
+        <div className="animate-fade-in-up animate-fade-in-up-delay-2 mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <button
+            type="button"
+            onClick={onGetStarted}
+            className={cn(
+              "btn-cinema inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-8 py-3",
+              "text-sm font-semibold shadow-md transition-transform hover:-translate-y-0.5",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+          >
+            {t.authSubmit}
+          </button>
+          <a
+            href="#pricing"
+            className={cn(
+              "btn-secondary inline-flex min-h-12 items-center justify-center rounded-xl px-6 py-3",
+              "text-sm font-semibold",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+          >
+            {t.landingPricingTitle}
+          </a>
+        </div>
 
         <button
           type="button"

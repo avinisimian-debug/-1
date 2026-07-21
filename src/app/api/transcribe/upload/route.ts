@@ -38,7 +38,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   const email = session.user.email.toLowerCase();
 
   // Never block token generation on plan-store failures.
-  let maxBytes = PLAN_LIMITS.pro.maxFileSizeBytes;
+  let maxBytes = PLAN_LIMITS.free.maxFileSizeBytes;
   try {
     const plan = await syncUserPlanOnAccess(
       email,
@@ -46,7 +46,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
     maxBytes = PLAN_LIMITS[plan].maxFileSizeBytes;
   } catch (error) {
-    console.error("[transcribe-upload] plan sync failed, using Pro limits:", error);
+    console.error("[transcribe-upload] plan sync failed, using free limits:", error);
   }
 
   try {

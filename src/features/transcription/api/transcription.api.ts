@@ -142,11 +142,19 @@ async function fetchBlobClientToken(
       typeof body.error === "string" && body.error.trim()
         ? body.error
         : `Upload authorization failed (${res.status}).`;
-    throw new Error(
-      detail.includes("CONFIG_")
-        ? detail
-        : `CONFIG_BLOB_TOKEN: ${detail}`,
-    );
+
+    // Only label true config/blob failures — not auth or validation errors.
+    if (detail.includes("CONFIG_") || res.status === 503) {
+      throw new Error(
+        detail.includes("CONFIG_")
+          ? detail
+          : `CONFIG_BLOB_TOKEN: ${detail}`,
+      );
+    }
+    if (res.status === 401) {
+      throw new Error(detail || "Sign in required to upload large files.");
+    }
+    throw new Error(detail);
   }
 
   if (!body.clientToken) {

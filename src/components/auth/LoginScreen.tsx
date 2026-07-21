@@ -39,6 +39,15 @@ export function LoginScreen() {
     }, 400);
   }, []);
 
+  const scrollToSignupForPro = useCallback(() => {
+    try {
+      sessionStorage.setItem("staz-upgrade-intent", "1");
+    } catch {
+      /* ignore */
+    }
+    scrollToSignup();
+  }, [scrollToSignup]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -114,17 +123,9 @@ export function LoginScreen() {
 
         <LandingHero onGetStarted={scrollToSignup} />
 
-        <div className="my-8">
-          <AdSenseUnit format="horizontal" className="min-h-[90px]" />
-        </div>
-
         <LandingTrustStrip className="-mx-4 sm:-mx-6 lg:-mx-8" />
 
         <LandingBenefits />
-
-        <div className="my-8">
-          <AdSenseUnit format="rectangle" className="min-h-[250px]" />
-        </div>
 
         <div className="py-12 sm:py-16">
           <SignupCard
@@ -139,10 +140,14 @@ export function LoginScreen() {
           />
         </div>
 
-        <LandingPricing onFreeSignup={scrollToSignup} className="-mx-4 rounded-none sm:-mx-6 lg:-mx-8" />
+        <LandingPricing
+          onFreeSignup={scrollToSignup}
+          onProSignup={scrollToSignupForPro}
+          className="-mx-4 rounded-none sm:-mx-6 lg:-mx-8"
+        />
 
-        <div className="my-8">
-          <AdSenseUnit format="auto" className="min-h-[100px]" />
+        <div className="my-10">
+          <AdSenseUnit format="horizontal" className="min-h-[90px]" />
         </div>
 
         <div className="mt-16 border-t border-border/80 pt-12">

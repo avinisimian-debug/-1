@@ -1,6 +1,9 @@
-import { privatePageRobots } from "@/lib/seo";
+import { buildPrivatePageMetadata } from "@/lib/seo";
 
-export const metadata = privatePageRobots;
+export const metadata = buildPrivatePageMetadata(
+  "Admin",
+  "Staz AI admin tools.",
+);
 
 export default function AdminLayout({
   children,

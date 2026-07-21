@@ -1,8 +1,11 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { privatePageRobots } from "@/lib/seo";
+import { buildPrivatePageMetadata } from "@/lib/seo";
 
-export const metadata = privatePageRobots;
+export const metadata = buildPrivatePageMetadata(
+  "History",
+  "Your transcription history on Staz AI.",
+);
 
 export default async function HistoryLayout({
   children,

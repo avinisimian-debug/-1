@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { DashboardWorkspace } from "@/components/dashboard/DashboardWorkspace";
 import { DashboardInspector } from "@/components/dashboard/DashboardInspector";
@@ -11,10 +13,23 @@ import {
 } from "@/features/transcription";
 import { useLocale } from "@/context/LocaleContext";
 import { useDashboardController } from "@/hooks/useDashboardController";
+import { SETTINGS_UPGRADE_PATH } from "@/lib/upgrade-navigation";
 
 export function DashboardContent() {
   const { t } = useLocale();
   const dash = useDashboardController();
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("staz-upgrade-intent") === "1") {
+        sessionStorage.removeItem("staz-upgrade-intent");
+        router.replace(SETTINGS_UPGRADE_PATH);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [router]);
 
   return (
     <DashboardShell title={t.dashTitle} description={t.dashDesc}>

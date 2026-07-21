@@ -16,6 +16,32 @@ interface AdSenseUnitProps {
   format?: "auto" | "horizontal" | "rectangle";
 }
 
+function waitForAdsByGoogle(timeoutMs = 8000): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(false);
+      return;
+    }
+    if (window.adsbygoogle) {
+      resolve(true);
+      return;
+    }
+
+    const started = Date.now();
+    const id = window.setInterval(() => {
+      if (window.adsbygoogle) {
+        window.clearInterval(id);
+        resolve(true);
+        return;
+      }
+      if (Date.now() - started >= timeoutMs) {
+        window.clearInterval(id);
+        resolve(false);
+      }
+    }, 100);
+  });
+}
+
 /**
  * Display ad unit. Requires an approved AdSense site + ad slot ID
  * (or Auto ads enabled in the AdSense dashboard).
@@ -31,12 +57,22 @@ export function AdSenseUnit({
 
   useEffect(() => {
     if (!resolvedSlot || pushed.current) return;
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      pushed.current = true;
-    } catch (error) {
-      console.warn("[AdSense] push failed:", error);
-    }
+    let cancelled = false;
+
+    void (async () => {
+      const ready = await waitForAdsByGoogle();
+      if (cancelled || !ready || pushed.current) return;
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        pushed.current = true;
+      } catch (error) {
+        console.warn("[AdSense] push failed:", error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [resolvedSlot]);
 
   if (!resolvedSlot) {
