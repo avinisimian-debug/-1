@@ -127,7 +127,9 @@ export function useTranscription() {
                 }
               : prev,
           );
-          setStage("queued");
+          // Direct sync path: upload done → STT in flight.
+          // Blob/job path immediately overrides via onJobStage("queued").
+          setStage("transcribing");
         },
         onJobStage: (jobStage) => {
           if (jobStage === "completed") return;

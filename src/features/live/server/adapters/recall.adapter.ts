@@ -1,7 +1,16 @@
 import type { LiveSession } from "../../types";
 import type { BotDispatchResult, MeetingBotAdapter } from "./bot-adapter";
 
-const RECALL_API = "https://us-west-2.recall.ai/api/v1";
+function recallApiBase(): string {
+  const explicit = process.env.RECALL_API_BASE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  const region = process.env.RECALL_AI_REGION?.trim() || "us-west-2";
+  return `https://${region}.recall.ai/api/v1`;
+}
+
+export function getRecallApiBase(): string {
+  return recallApiBase();
+}
 
 /**
  * Recall.ai meeting bot adapter.
@@ -18,15 +27,7 @@ export const recallBotAdapter: MeetingBotAdapter = {
       throw new Error("RECALL_AI_API_KEY is not configured.");
     }
 
-    const baseUrl =
-      process.env.AUTH_URL?.replace(/\/$/, "") ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-
-    const webhookUrl = baseUrl
-      ? `${baseUrl}/api/webhooks/recall?meetingId=${encodeURIComponent(session.id)}`
-      : undefined;
-
-    const res = await fetch(`${RECALL_API}/bot/`, {
+    const res = await fetch(`${recallApiBase()}/bot/`, {
       method: "POST",
       headers: {
         Authorization: `Token ${apiKey}`,
@@ -35,14 +36,15 @@ export const recallBotAdapter: MeetingBotAdapter = {
       body: JSON.stringify({
         meeting_url: session.meetingUrl,
         bot_name: `Staz AI — ${session.title.slice(0, 40)}`,
-        recording_config: {
-          transcript: { provider: { meeting_captions: {} } },
+        // Correlate webhooks back to our meeting (dashboard/Svix webhooks).
+        metadata: {
+          meetingId: session.id,
+          ownerEmail: session.ownerEmail,
         },
-        ...(webhookUrl
-          ? {
-              status_change_webhook_url: webhookUrl,
-            }
-          : {}),
+        recording_config: {
+          // Required for mixed MP4 download after bot.done
+          video_mixed_mp4: {},
+        },
       }),
     });
 
@@ -66,3 +68,57 @@ export const recallBotAdapter: MeetingBotAdapter = {
     };
   },
 };
+
+type RecallBotResponse = {
+  id?: string;
+  metadata?: { meetingId?: string };
+  recordings?: Array<{
+    media_shortcuts?: {
+      video_mixed?: { data?: { download_url?: string } };
+      audio_mixed?: { data?: { download_url?: string } };
+    };
+  }>;
+};
+
+/** Retrieve bot + extract mixed video (or audio) download URL after bot.done. */
+export async function fetchRecallRecordingDownloadUrl(
+  botId: string,
+): Promise<{ downloadUrl: string; meetingIdFromMeta?: string }> {
+  const apiKey = process.env.RECALL_AI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error("RECALL_AI_API_KEY is not configured.");
+  }
+
+  const res = await fetch(`${recallApiBase()}/bot/${encodeURIComponent(botId)}/`, {
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      Accept: "application/json",
+    },
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `Recall retrieve bot failed (${res.status}): ${text.slice(0, 200)}`,
+    );
+  }
+
+  const bot = (await res.json()) as RecallBotResponse;
+  const recording = bot.recordings?.[0];
+  const downloadUrl =
+    recording?.media_shortcuts?.video_mixed?.data?.download_url ||
+    recording?.media_shortcuts?.audio_mixed?.data?.download_url;
+
+  if (!downloadUrl) {
+    throw new Error("Recall bot has no downloadable recording yet.");
+  }
+
+  return {
+    downloadUrl,
+    meetingIdFromMeta:
+      typeof bot.metadata?.meetingId === "string"
+        ? bot.metadata.meetingId
+        : undefined,
+  };
+}

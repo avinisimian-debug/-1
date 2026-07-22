@@ -109,8 +109,10 @@ export function getRetryDelayMs(attempt: number): number {
 export async function markJobFailed(
   job: TranscriptionJob,
   error: string,
+  options?: { incrementAttempts?: boolean },
 ): Promise<TranscriptionJob> {
-  const attempts = job.attempts + 1;
+  const increment = options?.incrementAttempts !== false;
+  const attempts = increment ? job.attempts + 1 : job.attempts;
   const next: TranscriptionJob = {
     ...job,
     attempts,

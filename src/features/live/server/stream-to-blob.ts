@@ -37,7 +37,32 @@ export async function streamRemoteUrlToBlob(input: {
     throw new Error("Remote recording has no response body.");
   }
 
-  const blob = await put(input.pathname, res.body, {
+  let measuredSize = 0;
+  const reader = res.body.getReader();
+  const countingStream = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      const { done, value } = await reader.read();
+      if (done) {
+        controller.close();
+        return;
+      }
+      measuredSize += value.byteLength;
+      if (measuredSize > MAX_REMOTE_RECORDING_BYTES) {
+        controller.error(
+          new Error(
+            `Recording exceeds ${Math.round(MAX_REMOTE_RECORDING_BYTES / (1024 * 1024))} MB limit.`,
+          ),
+        );
+        return;
+      }
+      controller.enqueue(value);
+    },
+    cancel() {
+      void reader.cancel();
+    },
+  });
+
+  const blob = await put(input.pathname, countingStream, {
     access: "private",
     contentType,
     addRandomSuffix: false,
@@ -47,7 +72,7 @@ export async function streamRemoteUrlToBlob(input: {
   return {
     url: blob.url,
     pathname: blob.pathname,
-    size: Number.isFinite(declaredSize) ? declaredSize : 0,
+    size: measuredSize || (Number.isFinite(declaredSize) ? declaredSize : 0),
     contentType,
   };
 }

@@ -70,6 +70,16 @@ export async function getMeetingById(id: string): Promise<LiveSession | null> {
   return db[id] ?? null;
 }
 
+export async function findMeetingByExternalBotId(
+  botId: string,
+): Promise<LiveSession | null> {
+  if (!botId.trim()) return null;
+  const db = await readAll();
+  return (
+    Object.values(db).find((m) => m.externalBotId === botId.trim()) ?? null
+  );
+}
+
 export async function upsertMeeting(session: LiveSession): Promise<LiveSession> {
   const db = await readAll();
   db[session.id] = session;

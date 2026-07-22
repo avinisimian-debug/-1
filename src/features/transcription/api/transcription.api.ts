@@ -58,8 +58,8 @@ const RETRY_ATTEMPTS = 3;
 function mapJobStatusToStage(status: string): JobProgressStage | null {
   switch (status) {
     case "queued":
-    case "processing":
       return "queued";
+    case "processing":
     case "transcribing":
       return "transcribing";
     case "analyzing":
@@ -128,16 +128,16 @@ async function withRetry<T>(
 }
 
 /**
- * Use Blob only when the payload exceeds Vercel's serverless body limit.
+ * Prefer Blob + async jobs for every signed-in upload (avoids 413/504).
+ * Anonymous callers never use Blob (guest path stays under 4 MB sync).
  */
 function shouldUseBlobUpload(
-  file: File,
+  _file: File,
   userEmail?: string | null,
   forceBlob?: boolean,
 ): boolean {
   if (forceBlob) return Boolean(userEmail);
-  if (!userEmail) return false;
-  return file.size > VERCEL_DIRECT_UPLOAD_BYTES;
+  return Boolean(userEmail);
 }
 
 async function fetchUploadReadiness(): Promise<{
@@ -570,6 +570,14 @@ export async function uploadTranscription(
   const needsBlob =
     options.forceBlob ||
     options.file.size > VERCEL_DIRECT_UPLOAD_BYTES;
+
+  if (needsBlob && !options.userEmail) {
+    return failure(
+      new Error(
+        "Sign in required to upload files over ~4 MB (direct-to-storage).",
+      ),
+    );
+  }
 
   if (needsBlob) {
     const readiness = await fetchUploadReadiness();

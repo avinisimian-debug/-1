@@ -48,6 +48,9 @@ export const env = createEnv({
 
     /** Recall.ai — autonomous meeting bot join + recording */
     RECALL_AI_API_KEY: z.string().min(1).optional(),
+    RECALL_AI_REGION: z.string().min(1).optional(),
+    RECALL_API_BASE_URL: z.string().url().optional(),
+    RECALL_WEBHOOK_SECRET: z.string().min(1).optional(),
 
     /** Protects GET /api/cron/live-bots */
     CRON_SECRET: z.string().min(1).optional(),
@@ -83,6 +86,9 @@ export const env = createEnv({
     ASSEMBLYAI_API_KEY: process.env.ASSEMBLYAI_API_KEY,
     ASSEMBLYAI_WEBHOOK_SECRET: process.env.ASSEMBLYAI_WEBHOOK_SECRET,
     RECALL_AI_API_KEY: process.env.RECALL_AI_API_KEY,
+    RECALL_AI_REGION: process.env.RECALL_AI_REGION,
+    RECALL_API_BASE_URL: process.env.RECALL_API_BASE_URL,
+    RECALL_WEBHOOK_SECRET: process.env.RECALL_WEBHOOK_SECRET,
     CRON_SECRET: process.env.CRON_SECRET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,

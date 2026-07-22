@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { Loader2, Sparkles, Upload } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { BRAND_NAME } from "@/lib/brand";
-import { ACCEPTED_FILE_INPUT } from "@/lib/constants";
+import { ACCEPTED_FILE_INPUT, VERCEL_DIRECT_UPLOAD_BYTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface LandingHeroProps {
@@ -31,6 +31,10 @@ export function LandingHero({ onGetStarted, className }: LandingHeroProps) {
   const runGuestTrial = async (file: File) => {
     setError(null);
     setPreview(null);
+    if (file.size > VERCEL_DIRECT_UPLOAD_BYTES) {
+      setError(t.landingGuestLimit);
+      return;
+    }
     setBusy(true);
     try {
       const body = new FormData();

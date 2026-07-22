@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { transcribeAudio } from "@/features/transcription/server/transcribe.use-case";
+import { VERCEL_DIRECT_UPLOAD_BYTES } from "@/lib/constants";
 import {
   assertTranscriptionReady,
   getTranscriptionReadinessMessage,
@@ -9,7 +10,8 @@ import { isFailure } from "@/shared/lib/result";
 export const runtime = "nodejs";
 export const maxDuration = 120;
 
-const GUEST_MAX_BYTES = 10 * 1024 * 1024;
+/** Stay under Vercel ~4.5 MB request body limit for sync multipart. */
+const GUEST_MAX_BYTES = VERCEL_DIRECT_UPLOAD_BYTES;
 const GUEST_DAILY_LIMIT = 3;
 
 type RateEntry = { day: string; count: number };
@@ -44,7 +46,7 @@ function consumeGuestQuota(ip: string): { ok: boolean; remaining: number } {
 
 /**
  * Frictionless "try without account" transcription for short clips.
- * Hard-capped size + IP daily quota. Does not persist history.
+ * Hard-capped under Vercel body limits + IP daily quota. Does not persist history.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -62,22 +64,6 @@ export async function POST(request: NextRequest) {
         },
       },
       { status: 503 },
-    );
-  }
-
-  const ip = clientIp(request);
-  const quota = consumeGuestQuota(ip);
-  if (!quota.ok) {
-    return NextResponse.json(
-      {
-        data: null,
-        error: {
-          code: "RATE_LIMITED",
-          message:
-            "Guest trial limit reached for today. Sign in for unlimited uploads.",
-        },
-      },
-      { status: 429 },
     );
   }
 
@@ -117,10 +103,26 @@ export async function POST(request: NextRequest) {
         data: null,
         error: {
           code: "PAYLOAD_TOO_LARGE",
-          message: `Guest trial max file size is ${GUEST_MAX_BYTES / (1024 * 1024)} MB. Sign in for larger uploads.`,
+          message: `Guest trial max file size is ${Math.round(GUEST_MAX_BYTES / (1024 * 1024))} MB. Sign in for larger uploads.`,
         },
       },
       { status: 413 },
+    );
+  }
+
+  const ip = clientIp(request);
+  const quota = consumeGuestQuota(ip);
+  if (!quota.ok) {
+    return NextResponse.json(
+      {
+        data: null,
+        error: {
+          code: "RATE_LIMITED",
+          message:
+            "Guest trial limit reached for today. Sign in for unlimited uploads.",
+        },
+      },
+      { status: 429 },
     );
   }
 
@@ -143,7 +145,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Trim payload for guest preview (no need to ship full Pro fields).
   const data = result.data;
   const transcriptText = data.transcript
     .map((entry) => entry.text)

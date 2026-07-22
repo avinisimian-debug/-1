@@ -82,10 +82,20 @@ export async function POST(request: NextRequest) {
 
     if (status === "error") {
       waitUntil(
-        markJobFailed(
-          job,
-          body.error || "AssemblyAI transcription failed.",
-        ),
+        (async () => {
+          const failed = await markJobFailed(
+            job,
+            body.error || "AssemblyAI transcription failed.",
+          );
+          if (failed.meetingId) {
+            await finalizeMeetingDigest(
+              failed.meetingId,
+              undefined,
+              "failed",
+              failed.error,
+            );
+          }
+        })(),
       );
       return NextResponse.json({ ok: true });
     }
@@ -122,7 +132,15 @@ async function completeJobFromAssemblyAI(
 
     const stt = await fetchAssemblyAITranscriptById(transcriptId);
     if (isFailure(stt)) {
-      await markJobFailed(job, stt.error.message);
+      const failed = await markJobFailed(job, stt.error.message);
+      if (failed.meetingId) {
+        await finalizeMeetingDigest(
+          failed.meetingId,
+          undefined,
+          "failed",
+          failed.error,
+        );
+      }
       return;
     }
 
@@ -157,7 +175,15 @@ async function completeJobFromAssemblyAI(
     });
 
     if (isFailure(analyzed)) {
-      await markJobFailed(job, analyzed.error.message);
+      const failed = await markJobFailed(job, analyzed.error.message);
+      if (failed.meetingId) {
+        await finalizeMeetingDigest(
+          failed.meetingId,
+          undefined,
+          "failed",
+          failed.error,
+        );
+      }
       return;
     }
 

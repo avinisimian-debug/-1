@@ -122,7 +122,9 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
     });
 
     if (isFailure(result)) {
-      await markJobFailed(running, result.error.message);
+      await markJobFailed(running, result.error.message, {
+        incrementAttempts: false,
+      });
       await linkMeetingResult(running, "failed", undefined, result.error.message);
       return;
     }
@@ -155,7 +157,7 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Processing failed";
-    await markJobFailed(running, message);
+    await markJobFailed(running, message, { incrementAttempts: false });
     await linkMeetingResult(running, "failed", undefined, message);
   }
 }
