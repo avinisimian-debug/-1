@@ -1,12 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { jobQueue } from "@/features/jobs/server/transcription-queue";
+import { runTranscriptionJob } from "@/features/jobs/server/process-transcription-job";
+import {
+  getRetryDelayMs,
+  jobQueue,
+} from "@/features/jobs/server/transcription-queue";
 import { toPublicJob } from "@/features/jobs/types";
+import { waitUntil } from "@/lib/wait-until";
 import { normalizeApiError } from "@/shared/api";
 
 export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+/**
+ * Reclaim queued jobs that still have attempts left after a failure backoff.
+ * Polling clients become the retry dispatcher (no separate worker required).
+ */
+async function maybeReclaimQueuedJob(jobId: string): Promise<void> {
+  const job = await jobQueue.get(jobId);
+  if (!job || job.status !== "queued") return;
+  if (job.attempts >= job.maxAttempts) return;
+
+  const updatedAt = Date.parse(job.updatedAt);
+  if (!Number.isFinite(updatedAt)) return;
+
+  // Fresh jobs are started by POST waitUntil — only reclaim if stuck.
+  const delay =
+    job.attempts <= 0 ? 30_000 : getRetryDelayMs(job.attempts);
+  if (Date.now() - updatedAt < delay) return;
+
+  console.log(
+    `[jobs] reclaiming queued job=${jobId} attempt=${job.attempts}/${job.maxAttempts}`,
+  );
+  waitUntil(runTranscriptionJob(jobId));
+}
 
 /**
  * Poll async transcription job status.
@@ -60,7 +88,10 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       );
     }
 
-    return NextResponse.json({ data: toPublicJob(job), error: null });
+    await maybeReclaimQueuedJob(id);
+
+    const fresh = (await jobQueue.get(id)) ?? job;
+    return NextResponse.json({ data: toPublicJob(fresh), error: null });
   } catch (error) {
     const normalized = normalizeApiError(error);
     return NextResponse.json(

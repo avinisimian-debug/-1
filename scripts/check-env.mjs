@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from "fs";
-import { join } from "path";
 
 for (const f of [".env.local", ".env.vercel.production"]) {
   if (!existsSync(f)) {

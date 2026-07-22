@@ -1,6 +1,5 @@
 import { getSummaryTemplate, SUMMARY_TEMPLATE_LIST } from "../templates/registry";
 import type {
-  IngestedTranscript,
   OutputFormat,
   SummarizationInput,
   SummarizationOutput,

@@ -141,7 +141,7 @@ async function completeJobFromAssemblyAI(
             },
           ];
 
-    let timedWords = stt.data.timedWords ?? [];
+    const timedWords = stt.data.timedWords ?? [];
     if (timedWords.length > 0) {
       transcriptLines = attachWordsToEntries(transcriptLines, timedWords);
     }

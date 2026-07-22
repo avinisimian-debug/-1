@@ -23,7 +23,7 @@ function getLocalDataDir(): string {
 
 const LOCAL_FILE = join(getLocalDataDir(), "webhooks.json");
 
-function useBlobStorage(): boolean {
+function hasBlobBackend(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
@@ -47,7 +47,7 @@ export class LocalFileWebhooksPersistence implements WebhooksPersistenceAdapter 
   }
 }
 
-/** Optional Vercel Blob backend — enabled when BLOB_READ_WRITE_TOKEN is set. */
+/** Optional Vercel Blob backend ג€” enabled when BLOB_READ_WRITE_TOKEN is set. */
 export class BlobWebhooksPersistence implements WebhooksPersistenceAdapter {
   async read(): Promise<WebhooksDatabase> {
     try {
@@ -83,7 +83,7 @@ export class CompositeWebhooksPersistence implements WebhooksPersistenceAdapter 
   ) {}
 
   async read(): Promise<WebhooksDatabase> {
-    if (useBlobStorage()) {
+    if (hasBlobBackend()) {
       const fromBlob = await this.blob.read();
       if (Object.keys(fromBlob).length > 0) {
         return fromBlob;
@@ -93,7 +93,7 @@ export class CompositeWebhooksPersistence implements WebhooksPersistenceAdapter 
   }
 
   async write(data: WebhooksDatabase): Promise<void> {
-    if (useBlobStorage()) {
+    if (hasBlobBackend()) {
       await this.blob.write(data);
     }
     await this.local.write(data);

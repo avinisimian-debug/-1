@@ -153,7 +153,7 @@ export function FileUploadZone({
     if (!url) return;
     try {
       // Basic client validation — server re-validates.
-      // eslint-disable-next-line no-new
+       
       new URL(url);
     } catch {
       toast({

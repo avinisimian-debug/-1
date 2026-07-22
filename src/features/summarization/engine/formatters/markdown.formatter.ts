@@ -1,4 +1,4 @@
-import type { SummaryDocument, SummaryFormatter } from "../../types";
+import type { SummaryFormatter } from "../../types";
 
 function formatActionTable(
   items: Array<{ task: string; owner: string; deadline: string; priority?: string }>,

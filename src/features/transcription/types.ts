@@ -1,6 +1,11 @@
 import type { AiInsights } from "@/features/insights/types";
 
-export type ProcessingStage = "uploading" | "transcribing" | "analyzing";
+export type ProcessingStage =
+  | "uploading"
+  | "queued"
+  | "transcribing"
+  | "analyzing"
+  | "completed";
 
 export type TranscriptionStatus =
   | "idle"

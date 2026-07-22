@@ -1,5 +1,6 @@
 import { createHmac } from "crypto";
 import { buildTranscriptText } from "@/lib/export";
+import type { TranscriptionResult } from "@/features/transcription/types";
 import { getWebhookSettings } from "./webhooks-store";
 
 const WEBHOOK_FETCH_TIMEOUT_MS = 10_000;
@@ -91,9 +92,9 @@ export async function triggerWebhook(
 function buildProductionPayload(data: {
   userEmail: string;
   plan: string;
-  result: any;
+  result: TranscriptionResult | Record<string, unknown>;
 }): WebhookProductionPayload {
-  const { result } = data;
+  const result = data.result as TranscriptionResult & { fullText?: string };
   const fullText =
     result?.fullText ??
     (Array.isArray(result?.transcript) && result.transcript.length > 0
@@ -111,7 +112,7 @@ function buildProductionPayload(data: {
       duration: result?.duration ?? 0,
       processedAt: new Date().toISOString(),
     },
-    summary: result?.summary ?? {},
+    summary: (result?.summary as Record<string, unknown>) ?? {},
     fullText,
     transcript: result?.transcript ?? [],
     actionItems: result?.actionItems ?? [],

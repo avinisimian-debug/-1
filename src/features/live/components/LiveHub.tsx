@@ -44,9 +44,22 @@ export function LiveHub() {
     // Defer fetch so the effect stays a subscription setup (poll + initial load).
     const kickoff = window.setTimeout(() => void refresh(), 0);
     const timer = window.setInterval(() => void refresh(), 15_000);
+
+    // Hobby-compatible bot dispatcher: ping while Live Hub is open.
+    const dispatchOnce = () => {
+      void fetch("/api/live/dispatch", {
+        method: "POST",
+        credentials: "include",
+      }).catch(() => {});
+    };
+    const dispatchKickoff = window.setTimeout(dispatchOnce, 2_000);
+    const dispatchTimer = window.setInterval(dispatchOnce, 60_000);
+
     return () => {
       window.clearTimeout(kickoff);
       window.clearInterval(timer);
+      window.clearTimeout(dispatchKickoff);
+      window.clearInterval(dispatchTimer);
     };
   }, [email, refresh]);
 

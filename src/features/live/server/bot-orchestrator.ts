@@ -21,6 +21,18 @@ import {
 import type { MeetingBotAdapter } from "./adapters/bot-adapter";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/shared/api";
 
+function normalizeEmails(raw: string[] | undefined): string[] {
+  if (!raw?.length) return [];
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return [
+    ...new Set(
+      raw
+        .map((e) => e.trim().toLowerCase())
+        .filter((e) => emailRe.test(e)),
+    ),
+  ].slice(0, 40);
+}
+
 function resolveAdapter(): MeetingBotAdapter {
   if (simulatedBotAdapter.isAvailable()) return simulatedBotAdapter;
   if (recallBotAdapter.isAvailable()) return recallBotAdapter;
@@ -81,6 +93,7 @@ export async function createScheduledMeeting(
       })),
     qa: [],
     hostName: input.hostName?.trim() || undefined,
+    attendeeEmails: normalizeEmails(input.attendeeEmails),
     bot: {
       enabled: botEnabled,
       diarization: input.bot?.diarization ?? true,

@@ -124,10 +124,13 @@ export const ACCEPTED_FILE_INPUT =
   ACCEPTED_EXTENSIONS.join(",") +
   ",audio/*,video/mp4,video/quicktime,video/webm,video/x-matroska,video/x-msvideo,video/x-m4v,application/mp4";
 
+/** Client-facing pipeline stages (maps from async job statuses). */
 export const PROCESSING_STAGES = [
   { key: "uploading" as const },
+  { key: "queued" as const },
   { key: "transcribing" as const },
   { key: "analyzing" as const },
+  { key: "completed" as const },
 ] as const;
 
 export const NAV_ITEMS = [

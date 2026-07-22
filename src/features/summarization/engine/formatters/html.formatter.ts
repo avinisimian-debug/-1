@@ -1,4 +1,4 @@
-import type { SummaryDocument, SummaryFormatter } from "../../types";
+import type { SummaryFormatter } from "../../types";
 
 function escapeHtml(value: string): string {
   return value

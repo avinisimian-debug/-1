@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMeetingById, upsertMeeting } from "@/features/live/server/meetings-store";
 import { ingestMeetingRecording } from "@/features/live/server/ingest-recording";
+import { streamRemoteUrlToBlob } from "@/features/live/server/stream-to-blob";
 import { waitUntil } from "@/lib/wait-until";
 
 export const runtime = "nodejs";
@@ -8,9 +9,7 @@ export const maxDuration = 300;
 
 /**
  * Recall.ai status / recording webhook.
- * When a recording URL is available, download to Blob is out-of-band;
- * for MVP we store the external video URL and trigger ingest if we can
- * fetch into a File (or mark awaiting for manual attach).
+ * Streams finished recordings into Vercel Blob, then starts the AI pipeline.
  */
 export async function POST(request: NextRequest) {
   const meetingId = request.nextUrl.searchParams.get("meetingId")?.trim();
@@ -75,24 +74,27 @@ export async function POST(request: NextRequest) {
     waitUntil(
       (async () => {
         try {
-          const res = await fetch(recordingUrl);
-          if (!res.ok) throw new Error(`Download failed (${res.status})`);
-          const buffer = Buffer.from(await res.arrayBuffer());
-          const { put } = await import("@vercel/blob");
-          const pathname = `transcribe/${meeting.ownerEmail}/live-${meeting.id}-${Date.now()}.mp4`;
-          const blob = await put(pathname, buffer, {
-            access: "private",
-            contentType: "video/mp4",
-            addRandomSuffix: false,
+          await upsertMeeting({
+            ...meeting,
+            botStatus: "uploading",
+            updatedAt: new Date().toISOString(),
           });
+
+          const pathname = `transcribe/${meeting.ownerEmail}/live-${meeting.id}-${Date.now()}.mp4`;
+          const uploaded = await streamRemoteUrlToBlob({
+            sourceUrl: recordingUrl,
+            pathname,
+            contentType: "video/mp4",
+          });
+
           await ingestMeetingRecording({
             meetingId: meeting.id,
             ownerEmail: meeting.ownerEmail,
-            blobUrl: blob.url,
-            pathname: blob.pathname,
+            blobUrl: uploaded.url,
+            pathname: uploaded.pathname,
             fileName: `${meeting.title}.mp4`,
-            contentType: "video/mp4",
-            fileSize: buffer.length,
+            contentType: uploaded.contentType,
+            fileSize: uploaded.size,
           });
         } catch (error) {
           console.error("[recall-webhook] ingest failed:", error);

@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { PlanTier } from "@/lib/constants";
 import { formatDuration } from "@/lib/format";
+import { normalizeSecret } from "@/lib/transcription-ready";
 import {
   InternalServerError,
   normalizeApiError,
@@ -45,7 +46,7 @@ export interface SttPayloadForAnalysis {
 }
 
 function getOpenAIClient() {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = normalizeSecret(process.env.OPENAI_API_KEY);
   if (!apiKey) {
     throw new InternalServerError(
       "OPENAI_API_KEY is not configured. Add it to your .env.local file.",

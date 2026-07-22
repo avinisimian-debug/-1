@@ -1,5 +1,3 @@
-import type { HistoryEntry } from "@/lib/history-store";
-
 export type HistorySearchField =
   | "fileName"
   | "headline"

@@ -52,6 +52,10 @@ export const env = createEnv({
     /** Protects GET /api/cron/live-bots */
     CRON_SECRET: z.string().min(1).optional(),
 
+    /** Resend — post-meeting digest emails */
+    RESEND_API_KEY: z.string().min(1).optional(),
+    RESEND_FROM_EMAIL: z.string().min(1).optional(),
+
     /** Dev: force simulated bot adapter */
     MEETING_BOT_SIMULATE: z.string().optional(),
   },
@@ -80,6 +84,8 @@ export const env = createEnv({
     ASSEMBLYAI_WEBHOOK_SECRET: process.env.ASSEMBLYAI_WEBHOOK_SECRET,
     RECALL_AI_API_KEY: process.env.RECALL_AI_API_KEY,
     CRON_SECRET: process.env.CRON_SECRET,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
     MEETING_BOT_SIMULATE: process.env.MEETING_BOT_SIMULATE,
     NEXT_PUBLIC_PAYPAL_CLIENT_ID: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,

@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { getAppBaseUrl } from "@/lib/paypal-subscriptions";
+import { normalizeSecret } from "@/lib/transcription-ready";
 import { readPersistedJson } from "@/lib/user-persistence";
 
 const CHECK_TIMEOUT_MS = 8_000;
@@ -92,7 +93,7 @@ export async function checkPersistenceLayer(): Promise<HealthCheckResult> {
  * Lightweight OpenAI credential check (models list). Transcription uses Whisper via this key.
  */
 export async function checkOpenAI(): Promise<HealthCheckResult> {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = normalizeSecret(process.env.OPENAI_API_KEY);
 
   if (!apiKey) {
     return {
@@ -142,8 +143,8 @@ export async function checkOpenAI(): Promise<HealthCheckResult> {
 }
 
 /**
- * AssemblyAI is not used in this codebase (Whisper handles transcription).
- * Reports skipped unless ASSEMBLYAI_API_KEY is explicitly set for future use.
+ * AssemblyAI is the primary STT engine when ASSEMBLYAI_API_KEY is set.
+ * Whisper (OpenAI) remains the fallback and powers GPT analysis.
  */
 export async function checkAssemblyAI(): Promise<HealthCheckResult> {
   const apiKey = process.env.ASSEMBLYAI_API_KEY?.trim();
@@ -153,7 +154,7 @@ export async function checkAssemblyAI(): Promise<HealthCheckResult> {
       name: "assemblyai",
       status: "healthy",
       latencyMs: 0,
-      message: "Not configured — app uses OpenAI Whisper (no AssemblyAI integration).",
+      message: "Not configured — using OpenAI Whisper STT fallback.",
       details: { configured: false, skipped: true },
     };
   }

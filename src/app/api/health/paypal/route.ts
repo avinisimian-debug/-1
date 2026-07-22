@@ -5,6 +5,11 @@ import {
   isPayPalConfigured,
 } from "@/lib/paypal-subscriptions";
 import { getPayPalAccessToken } from "@/lib/paypal";
+import {
+  isAssemblyAIConfigured,
+  isBlobStorageConfigured,
+  isOpenAiKeyConfigured,
+} from "@/lib/transcription-ready";
 
 /** Public health — no secrets exposed. */
 export async function GET() {
@@ -37,9 +42,9 @@ export async function GET() {
     clientIdMatch: clientMatch,
     authOk,
     baseUrl,
-    blobStorage: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-    assemblyai: Boolean(process.env.ASSEMBLYAI_API_KEY?.trim()),
-    openai: Boolean(process.env.OPENAI_API_KEY?.trim()),
+    blobStorage: isBlobStorageConfigured(),
+    assemblyai: isAssemblyAIConfigured(),
+    openai: isOpenAiKeyConfigured(),
     billing: billing
       ? {
           planOk: billing.planOk,

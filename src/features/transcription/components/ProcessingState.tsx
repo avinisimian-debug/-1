@@ -14,8 +14,10 @@ const STAGE_LABELS: Record<
   keyof ReturnType<typeof useLocale>["t"]
 > = {
   uploading: "procUploading",
+  queued: "procQueued",
   transcribing: "procTranscribing",
   analyzing: "procAnalyzing",
+  completed: "procCompleted",
 };
 
 interface ProcessingStateProps {

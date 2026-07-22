@@ -15,14 +15,14 @@ function getLocalDataDir(): string {
 
 const LOCAL_FILE = join(getLocalDataDir(), "context.json");
 
-function useBlobStorage(): boolean {
+function hasBlobBackend(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
 export async function readContextJson<T>(fallback: T): Promise<T> {
   let raw: string | null = null;
 
-  if (useBlobStorage()) {
+  if (hasBlobBackend()) {
     try {
       const result = await get(BLOB_PATH, { access: "private" });
       if (result?.statusCode === 200) {
@@ -55,7 +55,7 @@ export async function readContextJson<T>(fallback: T): Promise<T> {
 export async function writeContextJson<T>(data: T): Promise<void> {
   const content = JSON.stringify(data, null, 2);
 
-  if (useBlobStorage()) {
+  if (hasBlobBackend()) {
     await put(BLOB_PATH, content, {
       access: "private",
       addRandomSuffix: false,

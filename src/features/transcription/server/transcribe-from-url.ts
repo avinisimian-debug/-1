@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { formatDuration } from "@/lib/format";
 import { hasFeature } from "@/lib/plan-features";
 import type { PlanTier } from "@/lib/constants";
+import { normalizeSecret } from "@/lib/transcription-ready";
 import {
   BadRequestError,
   InternalServerError,
@@ -24,7 +25,7 @@ import {
 } from "./build-word-timestamps";
 
 function getOpenAIClient() {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = normalizeSecret(process.env.OPENAI_API_KEY);
   if (!apiKey) {
     throw new InternalServerError("OPENAI_API_KEY is not configured.");
   }
@@ -118,7 +119,7 @@ export async function transcribeRemoteUrlWithAssemblyAI(input: {
             },
           ];
 
-    let timedWords =
+    const timedWords =
       transcript.words && transcript.words.length > 0
         ? mapAssemblyAIWordsToTimedWords(
             transcript.words.map((w) => ({

@@ -15,7 +15,7 @@ function getLocalDataDir(): string {
 
 const LOCAL_USERS_FILE = join(getLocalDataDir(), "users.json");
 
-function useBlobStorage(): boolean {
+function hasBlobBackend(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
@@ -55,10 +55,10 @@ async function writeToBlob(content: string): Promise<void> {
 /**
  * Read persisted JSON.
  * On Vercel with Blob configured: never fall back to empty /tmp and then
- * overwrite Blob — that wiped Pro purchases for everyone.
+ * overwrite Blob ג€” that wiped Pro purchases for everyone.
  */
 export async function readPersistedJson<T>(fallback: T): Promise<T> {
-  if (useBlobStorage()) {
+  if (hasBlobBackend()) {
     try {
       const raw = await readFromBlob();
       if (!raw) return fallback;
@@ -97,7 +97,7 @@ export async function readPersistedJson<T>(fallback: T): Promise<T> {
 export async function writePersistedJson<T>(data: T): Promise<void> {
   const content = JSON.stringify(data, null, 2);
 
-  if (useBlobStorage()) {
+  if (hasBlobBackend()) {
     // Guard: never overwrite Blob with an empty users array unless intentional.
     if (Array.isArray(data) && data.length === 0) {
       try {
@@ -112,7 +112,7 @@ export async function writePersistedJson<T>(data: T): Promise<void> {
           }
         }
       } catch {
-        // If we cannot verify, still write — first bootstrap.
+        // If we cannot verify, still write ג€” first bootstrap.
       }
     }
     await writeToBlob(content);
@@ -122,7 +122,7 @@ export async function writePersistedJson<T>(data: T): Promise<void> {
     await writeToLocalFile(content);
   } catch (error) {
     // Local /tmp write is best-effort on Vercel.
-    if (!useBlobStorage()) throw error;
+    if (!hasBlobBackend()) throw error;
     console.warn("[user-persistence] Local cache write failed:", error);
   }
 }

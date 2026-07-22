@@ -30,6 +30,7 @@ export function LiveSessionForm({ hostName, onCreated }: LiveSessionFormProps) {
   const [botEnabled, setBotEnabled] = useState(true);
   const [diarization, setDiarization] = useState(true);
   const [language, setLanguage] = useState("auto");
+  const [attendeesText, setAttendeesText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
@@ -77,6 +78,10 @@ export function LiveSessionForm({ hostName, onCreated }: LiveSessionFormProps) {
             ? [{ title: materialTitle, url: materialUrl }]
             : [],
         hostName: hostName ?? undefined,
+        attendeeEmails: attendeesText
+          .split(/[,;\s]+/)
+          .map((e) => e.trim())
+          .filter(Boolean),
         bot: {
           enabled: botEnabled,
           diarization,
@@ -92,6 +97,7 @@ export function LiveSessionForm({ hostName, onCreated }: LiveSessionFormProps) {
       setAgendaText("");
       setMaterialTitle("");
       setMaterialUrl("");
+      setAttendeesText("");
       setOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not schedule meeting.");
@@ -206,6 +212,17 @@ export function LiveSessionForm({ hostName, onCreated }: LiveSessionFormProps) {
               onChange={(e) => setMaterialUrl(e.target.value)}
               className="rounded-xl border border-border bg-background px-3 py-2.5"
             />
+          </label>
+
+          <label className="grid gap-1 text-start text-sm sm:col-span-2">
+            <span className="font-medium text-foreground">{t.liveAttendeesLabel}</span>
+            <input
+              value={attendeesText}
+              onChange={(e) => setAttendeesText(e.target.value)}
+              placeholder="alex@company.com, jordan@company.com"
+              className="rounded-xl border border-border bg-background px-3 py-2.5 outline-none ring-accent/30 focus:ring-2"
+            />
+            <span className="text-[11px] text-muted-foreground">{t.liveAttendeesHint}</span>
           </label>
 
           <div className="sm:col-span-2 grid gap-3 rounded-xl border border-border/70 bg-muted/20 p-4 sm:grid-cols-3">

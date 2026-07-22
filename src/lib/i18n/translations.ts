@@ -138,8 +138,15 @@ export interface Translations {
   // Processing
   procWait: string;
   procUploading: string;
+  procQueued: string;
   procTranscribing: string;
   procAnalyzing: string;
+  procCompleted: string;
+  landingGuestTryHint: string;
+  landingGuestLimit: string;
+  landingGuestSignIn: string;
+  liveAttendeesLabel: string;
+  liveAttendeesHint: string;
   // Results
   resComplete: string;
   resProcessed: string;
@@ -784,8 +791,15 @@ const en: Translations = {
   blobBannerCta: "Open Vercel Dashboard",
   procWait: "Processing your recording — longer files may take a few minutes.",
   procUploading: "Uploading...",
+  procQueued: "Queued for processing...",
   procTranscribing: "Transcribing audio using AI...",
-  procAnalyzing: "Analyzing key insights...",
+  procAnalyzing: "Summarizing & extracting insights...",
+  procCompleted: "Completed",
+  landingGuestTryHint: "Try a short clip free — no account needed (max 10 MB).",
+  landingGuestLimit: "Guest trial is limited to 10 MB. Sign in for full uploads.",
+  landingGuestSignIn: "Create a free account to save history & unlock Pro.",
+  liveAttendeesLabel: "Attendee emails (optional)",
+  liveAttendeesHint: "Comma-separated. Digests are emailed when the bot finishes.",
   resComplete: "Transcription Complete",
   resProcessed: "Processed",
   resDownloadTranscript: "Download Transcript",
@@ -1447,8 +1461,15 @@ const he: Translations = {
   blobBannerCta: "פתיחת Vercel Dashboard",
   procWait: "מעבד את ההקלטה — קבצים ארוכים עשויים לקחת כמה דקות.",
   procUploading: "מעלה...",
+  procQueued: "בתור לעיבוד...",
   procTranscribing: "מתמלל באמצעות AI...",
-  procAnalyzing: "מנתח תובנות מרכזיות...",
+  procAnalyzing: "מסכם ומחלץ תובנות...",
+  procCompleted: "הושלם",
+  landingGuestTryHint: "נסו קליפ קצר בחינם — בלי חשבון (עד 10MB).",
+  landingGuestLimit: "ניסיון אורח מוגבל ל־10MB. התחברו להעלאות מלאות.",
+  landingGuestSignIn: "צרו חשבון חינם לשמירת היסטוריה ולפתיחת Pro.",
+  liveAttendeesLabel: "אימיילים של משתתפים (אופציונלי)",
+  liveAttendeesHint: "מופרדים בפסיקים. סיכום יישלח כשהבוט מסיים.",
   resComplete: "התמלול הושלם",
   resProcessed: "עובד",
   resDownloadTranscript: "הורד תמלול",

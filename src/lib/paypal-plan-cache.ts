@@ -10,7 +10,7 @@ export interface CachedPayPalPlans {
   productId?: string;
   launchPlanId?: string;
   launchPlanTrialDays?: number;
-  /** Bumped when billing_cycles shape changes — forces a fresh PayPal plan. */
+  /** Bumped when billing_cycles shape changes ג€” forces a fresh PayPal plan. */
   launchPlanSchemaVersion?: number;
   regularPlanId?: string;
 }
@@ -22,14 +22,14 @@ function getLocalFile(): string {
   return join(dir, "paypal-plans.json");
 }
 
-function useBlob(): boolean {
+function hasBlobBackend(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
 export async function readPayPalPlanCache(): Promise<CachedPayPalPlans> {
   let raw: string | null = null;
 
-  if (useBlob()) {
+  if (hasBlobBackend()) {
     try {
       const result = await get(BLOB_PATH, { access: "private" });
       if (result?.statusCode === 200) {
@@ -63,7 +63,7 @@ export async function writePayPalPlanCache(
 ): Promise<void> {
   const content = JSON.stringify(data, null, 2);
 
-  if (useBlob()) {
+  if (hasBlobBackend()) {
     await put(BLOB_PATH, content, {
       access: "private",
       addRandomSuffix: false,

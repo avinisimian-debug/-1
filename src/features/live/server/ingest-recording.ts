@@ -6,6 +6,7 @@ import { syncUserPlanOnAccess } from "@/lib/users-store";
 import { BadRequestError, NotFoundError } from "@/shared/api";
 import type { LiveSession } from "../types";
 import { getMeetingById, upsertMeeting } from "./meetings-store";
+import { sendMeetingDigestEmail } from "./send-digest-email";
 
 /**
  * Attach a Blob-uploaded recording to a meeting and kick off the AI pipeline.
@@ -79,6 +80,52 @@ export async function ingestMeetingRecording(input: {
   return updated;
 }
 
+type DigestLike = {
+  followUpEmail?: { subject?: string; body?: string };
+  executiveSummary?: string;
+  overview?: string;
+  actionItems?: Array<{ task?: string; owner?: string } | string>;
+};
+
+function extractDigestFields(digest: unknown): {
+  subject: string;
+  body: string;
+  summary?: string;
+  actions: string[];
+} {
+  const d = (digest ?? {}) as DigestLike & {
+    summary?: { overview?: string; executive?: string[] };
+  };
+  const actions = (d.actionItems ?? [])
+    .map((item) => {
+      if (typeof item === "string") return item.trim();
+      const task = item.task?.trim() ?? "";
+      const owner = item.owner?.trim();
+      if (!task) return "";
+      return owner ? `${task} (${owner})` : task;
+    })
+    .filter(Boolean)
+    .slice(0, 12);
+
+  const summary =
+    d.executiveSummary?.trim() ||
+    d.overview?.trim() ||
+    d.summary?.overview?.trim() ||
+    d.summary?.executive?.slice(0, 3).join(" ").trim() ||
+    undefined;
+
+  return {
+    subject:
+      d.followUpEmail?.subject?.trim() ||
+      "Your meeting digest is ready",
+    body:
+      d.followUpEmail?.body?.trim() ||
+      "Your automated meeting digest is ready. Open the secure link to review the transcript, summary, and action items.",
+    summary,
+    actions,
+  };
+}
+
 /**
  * Called when a transcription job linked to a meeting completes.
  */
@@ -91,11 +138,57 @@ export async function finalizeMeetingDigest(
   const meeting = await getMeetingById(meetingId);
   if (!meeting) return;
 
+  const nextStatus = status === "ready" ? "ready" : "failed";
+  // Brief analyzing signal before ready for UI fidelity
+  if (status === "ready") {
+    await upsertMeeting({
+      ...meeting,
+      botStatus: "analyzing",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
   await upsertMeeting({
     ...meeting,
-    botStatus: status === "ready" ? "ready" : "failed",
+    botStatus: nextStatus,
     digest: status === "ready" ? digest : meeting.digest,
     error: status === "failed" ? error : undefined,
     updatedAt: new Date().toISOString(),
   });
+
+  if (status !== "ready") return;
+
+  const recipients = [
+    meeting.ownerEmail,
+    ...(meeting.attendeeEmails ?? []),
+  ];
+  const fields = extractDigestFields(digest);
+  const base =
+    process.env.AUTH_URL?.replace(/\/$/, "") ||
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  const playbackUrl = base
+    ? `${base}/live/${meeting.id}`
+    : `/live/${meeting.id}`;
+
+  waitUntil(
+    sendMeetingDigestEmail({
+      to: recipients,
+      meetingTitle: meeting.title,
+      meetingUrl: meeting.meetingUrl,
+      playbackUrl,
+      subject: `${fields.subject} — ${meeting.title}`,
+      bodyText: fields.body,
+      executiveSummary: fields.summary,
+      actionItems: fields.actions,
+    }).then((result) => {
+      if (result.sent) {
+        console.log(`[email] digest sent meeting=${meetingId} id=${result.id}`);
+      } else if (result.skipped) {
+        console.log(`[email] skipped meeting=${meetingId}: ${result.skipped}`);
+      } else {
+        console.warn(`[email] failed meeting=${meetingId}: ${result.error}`);
+      }
+    }),
+  );
 }

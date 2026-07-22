@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getGoogleAuthMode, resolveGoogleClientId } from "@/lib/auth-oauth";
 
 export const runtime = "nodejs";

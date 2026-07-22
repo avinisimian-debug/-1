@@ -27,7 +27,6 @@ export function WorkspaceAudioPlayer({
   onSeek,
 }: WorkspaceAudioPlayerProps) {
   const { t } = useLocale();
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">

@@ -3,11 +3,11 @@ import { get, put } from "@vercel/blob";
 import type { EnqueueTranscriptionInput, TranscriptionJob } from "../types";
 
 /**
- * Job queue — in-memory + Vercel Blob when BLOB_READ_WRITE_TOKEN is set
+ * Job queue ג€” in-memory + Vercel Blob when BLOB_READ_WRITE_TOKEN is set
  * so polling works across serverless instances.
  *
  * Flow:
- *   POST /api/transcribe/jobs → enqueue → waitUntil(process) → 202 { jobId }
+ *   POST /api/transcribe/jobs ג†’ enqueue ג†’ waitUntil(process) ג†’ 202 { jobId }
  *   Client polls GET /api/transcribe/jobs/:id every 2s
  */
 
@@ -19,7 +19,7 @@ export interface JobQueue {
 
 const memory = new Map<string, TranscriptionJob>();
 
-function useBlobStorage(): boolean {
+function hasBlobBackend(): boolean {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
 }
 
@@ -29,7 +29,7 @@ function jobBlobPath(jobId: string): string {
 
 async function persistJob(job: TranscriptionJob): Promise<void> {
   memory.set(job.id, job);
-  if (!useBlobStorage()) return;
+  if (!hasBlobBackend()) return;
 
   await put(jobBlobPath(job.id), JSON.stringify(job), {
     access: "private",
@@ -43,7 +43,7 @@ async function loadJob(jobId: string): Promise<TranscriptionJob | null> {
   const cached = memory.get(jobId);
   if (cached) return cached;
 
-  if (!useBlobStorage()) return null;
+  if (!hasBlobBackend()) return null;
 
   try {
     const result = await get(jobBlobPath(jobId), { access: "private" });

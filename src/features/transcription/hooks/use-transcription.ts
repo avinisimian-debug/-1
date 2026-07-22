@@ -127,7 +127,11 @@ export function useTranscription() {
                 }
               : prev,
           );
-          setStage("transcribing");
+          setStage("queued");
+        },
+        onJobStage: (jobStage) => {
+          if (jobStage === "completed") return;
+          setStage(jobStage);
         },
         onHeadersReceived: () => setStage("analyzing"),
       }).then((uploadResult) => {

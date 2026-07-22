@@ -66,6 +66,8 @@ export interface LiveSession {
   materials: LiveMaterial[];
   qa: LiveQaItem[];
   hostName?: string;
+  /** Optional attendee emails for post-meeting digest delivery */
+  attendeeEmails?: string[];
   bot: LiveBotOptions;
   botStatus: BotStatus;
   botProvider?: BotProvider;
@@ -92,6 +94,7 @@ export interface LiveSessionInput {
   agenda?: string[];
   materials?: Array<{ title: string; url: string }>;
   hostName?: string;
+  attendeeEmails?: string[];
   bot?: Partial<LiveBotOptions>;
 }
 

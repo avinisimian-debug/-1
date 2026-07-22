@@ -1,4 +1,3 @@
-import type { ActionItemsPushPayload, IntegrationPushResult } from "../../types";
 import type { IntegrationAdapter } from "./adapter.types";
 
 export const slackAdapter: IntegrationAdapter = {

@@ -11,7 +11,6 @@ import {
 } from "@/lib/constants";
 import {
   type PricingTierId,
-  TIER_PRICING,
   appPlanToPricingTier,
   formatPrice,
   getDisplayPrice,

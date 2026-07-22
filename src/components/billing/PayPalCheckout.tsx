@@ -92,7 +92,7 @@ function PayPalButtonInner({ onSuccess }: PayPalCheckoutProps) {
           height: 45,
         }}
         disabled={status === "processing"}
-        createOrder={async (_data, actions: CreateOrderActions) => {
+        createOrder={async (_data, _actions: CreateOrderActions) => {
           setStatus("processing");
           setErrorMsg(null);
 

@@ -28,6 +28,12 @@ export interface UploadProgressInfo {
   bytesPerSecond: number;
 }
 
+export type JobProgressStage =
+  | "queued"
+  | "transcribing"
+  | "analyzing"
+  | "completed";
+
 export interface UploadTranscriptionOptions {
   file: File;
   plan: PlanTier;
@@ -39,12 +45,31 @@ export interface UploadTranscriptionOptions {
   onUploadProgress?: (info: UploadProgressInfo) => void;
   onUploadComplete?: () => void;
   onHeadersReceived?: () => void;
+  /** Async job progress: queued → transcribing → analyzing → completed. */
+  onJobStage?: (stage: JobProgressStage) => void;
 }
 
 const REQUEST_TIMEOUT_MS = 290_000;
-const JOB_POLL_INTERVAL_MS = 2_000;
-const JOB_POLL_MAX_MS = 280_000;
+const JOB_POLL_INTERVAL_MS = 2_500;
+/** Allow long AssemblyAI + GPT pipelines (webhook + poll). */
+const JOB_POLL_MAX_MS = 900_000;
 const RETRY_ATTEMPTS = 3;
+
+function mapJobStatusToStage(status: string): JobProgressStage | null {
+  switch (status) {
+    case "queued":
+    case "processing":
+      return "queued";
+    case "transcribing":
+      return "transcribing";
+    case "analyzing":
+      return "analyzing";
+    case "completed":
+      return "completed";
+    default:
+      return null;
+  }
+}
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -287,9 +312,11 @@ async function pollTranscriptionJob(
   jobId: string,
   signal?: AbortSignal,
   onHeadersReceived?: () => void,
+  onJobStage?: (stage: JobProgressStage) => void,
 ): Promise<Result<TranscriptionResult, Error>> {
   const started = Date.now();
   let notified = false;
+  let lastStage: JobProgressStage | null = null;
 
   while (Date.now() - started < JOB_POLL_MAX_MS) {
     if (signal?.aborted) {
@@ -315,12 +342,20 @@ async function pollTranscriptionJob(
     }
 
     const job = body.data;
-    if (!notified && (job.status === "processing" || job.status === "transcribing")) {
-      onHeadersReceived?.();
-      notified = true;
+    const mapped = mapJobStatusToStage(job.status);
+    if (mapped && mapped !== lastStage) {
+      lastStage = mapped;
+      onJobStage?.(mapped);
+      if (mapped === "transcribing" || mapped === "analyzing") {
+        if (!notified) {
+          onHeadersReceived?.();
+          notified = true;
+        }
+      }
     }
 
     if (job.status === "completed" && job.result) {
+      onJobStage?.("completed");
       return success(job.result);
     }
 
@@ -340,13 +375,13 @@ async function pollTranscriptionJob(
 
 async function transcribeFromBlob({
   file,
-  plan,
   userEmail,
   language = "auto",
   signal,
   onUploadProgress,
   onUploadComplete,
   onHeadersReceived,
+  onJobStage,
 }: UploadTranscriptionOptions): Promise<Result<TranscriptionResult, Error>> {
   if (!userEmail) {
     return failure(new Error("Sign in required to upload large files."));
@@ -376,6 +411,7 @@ async function transcribeFromBlob({
 
     track(file.size, file.size);
     onUploadComplete?.();
+    onJobStage?.("queued");
 
     // Async job path avoids gateway timeouts on long STT + GPT analysis.
     const enqueue = await withRetry(
@@ -404,7 +440,7 @@ async function transcribeFromBlob({
       { signal, label: "enqueue-job", attempts: 2 },
     );
 
-    return pollTranscriptionJob(enqueue, signal, onHeadersReceived);
+    return pollTranscriptionJob(enqueue, signal, onHeadersReceived, onJobStage);
   } catch (error) {
     if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
       return failure(new Error("Upload cancelled."));
@@ -435,7 +471,6 @@ async function transcribeFromBlob({
 /** XHR upload with real byte progress for small direct uploads. */
 function transcribeDirectUpload({
   file,
-  plan,
   language = "auto",
   signal,
   onUploadProgress,
