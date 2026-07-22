@@ -1,5 +1,6 @@
 "use client";
 
+import { ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocale } from "@/context/LocaleContext";
 import { cn } from "@/lib/utils";
@@ -141,16 +142,34 @@ export function LiveSessionForm({ hostName, onCreated }: LiveSessionFormProps) {
             />
           </label>
 
-          <label className="grid gap-1 text-start text-sm sm:col-span-2">
-            <span className="font-medium text-foreground">{t.liveHubFieldUrl}</span>
-            <input
-              value={meetingUrl}
-              onChange={(e) => setMeetingUrl(e.target.value)}
-              placeholder="Zoom · Meet · Teams · rtmp:// · WebRTC"
-              className="rounded-xl border border-border bg-background px-3 py-2.5 outline-none ring-accent/30 focus:ring-2"
-              required
-            />
-          </label>
+          <div className="grid gap-2 text-start text-sm sm:col-span-2">
+            <label className="grid gap-1">
+              <span className="font-medium text-foreground">{t.liveHubFieldUrl}</span>
+              <input
+                value={meetingUrl}
+                onChange={(e) => setMeetingUrl(e.target.value)}
+                placeholder="Zoom · Meet · Teams · rtmp:// · WebRTC"
+                className="rounded-xl border border-border bg-background px-3 py-2.5 outline-none ring-accent/30 focus:ring-2"
+                required
+                aria-describedby="live-meeting-bot-transparency"
+              />
+            </label>
+            <p
+              id="live-meeting-bot-transparency"
+              className="flex items-start gap-2.5 rounded-xl border border-accent/20 bg-accent/5 px-3.5 py-3 text-[13px] leading-relaxed text-muted-foreground"
+            >
+              <ShieldCheck
+                className="mt-0.5 size-4 shrink-0 text-accent"
+                aria-hidden
+              />
+              <span>
+                <span className="me-1" aria-hidden>
+                  💡
+                </span>
+                {t.liveHubBotTransparency}
+              </span>
+            </p>
+          </div>
 
           <label className="grid gap-1 text-start text-sm">
             <span className="font-medium text-foreground">{t.liveHubFieldStarts}</span>

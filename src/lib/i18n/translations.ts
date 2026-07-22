@@ -503,6 +503,7 @@ export interface Translations {
   liveHubQaSend: string;
   liveHubFieldTitle: string;
   liveHubFieldUrl: string;
+  liveHubBotTransparency: string;
   liveHubFieldStarts: string;
   liveHubFieldDuration: string;
   liveHubFieldDesc: string;
@@ -1175,6 +1176,8 @@ const en: Translations = {
   liveHubQaSend: "Send",
   liveHubFieldTitle: "Session title",
   liveHubFieldUrl: "Meeting link (Zoom / Meet / Teams / RTMP)",
+  liveHubBotTransparency:
+    "After you paste the link, Staz AI Assistant will join the meeting as a quiet participant. The bot records and listens only to produce a transcript, executive summary, and action items when the session ends.",
   liveHubFieldStarts: "Starts at",
   liveHubFieldDuration: "Duration (minutes)",
   liveHubFieldDesc: "Description",
@@ -1839,6 +1842,8 @@ const he: Translations = {
   liveHubQaSend: "שליחה",
   liveHubFieldTitle: "כותרת המפגש",
   liveHubFieldUrl: "קישור פגישה (Zoom / Meet / Teams / RTMP)",
+  liveHubBotTransparency:
+    "לאחר הדבקת הקישור, נציג סיכום אוטומטי מטעם המערכת (Staz AI Assistant) יצטרף לפגישה כמשתתף שקט. הבוט יקליט ויקשיב לשיחה בלבד כדי לייצר עבורכם תמלול, סיכום מנהלים ורשימת משימות בסיומה.",
   liveHubFieldStarts: "שעת התחלה",
   liveHubFieldDuration: "משך (דקות)",
   liveHubFieldDesc: "תיאור",
