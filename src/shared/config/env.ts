@@ -52,8 +52,14 @@ export const env = createEnv({
     RECALL_API_BASE_URL: z.string().url().optional(),
     RECALL_WEBHOOK_SECRET: z.string().min(1).optional(),
 
-    /** Protects GET /api/cron/live-bots */
-    CRON_SECRET: z.string().min(1).optional(),
+    /** Protects GET /api/cron/live-bots — no leading/trailing whitespace (Vercel cron requirement). */
+    CRON_SECRET: z
+      .string()
+      .min(1)
+      .refine((s) => s === s.trim(), {
+        message: "CRON_SECRET must not contain leading or trailing whitespace",
+      })
+      .optional(),
 
     /** Resend — post-meeting digest emails */
     RESEND_API_KEY: z.string().min(1).optional(),
@@ -89,7 +95,7 @@ export const env = createEnv({
     RECALL_AI_REGION: process.env.RECALL_AI_REGION,
     RECALL_API_BASE_URL: process.env.RECALL_API_BASE_URL,
     RECALL_WEBHOOK_SECRET: process.env.RECALL_WEBHOOK_SECRET,
-    CRON_SECRET: process.env.CRON_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET?.trim(),
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
     MEETING_BOT_SIMULATE: process.env.MEETING_BOT_SIMULATE,
