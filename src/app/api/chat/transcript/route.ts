@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { chatWithTranscript } from "@/features/chat/server/chat-transcript.use-case";
+import type { TranscriptEntry } from "@/features/transcription/types";
 import { BadRequestError, UnauthorizedError, withApiHandler } from "@/shared/api";
 import { isFailure } from "@/shared/lib/result";
 
@@ -15,20 +16,23 @@ export const POST = withApiHandler(async (request: NextRequest) => {
 
   const body = (await request.json()) as {
     transcriptText?: string;
+    transcriptEntries?: TranscriptEntry[];
     fileName?: string;
     question?: string;
     history?: Array<{ role: "user" | "assistant"; content: string }>;
   };
 
-  if (!body.transcriptText?.trim()) {
-    throw new BadRequestError("transcriptText is required.");
+  const hasEntries = Boolean(body.transcriptEntries?.length);
+  if (!body.transcriptText?.trim() && !hasEntries) {
+    throw new BadRequestError("transcriptText or transcriptEntries is required.");
   }
   if (!body.question?.trim()) {
     throw new BadRequestError("question is required.");
   }
 
   const result = await chatWithTranscript({
-    transcriptText: body.transcriptText,
+    transcriptText: body.transcriptText ?? "",
+    transcriptEntries: body.transcriptEntries,
     fileName: body.fileName,
     question: body.question,
     history: body.history,

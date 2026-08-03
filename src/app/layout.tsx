@@ -1,26 +1,38 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import {
+  Fraunces,
+  Heebo,
+  IBM_Plex_Mono,
+  Manrope,
+} from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { buildSiteMetadata } from "@/lib/seo";
 import { I18N_BOOTSTRAP_SCRIPT } from "@/lib/i18n/bootstrap-script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
   display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const heebo = Heebo({
+  variable: "--font-heebo",
+  subsets: ["hebrew", "latin"],
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  weight: ["400", "500"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -29,8 +41,8 @@ export const metadata: Metadata = buildSiteMetadata();
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f5f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0e0d" },
   ],
 };
 
@@ -44,13 +56,12 @@ export default function RootLayout({
       lang="he"
       dir="rtl"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${manrope.variable} ${heebo.variable} ${ibmPlexMono.variable} h-full antialiased font-ui`}
     >
       <head>
         <script
           dangerouslySetInnerHTML={{ __html: I18N_BOOTSTRAP_SCRIPT }}
         />
-        {/* Plain tags so AdSense crawler can verify without waiting for Next.js Script hydration */}
         <meta
           name="google-adsense-account"
           content="ca-pub-1517251000751283"

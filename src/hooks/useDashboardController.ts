@@ -10,6 +10,7 @@ import {
   type TranscriptionResult,
   type TranscriptionStatus,
 } from "@/features/transcription";
+import { markProcessedFirstFile } from "@/lib/user-milestones";
 
 export type DashboardPhase = TranscriptionStatus;
 
@@ -17,7 +18,9 @@ export function useDashboardController() {
   const { promptUpgrade } = useFeatureGate();
   const { count, limit, canTranscribe } = useUsage();
   const [language, setLanguage] = useState("auto");
-  const [historyResult, setHistoryResult] = useState<TranscriptionResult | null>(null);
+  const [historyResult, setHistoryResult] = useState<TranscriptionResult | null>(
+    null,
+  );
 
   const transcription = useTranscription();
 
@@ -39,8 +42,23 @@ export function useDashboardController() {
       window.removeEventListener("stazai:open-history-result", loadFromStorage);
   }, []);
 
+  // Hide demo after first successful real transcription (not demo workspace)
+  useEffect(() => {
+    const result = transcription.result;
+    if (!result) return;
+    if (
+      result.fileName.includes("Staz Demo") ||
+      result.fileName.includes("Demo")
+    ) {
+      return;
+    }
+    markProcessedFirstFile();
+  }, [transcription.result]);
+
   const displayResult = transcription.result ?? historyResult;
-  const phase: DashboardPhase = displayResult ? "complete" : transcription.status;
+  const phase: DashboardPhase = displayResult
+    ? "complete"
+    : transcription.status;
 
   const onboarding = useOnboarding({
     transcriptionStatus: phase,
@@ -51,6 +69,7 @@ export function useDashboardController() {
 
   const processFile = useCallback(
     (file: File) => {
+      markProcessedFirstFile();
       transcription.processFile(file, language);
     },
     [transcription, language],
@@ -58,6 +77,7 @@ export function useDashboardController() {
 
   const processUrl = useCallback(
     (url: string) => {
+      markProcessedFirstFile();
       transcription.processUrl(url, language);
     },
     [transcription, language],

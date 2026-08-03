@@ -24,30 +24,53 @@
 :root {
   color-scheme: light;
 
+  /* ── Latitude design system (Wave 1) ─────────────────────────────────── */
+  --bg-canvas: #f6f5f2;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #eef0ec;
+  --bg-mute: #e4e7e2;
+  --ink-primary: #141816;
+  --ink-secondary: #5c635c;
+  --ink-tertiary: #8b928a;
+  --ink-inverse: #f6f5f2;
+  --line-subtle: rgba(20, 24, 22, 0.08);
+  --line-strong: rgba(20, 24, 22, 0.14);
+  --brand-ink: #0e1210;
+  --accent-soft: rgba(31, 107, 92, 0.1);
+  --accent-glow: rgba(31, 107, 92, 0.18);
+  --signal: #c4a35a;
+  --stage-radial: radial-gradient(120% 80% at 50% -10%, #1a2a26 0%, #0c0e0d 55%);
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --motion-fast: 160ms;
+  --motion-base: 240ms;
+  --motion-slow: 400ms;
+  --ease-premium: cubic-bezier(0.2, 0.8, 0.2, 1);
+
   /* ── Semantic core tokens ─────────────────────────────────────────────── */
-  --background: #fafafa;
-  --surface: #ffffff;
-  --surface-raised: #ffffff;
-  --surface-sunken: #f4f4f5;
-  --foreground: #09090b;
+  --background: var(--bg-canvas);
+  --surface: var(--bg-elevated);
+  --surface-raised: var(--bg-elevated);
+  --surface-sunken: var(--bg-subtle);
+  --foreground: var(--ink-primary);
 
   /* Text hierarchy */
-  --text-secondary: #52525b;
-  --text-tertiary: #71717a;
+  --text-secondary: var(--ink-secondary);
+  --text-tertiary: var(--ink-tertiary);
   --text-disabled: #a1a1aa;
-  --text-inverse: #fafafa;
+  --text-inverse: var(--ink-inverse);
 
-  /* Brand & actions */
-  --primary: #18181b;
-  --primary-hover: #27272a;
-  --primary-active: #3f3f46;
-  --primary-foreground: #fafafa;
+  /* Brand & actions — cedar teal (not purple) */
+  --primary: var(--brand-ink);
+  --primary-hover: #1c221f;
+  --primary-active: #2a322e;
+  --primary-foreground: var(--ink-inverse);
 
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-active: #4338ca;
+  --accent: #1f6b5c;
+  --accent-hover: #185547;
+  --accent-active: #134539;
   --accent-foreground: #ffffff;
-  --accent-muted: #eef2ff;
+  --accent-muted: var(--accent-soft);
 
   /* Semantic status */
   --destructive: #dc2626;
@@ -75,7 +98,7 @@
   --border-muted: #ebebef;
   --border-strong: #d4d4d8;
   --input: #e4e4e7;
-  --ring: #6366f1;
+  --ring: #1f6b5c;
 
   /* Radius — rem-based */
   --radius-sm: 0.375rem;
@@ -89,11 +112,11 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
   --shadow-lg: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-  --shadow-focus: 0 0 0 3px rgb(99 102 241 / 0.22);
+  --shadow-focus: 0 0 0 3px var(--accent-glow);
   --shadow-premium:
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 8px 24px -4px rgb(99 102 241 / 0.08),
-    0 24px 48px -12px rgb(0 0 0 / 0.06);
+    0 1px 2px rgb(20 24 22 / 0.04),
+    0 8px 24px -4px rgb(20 24 22 / 0.06),
+    0 16px 40px -12px rgb(20 24 22 / 0.08);
 
   /* Motion */
   --duration-fast: 100ms;
@@ -141,13 +164,29 @@
 .dark {
   color-scheme: dark;
 
-  --background: #09090b;
-  --surface: #18181b;
-  --surface-raised: #1f1f23;
-  --surface-sunken: #0f0f11;
-  --foreground: #fafafa;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
+  --bg-canvas: #0c0e0d;
+  --bg-elevated: #141816;
+  --bg-subtle: #1c211e;
+  --bg-mute: #252b27;
+  --ink-primary: #ededea;
+  --ink-secondary: #a8aea8;
+  --ink-tertiary: #6f7670;
+  --ink-inverse: #0c0e0d;
+  --line-subtle: rgba(237, 237, 234, 0.08);
+  --line-strong: rgba(237, 237, 234, 0.14);
+  --accent-soft: rgba(61, 155, 134, 0.14);
+  --accent-glow: rgba(61, 155, 134, 0.22);
+  --signal: #d4b46a;
+  --glass: rgba(20, 24, 22, 0.72);
+  --glass-border: rgba(237, 237, 234, 0.08);
+
+  --background: var(--bg-canvas);
+  --surface: var(--bg-elevated);
+  --surface-raised: #1a1f1c;
+  --surface-sunken: var(--bg-subtle);
+  --foreground: var(--ink-primary);
+  --text-secondary: var(--ink-secondary);
+  --text-tertiary: var(--ink-tertiary);
   --text-disabled: #52525b;
   --text-inverse: #09090b;
 
@@ -156,11 +195,11 @@
   --primary-active: #d4d4d8;
   --primary-foreground: #18181b;
 
-  --accent: #7c85e3;
-  --accent-hover: #8f97e8;
-  --accent-active: #a0a7ec;
+  --accent: #3d9b86;
+  --accent-hover: #4aaf98;
+  --accent-active: #5bc4ab;
   --accent-foreground: #09090b;
-  --accent-muted: #1e2035;
+  --accent-muted: var(--accent-soft);
 
   --destructive: #ef4444;
   --destructive-hover: #f87171;
@@ -184,13 +223,13 @@
   --border: #27272a;
   --border-strong: #3f3f46;
   --input: #27272a;
-  --ring: #7c85e3;
+  --ring: #3d9b86;
 
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
   --shadow-md: 0 2px 4px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
   --shadow-lg: 0 8px 16px -4px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-  --shadow-focus: 0 0 0 3px rgb(124 133 227 / 0.32);
+  --shadow-focus: 0 0 0 3px var(--accent-glow);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -1169,4 +1208,201 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* =============================================================================
+   LATITUDE — Wave 1 premium workspace patterns
+   ============================================================================= */
+
+@layer components {
+  .lat-stage {
+    background: var(--stage-radial);
+    color: #ededea;
+  }
+
+  .lat-glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--shadow-premium);
+  }
+
+  .lat-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    background: var(--accent);
+    color: #fff;
+    transition:
+      background var(--motion-fast) var(--ease-premium),
+      transform var(--motion-fast) var(--ease-premium);
+  }
+  .lat-btn-primary:hover {
+    background: var(--accent-hover);
+  }
+  .lat-btn-primary:active {
+    transform: scale(0.98);
+  }
+  .lat-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+
+  .lat-btn-inverse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    background: #ededea;
+    color: #0e1210;
+    transition: opacity var(--motion-fast) var(--ease-premium);
+  }
+  .lat-btn-inverse:hover {
+    opacity: 0.92;
+  }
+
+  .lat-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0 0.9rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    color: inherit;
+    opacity: 0.88;
+    transition: background var(--motion-fast) var(--ease-premium);
+  }
+  .lat-btn-ghost:hover {
+    background: var(--accent-soft);
+    opacity: 1;
+  }
+
+  .lat-panel {
+    background: var(--bg-elevated);
+    border: 1px solid var(--line-subtle);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .lat-transcript-line {
+    border-inline-start: 2px solid transparent;
+    padding-inline-start: 0.75rem;
+    transition:
+      background var(--motion-fast) var(--ease-premium),
+      border-color var(--motion-instant, 80ms) ease-out;
+  }
+  .lat-transcript-line[data-active="true"] {
+    background: var(--accent-soft);
+    border-inline-start-color: var(--signal);
+  }
+
+  .lat-time-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-subtle);
+    padding: 0.15rem 0.45rem;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ink-secondary);
+    transition:
+      background var(--motion-fast) var(--ease-premium),
+      border-color var(--motion-fast) var(--ease-premium),
+      color var(--motion-fast) var(--ease-premium);
+  }
+  .lat-time-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .lat-workspace-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 28%) minmax(280px, 1fr) minmax(300px, 30%);
+    min-height: 0;
+    flex: 1;
+  }
+
+  @media (max-width: 1023px) {
+    .lat-workspace-grid {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .lat-fade-rise {
+    animation: fade-in-up var(--motion-base) var(--ease-premium) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lat-fade-rise {
+      animation: none;
+    }
+  }
+}
+
+.font-brand {
+  font-family: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+.font-ui {
+  font-family: var(--font-heebo), var(--font-manrope), system-ui, sans-serif;
+}
+.font-mono-time {
+  font-family: var(--font-ibm-plex-mono), ui-monospace, monospace;
+}
+
+/* Capture stage — Latitude glass dropzone */
+.lat-capture-zone {
+  border-radius: 1.25rem;
+  border: 1.5px dashed var(--line-strong);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(246, 245, 242, 0.92) 100%
+    );
+  box-shadow: var(--shadow-premium);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition:
+    border-color var(--motion-base) var(--ease-premium),
+    box-shadow var(--motion-base) var(--ease-premium),
+    transform var(--motion-base) var(--ease-premium),
+    background var(--motion-base) var(--ease-premium);
+}
+.lat-capture-zone:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line-strong));
+  transform: translateY(-1px);
+}
+.lat-capture-zone--dragging {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 4px var(--accent-glow), var(--shadow-premium);
+  transform: scale(1.01);
+}
+.dark .lat-capture-zone {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 24, 22, 0.85) 0%,
+      rgba(12, 14, 13, 0.95) 100%
+    );
+  border-color: var(--line-strong);
 }

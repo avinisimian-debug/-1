@@ -38,6 +38,7 @@ export function useTranscriptChat(result: TranscriptionResult) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             transcriptText: buildTimestampedTranscriptText(result),
+            transcriptEntries: result.transcript,
             fileName: result.fileName,
             question: trimmed,
             history: history.slice(0, -1),

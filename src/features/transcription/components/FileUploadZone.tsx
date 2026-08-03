@@ -200,9 +200,9 @@ export function FileUploadZone({
         }}
         onClick={() => !disabled && inputRef.current?.click()}
         className={cn(
-          "upload-zone group relative cursor-pointer overflow-hidden p-10 text-center sm:p-14",
-          isDragging && "upload-zone-dragging",
-          disabled && "upload-zone-disabled pointer-events-none opacity-50",
+          "lat-capture-zone group relative cursor-pointer overflow-hidden p-10 text-center sm:p-14",
+          isDragging && "lat-capture-zone--dragging",
+          disabled && "pointer-events-none opacity-50",
         )}
       >
         <input
@@ -220,15 +220,15 @@ export function FileUploadZone({
 
         <div
           aria-hidden
-          className="pointer-events-none mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-muted ring-1 ring-accent/15 transition-transform duration-300 group-hover:scale-105"
+          className="pointer-events-none mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--accent-soft)] ring-1 ring-[var(--accent)]/15 transition-transform duration-300 group-hover:scale-105"
         >
-          <Upload className="h-7 w-7 text-accent" strokeWidth={1.75} />
+          <Upload className="h-7 w-7 text-[var(--accent)]" strokeWidth={1.75} />
         </div>
 
-        <h2 className="relative text-xl font-semibold text-foreground">
+        <h2 className="relative text-xl font-semibold text-[var(--ink-primary)]">
           {t.uploadDrop}
         </h2>
-        <p className="relative mt-2 text-sm leading-relaxed text-muted-foreground">
+        <p className="relative mt-2 text-sm leading-relaxed text-[var(--ink-secondary)]">
           {t.uploadBrowse}
         </p>
 
@@ -236,20 +236,20 @@ export function FileUploadZone({
           {formatLabels.map(({ icon: Icon, label }) => (
             <span
               key={label}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--line-subtle)] bg-[var(--bg-elevated)]/80 px-3 py-1.5 text-xs text-[var(--ink-tertiary)] shadow-xs backdrop-blur-sm"
             >
-              <Icon className="h-3.5 w-3.5 text-accent/70" />
+              <Icon className="h-3.5 w-3.5 text-[var(--accent)]/80" />
               {label}
             </span>
           ))}
         </div>
 
         <div className="relative mt-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-4">
-          <span className="inline-flex items-center rounded-md border border-border/80 bg-card/80 px-3 py-1.5 text-xs text-muted-foreground">
+          <span className="inline-flex items-center rounded-lg border border-[var(--line-subtle)] bg-[var(--bg-elevated)]/70 px-3 py-1.5 text-xs text-[var(--ink-tertiary)] backdrop-blur-sm">
             {t.uploadFileSizeNote.replace("{size}", limits.maxFileSizeLabel)}
           </span>
-          <span className="hidden h-3 w-px bg-border sm:block" aria-hidden />
-          <span className="inline-flex items-center rounded-md border border-border/80 bg-card/80 px-3 py-1.5 text-xs text-muted-foreground">
+          <span className="hidden h-3 w-px bg-[var(--line-subtle)] sm:block" aria-hidden />
+          <span className="inline-flex items-center rounded-lg border border-[var(--line-subtle)] bg-[var(--bg-elevated)]/70 px-3 py-1.5 text-xs text-[var(--ink-tertiary)] backdrop-blur-sm">
             {t.uploadDurationNote
               .replace("{duration}", limits.maxDurationLabel)
               .replace("{plan}", isPro ? "Pro" : t.planFree)}
@@ -257,7 +257,7 @@ export function FileUploadZone({
         </div>
 
         {!isPro && (
-          <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-accent">
+          <p className="relative mt-3 inline-flex items-center gap-1.5 text-xs text-[var(--accent)]">
             <Lock className="h-3 w-3" />
             <Link
               href="/settings#upgrade"

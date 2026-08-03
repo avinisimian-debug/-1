@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { normalizeSecret } from "@/lib/transcription-ready";
+import type { TranscriptEntry } from "@/features/transcription/types";
 import {
   BadRequestError,
   InternalServerError,
@@ -13,6 +14,10 @@ import {
   buildChatUserPrompt,
   buildWorkspaceChatSystemPrompt,
 } from "./chat-prompts";
+import {
+  buildGroundedTranscriptBlock,
+  groundCitationsAgainstTranscript,
+} from "./ground-citations";
 
 const CHAT_MODEL = "gpt-4o-mini";
 
@@ -44,30 +49,38 @@ function normalizeCitations(
       speaker: c.speaker?.trim() || undefined,
       quote: c.quote?.trim() || undefined,
     }))
-    .filter((c) => Boolean(c.timestamp));
+    .filter((c) => Boolean(c.timestamp) || Boolean(c.quote));
 }
 
 export async function chatWithTranscript(input: {
   transcriptText: string;
+  /** Prefer structured entries for hard grounding (required for verified ↗). */
+  transcriptEntries?: TranscriptEntry[];
   fileName?: string;
   question: string;
   history?: Array<{ role: "user" | "assistant"; content: string }>;
 }): Promise<Result<ChatTranscriptResponse, ApiError>> {
   try {
-    const transcriptText = input.transcriptText.trim();
     const question = input.question.trim();
-    if (!transcriptText) {
-      return failure(new BadRequestError("Transcript text is empty."));
-    }
     if (!question) {
       return failure(new BadRequestError("Question is required."));
+    }
+
+    const entries = input.transcriptEntries?.filter((e) => e.text?.trim()) ?? [];
+    const transcriptText =
+      entries.length > 0
+        ? buildGroundedTranscriptBlock(entries)
+        : input.transcriptText.trim();
+
+    if (!transcriptText) {
+      return failure(new BadRequestError("Transcript text is empty."));
     }
 
     const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: CHAT_MODEL,
       response_format: { type: "json_object" },
-      temperature: 0.3,
+      temperature: 0.2,
       messages: [
         { role: "system", content: buildChatSystemPrompt() },
         {
@@ -87,15 +100,29 @@ export async function chatWithTranscript(input: {
       return failure(new InternalServerError("Chat model returned no content."));
     }
 
-    const parsed = JSON.parse(raw) as GptChatResponse;
+    let parsed: GptChatResponse;
+    try {
+      parsed = JSON.parse(raw) as GptChatResponse;
+    } catch {
+      return failure(
+        new InternalServerError("Chat model returned invalid JSON."),
+      );
+    }
+
     const answer = parsed.answer?.trim();
     if (!answer) {
       return failure(new InternalServerError("Chat response missing answer."));
     }
 
+    const loose = normalizeCitations(parsed.citations);
+    const citations =
+      entries.length > 0
+        ? groundCitationsAgainstTranscript(loose, entries)
+        : loose.filter((c) => Boolean(c.timestamp));
+
     return success({
       answer,
-      citations: normalizeCitations(parsed.citations),
+      citations,
       model: CHAT_MODEL,
     });
   } catch (error) {
@@ -136,7 +163,14 @@ export async function chatWithWorkspaceCorpus(input: {
       return failure(new InternalServerError("Chat model returned no content."));
     }
 
-    const parsed = JSON.parse(raw) as GptChatResponse;
+    let parsed: GptChatResponse;
+    try {
+      parsed = JSON.parse(raw) as GptChatResponse;
+    } catch {
+      return failure(
+        new InternalServerError("Chat model returned invalid JSON."),
+      );
+    }
     const answer = parsed.answer?.trim();
     if (!answer) {
       return failure(new InternalServerError("Chat response missing answer."));
@@ -144,7 +178,9 @@ export async function chatWithWorkspaceCorpus(input: {
 
     return success({
       answer,
-      citations: normalizeCitations(parsed.citations),
+      citations: normalizeCitations(parsed.citations).filter((c) =>
+        Boolean(c.timestamp),
+      ),
       model: CHAT_MODEL,
     });
   } catch (error) {

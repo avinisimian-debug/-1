@@ -6,6 +6,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { DashboardWorkspace } from "@/components/dashboard/DashboardWorkspace";
 import { DashboardInspector } from "@/components/dashboard/DashboardInspector";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { DemoWorkspaceEntry } from "@/features/staz-workspace";
 import {
   ErrorState,
   ProcessingState,
@@ -47,6 +48,7 @@ export function DashboardContent() {
       {dash.phase === "idle" && (
         <div className="flex items-start gap-6">
           <div className="min-w-0 flex-1">
+            <DemoWorkspaceEntry />
             <DashboardWorkspace
               language={dash.language}
               onLanguageChange={dash.setLanguage}
