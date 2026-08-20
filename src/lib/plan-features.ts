@@ -24,7 +24,8 @@ export type FeatureKey =
   | "sharedLinks"
   | "smartSearch"
   | "summaryTemplates"
-  | "speakerDiarization";
+  | "speakerDiarization"
+  | "meetingQuota";
 
 export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   executiveSummary: "both",
@@ -33,7 +34,7 @@ export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   actionItems: "both",
   transcriptSearch: "both",
   copyToClipboard: "both",
-  pdfExport: "both",
+  pdfExport: "pro",
   txtExport: "both",
   history: "both",
   sentimentAnalysis: "pro",
@@ -51,6 +52,7 @@ export const PLAN_FEATURE_ACCESS: Record<FeatureKey, PlanTier | "both"> = {
   smartSearch: "both",
   summaryTemplates: "pro",
   speakerDiarization: "pro",
+  meetingQuota: "pro",
 };
 
 export function hasFeature(plan: PlanTier, feature: FeatureKey): boolean {

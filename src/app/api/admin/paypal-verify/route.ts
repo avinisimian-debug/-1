@@ -30,10 +30,13 @@ export async function GET() {
     checks.push({ name: "resolve_plan", ok: true, detail: planId });
 
     const baseUrl = getAppBaseUrl();
+    if (!session.user.email) {
+      return NextResponse.json({ error: "Missing admin email" }, { status: 400 });
+    }
     const subscription = await createPayPalSubscription(
       `${baseUrl}/settings?subscription=success`,
       `${baseUrl}/settings?subscription=cancel`,
-      session.user.email ?? undefined,
+      session.user.email,
     );
     checks.push({
       name: "create_subscription",

@@ -1,4 +1,3 @@
-import { del } from "@vercel/blob";
 import {
   canUseAssemblyAIWebhook,
   submitAssemblyAIWithWebhook,
@@ -16,7 +15,9 @@ import {
   fileFromBlobUrl,
 } from "@/lib/blob-file";
 import { hasFeature } from "@/lib/plan-features";
+import { saveMeetingForUser, recoverableFailedResult } from "@/features/library/server/meetings-store";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
+import { incrementServerUsage } from "@/lib/usage-server";
 import { isFailure } from "@/shared/lib/result";
 import type { TranscriptionJob } from "../types";
 import { jobQueue, markJobFailed } from "./transcription-queue";
@@ -122,6 +123,23 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
     });
 
     if (isFailure(result)) {
+      try {
+        await saveMeetingForUser({
+          ownerEmail: running.ownerEmail,
+          result: recoverableFailedResult(
+            running.fileName,
+            "התמלול או הניתוח נכשלו.",
+          ),
+          mediaBlobUrl: running.audioBlobUrl,
+          mediaKind: running.contentType?.startsWith("video/")
+            ? "video"
+            : "audio",
+          plan: running.plan,
+          persistStatus: "failed_recoverable",
+        });
+      } catch (error) {
+        console.error("[jobs] recoverable library save failed", error);
+      }
       await markJobFailed(running, result.error.message, {
         incrementAttempts: false,
       });
@@ -138,7 +156,27 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
       error: undefined,
     });
 
+    try {
+      await saveMeetingForUser({
+        ownerEmail: running.ownerEmail,
+        result: result.data,
+        mediaBlobUrl: running.audioBlobUrl,
+        mediaKind: running.contentType?.startsWith("video/")
+          ? "video"
+          : "audio",
+        plan: running.plan,
+        persistStatus: "complete",
+      });
+    } catch (error) {
+      console.error("[jobs] failed to persist meeting library row", error);
+      await markJobFailed(running, "העיבוד הצליח אך הספרייה בענן לא נשמרה.", {
+        incrementAttempts: false,
+      });
+      return;
+    }
+
     await incrementTranscriptionsToday();
+    await incrementServerUsage(running.ownerEmail);
     await linkMeetingResult(running, "ready", result.data);
 
     const userId = resolveUserId(running.ownerEmail);
@@ -147,13 +185,6 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
       plan: running.plan,
       result: result.data,
     }).catch(() => {});
-
-    if (running.audioBlobUrl && process.env.BLOB_READ_WRITE_TOKEN) {
-      // Keep recording when linked to a Live meeting for playback.
-      if (!running.meetingId) {
-        await del(running.audioBlobUrl).catch(() => {});
-      }
-    }
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Processing failed";

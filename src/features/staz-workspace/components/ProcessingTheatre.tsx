@@ -1,27 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { ProcessingStage } from "@/features/transcription/types";
 import { cn } from "@/lib/utils";
 
-const STAGE_LABELS = [
-  "Uploading",
-  "Listening",
-  "Understanding",
-  "Organizing decisions",
-] as const;
-
 const STAGE_LABELS_HE = [
-  "\u05de\u05e2\u05dc\u05d9\u05dd",
-  "\u05de\u05e7\u05e9\u05d9\u05d1\u05d9\u05dd",
-  "\u05de\u05d1\u05d9\u05e0\u05d9\u05dd",
-  "\u05de\u05d0\u05e8\u05d2\u05e0\u05d9\u05dd \u05d4\u05d7\u05dc\u05d8\u05d5\u05ea",
+  "מעלים",
+  "מתמללים",
+  "בונים תמצית מנהלים",
+  "מארגנים החלטות ומשימות",
 ] as const;
 
 interface ProcessingTheatreProps {
   fileName?: string;
   stage?: ProcessingStage;
   className?: string;
+  onCancel?: () => void;
 }
 
 function stageIndex(stage?: ProcessingStage): number {
@@ -44,17 +37,9 @@ export function ProcessingTheatre({
   fileName,
   stage,
   className,
+  onCancel,
 }: ProcessingTheatreProps) {
   const active = stageIndex(stage);
-  const [tick, setTick] = useState(0);
-  const title = "Staz " + "\u05de\u05e7\u05e9\u05d9\u05d1";
-  const caption =
-    "\u05d0\u05e4\u05e9\u05e8 \u05dc\u05d4\u05de\u05e9\u05d9\u05da \u05dc\u05e2\u05d1\u05d5\u05d3 \u2014 \u05e0\u05e2\u05d3\u05db\u05df \u05db\u05e9\u05d9\u05d4\u05d9\u05d4 \u05de\u05d5\u05db\u05df";
-
-  useEffect(() => {
-    const id = window.setInterval(() => setTick((t) => t + 1), 800);
-    return () => window.clearInterval(id);
-  }, []);
 
   return (
     <div
@@ -64,7 +49,7 @@ export function ProcessingTheatre({
       )}
     >
       <p className="font-brand text-3xl tracking-tight text-[#ededea]">STAZ</p>
-      <h2 className="mt-4 text-xl font-semibold text-[#ededea]">{title}</h2>
+      <h2 className="mt-4 text-xl font-semibold text-[#ededea]">Staz מקשיב</h2>
       {fileName ? (
         <p className="mt-2 max-w-sm truncate text-sm text-[#a8aea8]">{fileName}</p>
       ) : null}
@@ -74,7 +59,7 @@ export function ProcessingTheatre({
           const done = i < active || (i === active && stage === "completed");
           const current = i === active && stage !== "completed";
           return (
-            <li key={STAGE_LABELS[i]} className="flex items-center gap-3 text-sm">
+            <li key={label} className="flex items-center gap-3 text-sm">
               <span
                 className={cn(
                   "flex size-6 items-center justify-center rounded-full text-[11px] font-bold",
@@ -97,15 +82,18 @@ export function ProcessingTheatre({
         })}
       </ol>
 
-      <div className="mt-8 h-1 w-full max-w-xs overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full rounded-full bg-gradient-to-l from-[var(--signal)] to-[#3d9b86] transition-all duration-500"
-          style={{
-            width: `${Math.min(95, 20 + active * 22 + (tick % 3) * 2)}%`,
-          }}
-        />
-      </div>
-      <p className="mt-4 text-xs text-[#6f7670]">{caption}</p>
+      <p className="mt-8 max-w-xs text-xs text-[#6f7670]">
+        השלב המודגש הוא השלב האמיתי בתהליך. אין אחוז מדויק מהשרת.
+      </p>
+      {onCancel ? (
+        <button
+          type="button"
+          onClick={onCancel}
+          className="lat-btn-ghost mt-6 text-sm text-[#a8aea8]"
+        >
+          ביטול
+        </button>
+      ) : null}
     </div>
   );
 }

@@ -7,6 +7,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isAdmin?: boolean;
+      id?: string;
     };
   }
 }

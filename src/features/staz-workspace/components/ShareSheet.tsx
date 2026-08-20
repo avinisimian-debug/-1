@@ -6,6 +6,9 @@ import type { TranscriptionResult } from "@/features/transcription/types";
 import { buildSummaryText, copyToClipboard } from "@/lib/export";
 import { downloadPdfReport } from "@/lib/export-pdf";
 import { ExecutiveBriefPdfDocument } from "./ExecutiveBriefPdfDocument";
+import { usePlan } from "@/context/PlanContext";
+import { useFeatureGate } from "@/context/FeatureGateContext";
+import { hasFeature } from "@/lib/plan-features";
 
 interface ShareSheetProps {
   result: TranscriptionResult;
@@ -13,6 +16,9 @@ interface ShareSheetProps {
 }
 
 export function ShareSheet({ result, onClose }: ShareSheetProps) {
+  const { plan } = usePlan();
+  const { promptUpgrade } = useFeatureGate();
+  const canPdf = hasFeature(plan, "pdfExport");
   const [copied, setCopied] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
@@ -98,23 +104,33 @@ export function ShareSheet({ result, onClose }: ShareSheetProps) {
         ) : null}
 
         <div className="mt-4 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => void downloadPdf()}
-            disabled={pdfBusy}
-            className="lat-btn-primary w-full disabled:opacity-50"
-          >
-            {pdfBusy ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Download className="size-4" />
-            )}
-            {pdfBusy ? "מכין PDF…" : "הורד תמצית מנהלים (PDF)"}
-          </button>
-          <button type="button" onClick={() => void copy()} className="lat-btn-ghost w-full border border-[var(--line-strong)] text-sm">
+          <button type="button" onClick={() => void copy()} className="lat-btn-primary w-full">
             <Copy className="size-4" />
-            {copied ? "הועתק" : "העתק סיכום"}
+            {copied ? "הועתק" : "העתק סיכום לצוות"}
           </button>
+          {canPdf ? (
+            <button
+              type="button"
+              onClick={() => void downloadPdf()}
+              disabled={pdfBusy}
+              className="lat-btn-ghost w-full border border-[var(--line-strong)] text-sm disabled:opacity-50"
+            >
+              {pdfBusy ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}
+              {pdfBusy ? "מכין PDF…" : "הורד תמצית מנהלים (PDF)"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => promptUpgrade("pdfExport")}
+              className="lat-btn-ghost w-full border border-[var(--line-strong)] text-sm"
+            >
+              PDF מקצועי — כלול ב-Pro
+            </button>
+          )}
         </div>
       </div>
     </div>

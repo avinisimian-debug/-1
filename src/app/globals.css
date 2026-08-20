@@ -1216,8 +1216,20 @@
 
 @layer components {
   .lat-stage {
-    background: var(--stage-radial);
+    background:
+      radial-gradient(100% 70% at 80% -20%, rgba(31, 107, 92, 0.22) 0%, transparent 45%),
+      var(--stage-radial);
     color: #ededea;
+  }
+
+  .lat-landing-sheet {
+    background: var(--bg-canvas);
+    color: var(--ink-primary);
+    border-radius: 1.5rem;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 28px 80px -32px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
   }
 
   .lat-glass {
@@ -1266,10 +1278,15 @@
     font-weight: 600;
     background: #ededea;
     color: #0e1210;
-    transition: opacity var(--motion-fast) var(--ease-premium);
+    letter-spacing: -0.02em;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+    transition:
+      opacity var(--motion-fast) var(--ease-premium),
+      transform var(--motion-fast) var(--ease-premium);
   }
   .lat-btn-inverse:hover {
-    opacity: 0.92;
+    opacity: 1;
+    transform: translateY(-1px);
   }
 
   .lat-btn-ghost {

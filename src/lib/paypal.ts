@@ -1,16 +1,15 @@
-import { getProLifetimePrice } from "@/lib/constants";
+import { getProPlanPrice } from "@/lib/constants";
+import {
+  getPayPalBaseUrl,
+  getPayPalMode,
+  PRO_PLAN_CURRENCY,
+} from "@/lib/paypal-plan-inspect";
 
-export const PRO_PLAN_CURRENCY = "USD";
-
-export function getPayPalBaseUrl(): string {
-  return process.env.PAYPAL_MODE === "live"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
-}
+export { getPayPalBaseUrl, getPayPalMode, PRO_PLAN_CURRENCY };
 
 export async function getPayPalAccessToken(): Promise<string> {
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  const clientId = process.env.PAYPAL_CLIENT_ID?.trim();
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET?.trim();
 
   if (!clientId || !clientSecret) {
     throw new Error("PayPal credentials are not configured.");
@@ -31,7 +30,7 @@ export async function getPayPalAccessToken(): Promise<string> {
     const details = await response.text();
     console.error("PayPal auth error:", details);
     const hint =
-      process.env.PAYPAL_MODE === "live"
+      getPayPalMode() === "live"
         ? " Check PAYPAL_MODE=live matches your Live app keys."
         : " Check PAYPAL_MODE=sandbox matches your Sandbox app keys.";
     throw new Error("Failed to authenticate with PayPal." + hint);
@@ -41,7 +40,7 @@ export async function getPayPalAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-export async function createPayPalOrder(): Promise<string> {
+export async function createPayPalOrder(customId: string): Promise<string> {
   const token = await getPayPalAccessToken();
 
   const response = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders`, {
@@ -54,10 +53,11 @@ export async function createPayPalOrder(): Promise<string> {
       intent: "CAPTURE",
       purchase_units: [
         {
-          description: "Staz AI Pro — Lifetime access (one-time payment)",
+          custom_id: customId,
+          description: "Staz AI Pro — monthly (legacy one-time fallback)",
           amount: {
             currency_code: PRO_PLAN_CURRENCY,
-            value: getProLifetimePrice(),
+            value: getProPlanPrice(),
           },
         },
       ],
@@ -77,6 +77,7 @@ export async function createPayPalOrder(): Promise<string> {
 export async function capturePayPalOrder(orderId: string): Promise<{
   success: boolean;
   transactionId?: string;
+  customId?: string;
 }> {
   const token = await getPayPalAccessToken();
 
@@ -100,6 +101,7 @@ export async function capturePayPalOrder(orderId: string): Promise<{
   const data = (await response.json()) as {
     status: string;
     purchase_units?: Array<{
+      custom_id?: string;
       payments?: { captures?: Array<{ id: string }> };
     }>;
   };
@@ -110,11 +112,13 @@ export async function capturePayPalOrder(orderId: string): Promise<{
   return {
     success: data.status === "COMPLETED",
     transactionId,
+    customId: data.purchase_units?.[0]?.custom_id,
   };
 }
 
 export function isPayPalConfigured(): boolean {
   return Boolean(
-    process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET,
+    process.env.PAYPAL_CLIENT_ID?.trim() &&
+      process.env.PAYPAL_CLIENT_SECRET?.trim(),
   );
 }

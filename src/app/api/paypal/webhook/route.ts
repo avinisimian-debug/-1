@@ -1,66 +1,94 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mapPayPalSubscriptionStatus } from "@/lib/paypal-subscriptions";
+import { getPayPalAccessToken, getPayPalBaseUrl } from "@/lib/paypal";
+import {
+  decidePayPalWebhookApplication,
+  paypalSignatureHeadersPresent,
+  subscriptionIdFromEvent,
+  type PayPalWebhookEvent,
+} from "@/lib/paypal-webhook";
 import { updateSubscriptionByPayPalId } from "@/lib/users-store";
 
-type PayPalWebhookEvent = {
-  event_type?: string;
-  resource?: { id?: string };
-};
+async function verifyPayPalWebhookSignature(
+  request: NextRequest,
+  rawBody: string,
+): Promise<boolean> {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID?.trim();
+  if (!webhookId) return false;
+  if (!paypalSignatureHeadersPresent(request.headers)) return false;
 
-const SUBSCRIPTION_EVENTS = new Set([
-  "BILLING.SUBSCRIPTION.ACTIVATED",
-  "BILLING.SUBSCRIPTION.CANCELLED",
-  "BILLING.SUBSCRIPTION.SUSPENDED",
-  "BILLING.SUBSCRIPTION.EXPIRED",
-  "BILLING.SUBSCRIPTION.PAYMENT.FAILED",
-  "PAYMENT.SALE.COMPLETED",
-]);
-
-function subscriptionIdFromEvent(body: PayPalWebhookEvent): string | undefined {
-  const resource = body.resource as {
-    id?: string;
-    billing_agreement_id?: string;
-  };
-  if (body.event_type === "PAYMENT.SALE.COMPLETED") {
-    return resource.billing_agreement_id ?? resource.id;
+  let event: unknown;
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return false;
   }
-  return resource.id;
+
+  const token = await getPayPalAccessToken();
+  const response = await fetch(
+    `${getPayPalBaseUrl()}/v1/notifications/verify-webhook-signature`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        auth_algo: request.headers.get("paypal-auth-algo"),
+        cert_url: request.headers.get("paypal-cert-url"),
+        transmission_id: request.headers.get("paypal-transmission-id"),
+        transmission_sig: request.headers.get("paypal-transmission-sig"),
+        transmission_time: request.headers.get("paypal-transmission-time"),
+        webhook_id: webhookId,
+        webhook_event: event,
+      }),
+    },
+  );
+  if (!response.ok) return false;
+  const data = (await response.json()) as { verification_status?: string };
+  return data.verification_status === "SUCCESS";
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as PayPalWebhookEvent;
-    const eventType = body.event_type ?? "";
+    const rawBody = await request.text();
+    let body: PayPalWebhookEvent;
+    try {
+      body = JSON.parse(rawBody) as PayPalWebhookEvent;
+    } catch {
+      return NextResponse.json({ error: "invalid" }, { status: 400 });
+    }
+
+    const verified = await verifyPayPalWebhookSignature(request, rawBody);
     const subscriptionId = subscriptionIdFromEvent(body);
+    const decision = decidePayPalWebhookApplication({
+      verified,
+      eventType: body.event_type ?? "",
+      subscriptionId,
+    });
 
-    if (!subscriptionId || !SUBSCRIPTION_EVENTS.has(eventType)) {
-      return NextResponse.json({ received: true });
+    if (!decision.apply || !decision.status || !subscriptionId) {
+      if (!verified) {
+        console.error("[paypal-webhook] unsigned or invalid — ignoring");
+      }
+      return NextResponse.json({
+        received: true,
+        applied: false,
+        reason: decision.reason,
+      });
     }
 
-    let status: "trialing" | "active" | "cancelled" | "past_due" = "active";
+    const found = await updateSubscriptionByPayPalId(
+      subscriptionId,
+      decision.status,
+    );
 
-    if (
-      eventType === "BILLING.SUBSCRIPTION.CANCELLED" ||
-      eventType === "BILLING.SUBSCRIPTION.EXPIRED"
-    ) {
-      status = "cancelled";
-    } else if (
-      eventType === "BILLING.SUBSCRIPTION.SUSPENDED" ||
-      eventType === "BILLING.SUBSCRIPTION.PAYMENT.FAILED"
-    ) {
-      status = "past_due";
-    } else if (
-      eventType === "BILLING.SUBSCRIPTION.ACTIVATED" ||
-      eventType === "PAYMENT.SALE.COMPLETED"
-    ) {
-      status = mapPayPalSubscriptionStatus("ACTIVE");
-    }
-
-    await updateSubscriptionByPayPalId(subscriptionId, status);
-
-    return NextResponse.json({ received: true });
+    return NextResponse.json({
+      received: true,
+      applied: found,
+      reason: found ? "updated" : "unknown_subscription",
+    });
   } catch (error) {
     console.error("PayPal webhook error:", error);
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ received: true, applied: false });
   }
 }

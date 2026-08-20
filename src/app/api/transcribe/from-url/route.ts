@@ -10,6 +10,9 @@ import { isAssemblyAIConfigured } from "@/features/transcription/server/diarize-
 import { transcribeRemoteUrlWithAssemblyAI } from "@/features/transcription/server/transcribe-from-url";
 import { isWhisperLanguageCode } from "@/lib/whisper-languages";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
+import { incrementServerUsage, canServerTranscribe } from "@/lib/usage-server";
+import { saveMeetingForUser } from "@/features/library/server/meetings-store";
+import { CloudStorageUnavailableError } from "@/lib/runtime-env";
 import { assertTranscriptionReady } from "@/lib/transcription-ready";
 import { syncUserPlanOnAccess } from "@/lib/users-store";
 import {
@@ -30,7 +33,7 @@ interface FromUrlBody {
 export const POST = withApiHandler(async (request: NextRequest) => {
   const session = await auth();
   if (!session?.user?.email) {
-    throw new UnauthorizedError("Sign in required to transcribe.");
+    throw new UnauthorizedError("נדרשת התחברות כדי לתמלל.");
   }
 
   try {
@@ -70,6 +73,20 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     console.error("[transcribe-from-url] plan sync failed:", error);
   }
 
+  try {
+    const allowed = await canServerTranscribe(email, plan);
+    if (!allowed) {
+      throw new BadRequestError(
+        "QUOTA: נשמרו מספיק פגישות החודש בתוכנית החינמית. שמרו את ספריית הפגישות עם Staz Pro.",
+      );
+    }
+  } catch (error) {
+    if (error instanceof CloudStorageUnavailableError) {
+      throw new BadRequestError(error.message);
+    }
+    throw error;
+  }
+
   let parsedUrl: URL;
   try {
     parsedUrl = normalizeMediaUrl(rawUrl);
@@ -88,7 +105,21 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       language,
     });
     if (!isFailure(remote)) {
+      try {
+        await saveMeetingForUser({
+          ownerEmail: email,
+          result: remote.data,
+          plan,
+          persistStatus: "media_missing",
+        });
+      } catch (error) {
+        if (error instanceof CloudStorageUnavailableError) {
+          throw new BadRequestError(error.message);
+        }
+        throw new BadRequestError("העיבוד הצליח אך הספרייה בענן לא נשמרה.");
+      }
       await incrementTranscriptionsToday();
+      await incrementServerUsage(email);
       return remote.data;
     }
 
@@ -136,9 +167,26 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     throw result.error;
   }
 
-  await incrementTranscriptionsToday();
-  return {
+  const payload = {
     ...result.data,
     fileName: result.data.fileName || file.name,
   };
+
+  try {
+    await saveMeetingForUser({
+      ownerEmail: email,
+      result: payload,
+      plan,
+      persistStatus: "media_missing",
+    });
+  } catch (error) {
+    if (error instanceof CloudStorageUnavailableError) {
+      throw new BadRequestError(error.message);
+    }
+    throw new BadRequestError("העיבוד הצליח אך הספרייה בענן לא נשמרה.");
+  }
+
+  await incrementTranscriptionsToday();
+  await incrementServerUsage(email);
+  return payload;
 });

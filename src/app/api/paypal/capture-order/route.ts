@@ -33,6 +33,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (result.customId && result.customId !== session.user.email.toLowerCase()) {
+      return NextResponse.json(
+        { error: "Payment does not belong to this account." },
+        { status: 403 },
+      );
+    }
+
     await upgradeUserToPro(session.user.email, result.transactionId);
 
     return NextResponse.json({

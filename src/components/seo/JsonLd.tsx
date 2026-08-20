@@ -1,12 +1,12 @@
 import {
-  getProLifetimePrice,
-  PRO_LIFETIME_PRICE,
+  getProPlanPrice,
+  PRO_PLAN_REGULAR_PRICE,
 } from "@/lib/constants";
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/seo";
+import { SITE_DESCRIPTION, SITE_URL } from "@/lib/seo";
 import { BRAND_NAME } from "@/lib/brand";
 
 export function JsonLd() {
-  const proPrice = getProLifetimePrice();
+  const proPrice = getProPlanPrice();
 
   const organization = {
     "@context": "https://schema.org",
@@ -65,10 +65,10 @@ export function JsonLd() {
       },
       {
         "@type": "Offer",
-        name: "Pro Lifetime",
+        name: "Pro monthly",
         price: proPrice,
         priceCurrency: "USD",
-        description: SITE_TITLE,
+        description: `Staz Pro — $${PRO_PLAN_REGULAR_PRICE} per month`,
         url: `${SITE_URL}/#pricing`,
         priceValidUntil: "2027-12-31",
       },
@@ -92,7 +92,7 @@ export function JsonLd() {
         name: "כמה עולה תוכנית Pro?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: `תוכנית Pro זמינה כרכישה חד־פעמית החל מ־$${proPrice} בשבוע ההשקה (או $${PRO_LIFETIME_PRICE} לאחר מכן).`,
+          text: `תוכנית Pro היא מנוי חודשי ב־$${PRO_PLAN_REGULAR_PRICE} לחודש.`,
         },
       },
       {

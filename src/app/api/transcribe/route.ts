@@ -1,4 +1,3 @@
-import { del } from "@vercel/blob";
 import { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { transcribeAudio } from "@/features/transcription/server/transcribe.use-case";
@@ -11,6 +10,9 @@ import {
   fileFromBlobUrl,
 } from "@/lib/blob-file";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
+import { incrementServerUsage, canServerTranscribe } from "@/lib/usage-server";
+import { saveMeetingForUser, recoverableFailedResult } from "@/features/library/server/meetings-store";
+import { CloudStorageUnavailableError } from "@/lib/runtime-env";
 import {
   assertTranscriptionReady,
 } from "@/lib/transcription-ready";
@@ -80,7 +82,7 @@ function ensureTranscriptionReady(requireBlob: boolean): void {
 export const POST = withApiHandler(async (request: NextRequest) => {
   const session = await auth();
   if (!session?.user?.email) {
-    throw new UnauthorizedError("Sign in required to transcribe.");
+    throw new UnauthorizedError("נדרשת התחברות כדי לתמלל.");
   }
 
   const contentType = request.headers.get("content-type") ?? "";
@@ -96,14 +98,60 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   } catch (error) {
     console.error("[transcribe] plan sync failed, continuing as free:", error);
   }
+
+  try {
+    const allowed = await canServerTranscribe(email, plan);
+    if (!allowed) {
+      throw new BadRequestError(
+        "QUOTA: נשמרו מספיק פגישות החודש בתוכנית החינמית. שמרו את ספריית הפגישות עם Staz Pro.",
+      );
+    }
+  } catch (error) {
+    if (error instanceof CloudStorageUnavailableError) {
+      throw new BadRequestError(error.message);
+    }
+    throw error;
+  }
+
   const { file, language, blobUrl } = await resolveUploadFile(request, email);
 
   const result = await transcribeAudio({ file, plan, language });
   if (isFailure(result)) {
+    if (blobUrl) {
+      try {
+        await saveMeetingForUser({
+          ownerEmail: email,
+          result: recoverableFailedResult(file.name, "העיבוד נכשל."),
+          mediaBlobUrl: blobUrl,
+          mediaKind: file.type.startsWith("video/") ? "video" : "audio",
+          plan,
+          persistStatus: "failed_recoverable",
+        });
+      } catch (error) {
+        console.error("[transcribe] recoverable save failed", error);
+      }
+    }
     throw result.error;
   }
 
+  try {
+    await saveMeetingForUser({
+      ownerEmail: email,
+      result: result.data,
+      mediaBlobUrl: blobUrl,
+      mediaKind: file.type.startsWith("video/") ? "video" : "audio",
+      plan,
+      persistStatus: blobUrl ? "complete" : "media_missing",
+    });
+  } catch (error) {
+    if (error instanceof CloudStorageUnavailableError) {
+      throw new BadRequestError(error.message);
+    }
+    throw new BadRequestError("העיבוד הצליח אך הספרייה בענן לא נשמרה.");
+  }
+
   await incrementTranscriptionsToday();
+  await incrementServerUsage(email);
 
   const userId = resolveUserId(email);
   waitUntil(
@@ -113,10 +161,6 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       result: result.data,
     }),
   );
-
-  if (blobUrl && process.env.BLOB_READ_WRITE_TOKEN) {
-    waitUntil(del(blobUrl).catch(() => {}));
-  }
 
   return result.data;
 });

@@ -1,16 +1,22 @@
 import { NextResponse } from "next/server";
-import { getGoogleAuthMode, resolveGoogleClientId } from "@/lib/auth-oauth";
+import {
+  getGoogleAuthMode,
+  inspectGoogleAuthPublic,
+  resolveGoogleClientId,
+} from "@/lib/auth-oauth";
 
 export const runtime = "nodejs";
 
-/** Public auth capability flags for the login UI. */
+/** Public auth flags. Never returns secrets. Never returns placeholder client IDs. */
 export async function GET() {
   const mode = await getGoogleAuthMode();
   const clientId = await resolveGoogleClientId();
+  const inspect = await inspectGoogleAuthPublic();
 
   return NextResponse.json({
-    google: mode !== "none",
-    mode,
-    clientId: clientId ?? undefined,
+    google: mode !== "none" && inspect.ok,
+    mode: inspect.ok ? mode : "none",
+    placeholderDetected: inspect.placeholderDetected,
+    clientId: inspect.ok ? (clientId ?? undefined) : undefined,
   });
 }

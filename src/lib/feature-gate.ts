@@ -103,6 +103,18 @@ export const PRO_FEATURE_GATE: Partial<Record<FeatureKey, FeatureGateMeta>> = {
     line1Key: "gateSummaryTemplatesLine1",
     line2Key: "gateSummaryTemplatesLine2",
   },
+  meetingQuota: {
+    icon: FileAudio,
+    titleKey: "gateQuotaTitle",
+    line1Key: "gateQuotaLine1",
+    line2Key: "gateQuotaLine2",
+  },
+  pdfExport: {
+    icon: FileStack,
+    titleKey: "gatePdfTitle",
+    line1Key: "gatePdfLine1",
+    line2Key: "gatePdfLine2",
+  },
 };
 
 export function getFeatureGateMeta(

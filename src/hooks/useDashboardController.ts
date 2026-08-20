@@ -21,6 +21,10 @@ export function useDashboardController() {
   const [historyResult, setHistoryResult] = useState<TranscriptionResult | null>(
     null,
   );
+  const [historyMedia, setHistoryMedia] = useState<string | undefined>();
+  const [historyMediaKind, setHistoryMediaKind] = useState<"audio" | "video">(
+    "audio",
+  );
 
   const transcription = useTranscription();
 
@@ -29,7 +33,21 @@ export function useDashboardController() {
       const stored = sessionStorage.getItem(HISTORY_VIEW_KEY);
       if (!stored) return;
       try {
-        setHistoryResult(JSON.parse(stored) as TranscriptionResult);
+        const parsed = JSON.parse(stored) as
+          | TranscriptionResult
+          | {
+              result: TranscriptionResult;
+              mediaSrc?: string;
+              mediaKind?: "audio" | "video";
+            };
+        if ("result" in parsed && parsed.result) {
+          setHistoryResult(parsed.result);
+          setHistoryMedia(parsed.mediaSrc);
+          setHistoryMediaKind(parsed.mediaKind ?? "audio");
+        } else {
+          setHistoryResult(parsed as TranscriptionResult);
+          setHistoryMedia(undefined);
+        }
         sessionStorage.removeItem(HISTORY_VIEW_KEY);
       } catch {
         sessionStorage.removeItem(HISTORY_VIEW_KEY);
@@ -69,23 +87,32 @@ export function useDashboardController() {
 
   const processFile = useCallback(
     (file: File) => {
+      if (!canTranscribe) {
+        promptUpgrade("meetingQuota");
+        return;
+      }
       markProcessedFirstFile();
       transcription.processFile(file, language);
     },
-    [transcription, language],
+    [transcription, language, canTranscribe, promptUpgrade],
   );
 
   const processUrl = useCallback(
     (url: string) => {
+      if (!canTranscribe) {
+        promptUpgrade("meetingQuota");
+        return;
+      }
       markProcessedFirstFile();
       transcription.processUrl(url, language);
     },
-    [transcription, language],
+    [transcription, language, canTranscribe, promptUpgrade],
   );
 
   const resetAll = useCallback(() => {
     transcription.reset();
     setHistoryResult(null);
+    setHistoryMedia(undefined);
   }, [transcription]);
 
   return {
@@ -94,8 +121,8 @@ export function useDashboardController() {
     setLanguage,
     displayResult,
     uploadedFile: transcription.uploadedFile,
-    audioSrc: transcription.audioObjectUrl ?? undefined,
-    mediaKind: transcription.mediaKind,
+    audioSrc: transcription.audioObjectUrl ?? historyMedia,
+    mediaKind: historyResult ? historyMediaKind : transcription.mediaKind,
     stage: transcription.stage,
     stageIndex: transcription.stageIndex,
     uploadProgress: transcription.uploadProgress,

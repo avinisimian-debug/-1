@@ -8,27 +8,11 @@ import { cn } from "@/lib/utils";
 const FEATURE_ORDER: FeatureKey[] = [
   "executiveSummary",
   "smartDecisions",
-  "topicTags",
   "actionItems",
-  "transcriptSearch",
   "copyToClipboard",
   "pdfExport",
   "history",
-  "sentimentAnalysis",
-  "meetingChapters",
-  "actionPriorities",
-  "keyQuotes",
-  "risksBlockers",
-  "followUpEmail",
   "largeFiles",
-  "languageSelect",
-  "priorityProcessing",
-  "integrationsPush",
-  "transcriptionWebhooks",
-  "sharedLinks",
-  "smartSearch",
-  "summaryTemplates",
-  "speakerDiarization",
 ];
 
 const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translations").Translations> = {
@@ -56,6 +40,7 @@ const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translatio
   smartSearch: "featSmartSearch",
   summaryTemplates: "featSummaryTemplates",
   speakerDiarization: "featSpeakerDiarization",
+  meetingQuota: "featHistory",
 };
 
 export function PlanFeatureComparison() {

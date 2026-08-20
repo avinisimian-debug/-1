@@ -45,7 +45,7 @@ async function withLatency<T>(
  * There is no traditional SQL database in this app — Blob/local JSON is the data store.
  */
 export async function checkPersistenceLayer(): Promise<HealthCheckResult> {
-  const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
   const onVercel = Boolean(process.env.VERCEL);
 
   try {
@@ -194,7 +194,7 @@ export async function checkAssemblyAI(): Promise<HealthCheckResult> {
 
 /**
  * Probes the PayPal webhook route. A 2xx response means the route is deployed and reachable.
- * Signature verification is a separate security concern (currently not implemented).
+ * Unsigned probes must not mutate billing (live webhooks require PAYPAL_WEBHOOK_ID).
  */
 export async function checkWebhookEndpoint(
   probe = true,

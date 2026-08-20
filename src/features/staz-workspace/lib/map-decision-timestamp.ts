@@ -65,34 +65,6 @@ export function mapDecisionToTimestamp(
     }
   }
 
-  // Fallback: nearest mid-meeting line if soft match fails but we still want a chip
-  if (!best && entries.length > 0) {
-    // Try looser threshold once
-    for (const line of entries) {
-      const score = scoreLine(tokens, line);
-      if (!best || score > best.score) {
-        best = {
-          decision,
-          timestamp: line.timestamp,
-          speaker: line.speaker,
-          quote: line.text.slice(0, 160),
-          score,
-        };
-      }
-    }
-    if (best && best.score < 0.15) {
-      // last resort: anchor at middle of meeting
-      const mid = entries[Math.floor(entries.length / 2)];
-      return {
-        decision,
-        timestamp: mid.timestamp,
-        speaker: mid.speaker,
-        quote: mid.text.slice(0, 160),
-        score: 0,
-      };
-    }
-  }
-
   return best;
 }
 

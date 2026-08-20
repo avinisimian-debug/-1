@@ -69,7 +69,7 @@ export function useTranscription() {
     (file: File, language = "auto") => {
       if (!canTranscribe) {
         const message =
-          "Monthly transcription limit reached. Upgrade to Pro for more.";
+          "QUOTA: נשמרו מספיק פגישות החודש. שמרו את ספריית הפגישות עם Staz Pro.";
         setError(message);
         setStatus("error");
         toast({ title: message, variant: "warning" });
@@ -150,7 +150,7 @@ export function useTranscription() {
           setError(message);
           setStatus("error");
           toast({
-            title: "Transcription failed",
+            title: "העיבוד נכשל",
             description: message,
             variant: "error",
           });
@@ -163,7 +163,7 @@ export function useTranscription() {
         recordUsage();
         saveToHistory(uploadResult.data, HISTORY_LIMITS[plan]);
         toast({
-          title: "Transcription complete",
+          title: "הסגירה מוכנה",
           description: uploadResult.data.fileName,
           variant: "success",
         });
@@ -183,7 +183,7 @@ export function useTranscription() {
     (url: string, language = "auto") => {
       if (!canTranscribe) {
         const message =
-          "Monthly transcription limit reached. Upgrade to Pro for more.";
+          "QUOTA: נשמרו מספיק פגישות החודש. שמרו את ספריית הפגישות עם Staz Pro.";
         setError(message);
         setStatus("error");
         toast({ title: message, variant: "warning" });
@@ -247,7 +247,7 @@ export function useTranscription() {
           setError(message);
           setStatus("error");
           toast({
-            title: "Transcription failed",
+            title: "העיבוד נכשל",
             description: message,
             variant: "error",
           });
@@ -260,7 +260,7 @@ export function useTranscription() {
         recordUsage();
         saveToHistory(uploadResult.data, HISTORY_LIMITS[plan]);
         toast({
-          title: "Transcription complete",
+          title: "הסגירה מוכנה",
           description: uploadResult.data.fileName,
           variant: "success",
         });

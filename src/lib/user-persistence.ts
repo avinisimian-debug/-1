@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
 import { get, put } from "@vercel/blob";
+import { assertCloudPersistence } from "@/lib/runtime-env";
 
 const BLOB_PATH = "meetscribe/users.json";
 
@@ -16,7 +17,7 @@ function getLocalDataDir(): string {
 const LOCAL_USERS_FILE = join(getLocalDataDir(), "users.json");
 
 function hasBlobBackend(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
 }
 
 async function readFromLocalFile(): Promise<string | null> {
@@ -58,6 +59,7 @@ async function writeToBlob(content: string): Promise<void> {
  * overwrite Blob ג€” that wiped Pro purchases for everyone.
  */
 export async function readPersistedJson<T>(fallback: T): Promise<T> {
+  assertCloudPersistence();
   if (hasBlobBackend()) {
     try {
       const raw = await readFromBlob();
@@ -95,6 +97,7 @@ export async function readPersistedJson<T>(fallback: T): Promise<T> {
 }
 
 export async function writePersistedJson<T>(data: T): Promise<void> {
+  assertCloudPersistence();
   const content = JSON.stringify(data, null, 2);
 
   if (hasBlobBackend()) {

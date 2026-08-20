@@ -96,15 +96,6 @@ export function PremiumWorkspace({
     window.setTimeout(() => setAhaPulse(false), 4000);
   }, [seekTimestamp]);
 
-  const skipAha = useCallback(() => {
-    setAhaOpen(false);
-    try {
-      localStorage.setItem(AHA_STORAGE_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
   const activeLabel = result.transcript[
     Math.max(
       0,
@@ -242,18 +233,23 @@ export function PremiumWorkspace({
                 )}
               </button>
             )}
-            <input
-              type="range"
-              min={0}
-              max={Math.max(
-                mediaSrc ? playback.duration || 1 : 252,
-                1,
-              )}
-              step={0.1}
-              value={currentSeconds}
-              onChange={(e) => seekTo(Number(e.target.value))}
-              className="h-1.5 w-full cursor-pointer accent-[var(--accent)]"
-            />
+            {mediaSrc ? (
+              <input
+                type="range"
+                min={0}
+                max={Math.max(playback.duration || 1, 1)}
+                step={0.1}
+                value={currentSeconds}
+                onChange={(e) => seekTo(Number(e.target.value))}
+                className="h-1.5 w-full cursor-pointer accent-[var(--accent)]"
+              />
+            ) : (
+              <p className="text-[11px] text-[var(--ink-tertiary)]">
+                {demo
+                  ? "קפיצה בדמו היא לתמלול בלבד — לא להקלטה."
+                  : "אין הקלטה מצורפת לפגישה זו."}
+              </p>
+            )}
           </div>
         </section>
 
@@ -298,7 +294,6 @@ export function PremiumWorkspace({
         <AhaOnboarding
           targetTimestamp={DEMO_AHA_TIMESTAMP}
           onJump={completeAhaJump}
-          onSkip={skipAha}
         />
       )}
     </div>

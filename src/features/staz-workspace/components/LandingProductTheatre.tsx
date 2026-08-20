@@ -32,7 +32,7 @@ export function LandingProductTheatre({ className }: { className?: string }) {
 
   return (
     <div
-      className={`overflow-hidden rounded-2xl border border-white/10 bg-[#141816]/shadow-2xl ${className ?? ""}`}
+      className={`overflow-hidden rounded-2xl border border-white/10 bg-[#141816] shadow-[0_24px_80px_-24px_rgba(0,0,0,0.65)] ${className ?? ""}`}
     >
       <div className="grid md:grid-cols-[1.1fr_0.9fr]">
         <div className="border-b border-white/10 p-4 md:border-b-0 md:border-e">
@@ -78,12 +78,12 @@ export function LandingProductTheatre({ className }: { className?: string }) {
             ))}
           </ul>
           {showDecision && (
-            <button
-              type="button"
+            <a
+              href="#demo"
               className="lat-time-chip mt-4 w-fit border-[#3d9b86]/40 bg-[#3d9b86]/10 text-[#3d9b86]"
             >
-              {DEMO_AHA_TIMESTAMP} ↗ החלטה
-            </button>
+              {DEMO_AHA_TIMESTAMP} ↗ לחצו לדמו המלא
+            </a>
           )}
         </div>
       </div>

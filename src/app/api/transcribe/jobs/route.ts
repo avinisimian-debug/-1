@@ -8,6 +8,8 @@ import { assertBlobPathForUser } from "@/lib/blob-file";
 import { assertTranscriptionReady } from "@/lib/transcription-ready";
 import { waitUntil } from "@/lib/wait-until";
 import { syncUserPlanOnAccess } from "@/lib/users-store";
+import { canServerTranscribe } from "@/lib/usage-server";
+import { CloudStorageUnavailableError } from "@/lib/runtime-env";
 import { normalizeApiError } from "@/shared/api";
 
 export const runtime = "nodejs";
@@ -93,6 +95,32 @@ export async function POST(request: NextRequest) {
       plan = await syncUserPlanOnAccess(email, session.user.name ?? undefined);
     } catch (error) {
       console.error("[transcribe-jobs] plan sync failed:", error);
+    }
+
+    let allowed = false;
+    try {
+      allowed = await canServerTranscribe(email, plan);
+    } catch (error) {
+      if (error instanceof CloudStorageUnavailableError) {
+        return NextResponse.json(
+          { data: null, error: { code: "STORAGE", message: error.message } },
+          { status: 503 },
+        );
+      }
+      throw error;
+    }
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: {
+            code: "PLAN_LIMIT",
+            message:
+              "QUOTA: נשמרו מספיק פגישות החודש בתוכנית החינמית. שמרו את ספריית הפגישות עם Staz Pro.",
+          },
+        },
+        { status: 402 },
+      );
     }
 
     const job = await enqueueTranscriptionJob({

@@ -2,9 +2,11 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
 function sanitizeFileName(name: string): string {
-  return (
-    name.replace(/\.[^/.]+$/, "").replace(/[^\w\s-]/g, "").trim() || "report"
-  );
+  const stripped = name
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "")
+    .trim();
+  return stripped || "staz-brief";
 }
 
 export async function downloadPdfFromElement(

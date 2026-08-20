@@ -163,25 +163,34 @@ export function AiAssistantRail({
               <Scale className="size-4 text-[var(--accent)]" />
               החלטות
             </div>
-            {decisionMoments.length === 0 ? (
+            {decisionList.length === 0 ? (
               <p className="text-xs text-[var(--ink-tertiary)]">אין החלטות</p>
             ) : (
-              decisionMoments.map((m) => (
-                <div
-                  key={m.decision}
-                  className="rounded-xl border border-[var(--line-subtle)] bg-[var(--bg-subtle)] px-3 py-2.5 text-sm leading-relaxed"
-                >
-                  <p>{m.decision}</p>
-                  <button
-                    type="button"
-                    onClick={() => onSeek(m.timestamp)}
-                    className="lat-time-chip mt-2"
-                    title={m.quote}
+              decisionList.map((decision) => {
+                const m = decisionMoments.find((x) => x.decision === decision);
+                return (
+                  <div
+                    key={decision}
+                    className="rounded-xl border border-[var(--line-subtle)] bg-[var(--bg-subtle)] px-3 py-2.5 text-sm leading-relaxed"
                   >
-                    {m.timestamp} ↗
-                  </button>
-                </div>
-              ))
+                    <p>{decision}</p>
+                    {m ? (
+                      <button
+                        type="button"
+                        onClick={() => onSeek(m.timestamp)}
+                        className="lat-time-chip mt-2"
+                        title={m.quote}
+                      >
+                        {m.timestamp} ↗
+                      </button>
+                    ) : (
+                      <p className="mt-2 text-[11px] text-[var(--ink-tertiary)]">
+                        לא נמצא רגע מדויק בהקלטה
+                      </p>
+                    )}
+                  </div>
+                );
+              })
             )}
           </div>
         )}
@@ -192,7 +201,10 @@ export function AiAssistantRail({
               <ListChecks className="size-4 text-[var(--accent)]" />
               משימות
             </div>
-            {actionMoments.map((a) => (
+            {actionMoments.length === 0 ? (
+              <p className="text-xs text-[var(--ink-tertiary)]">אין משימות שזוהו</p>
+            ) : (
+              actionMoments.map((a) => (
               <div
                 key={a.id}
                 className="rounded-xl border border-[var(--line-subtle)] px-3 py-2.5"
@@ -201,10 +213,10 @@ export function AiAssistantRail({
                   {a.task}
                 </p>
                 <p className="mt-1 text-xs text-[var(--ink-tertiary)]">
-                  {a.owner}
+                  {a.owner === "Unassigned" ? "לא צוין" : a.owner}
                   {a.deadline ? ` · ${a.deadline}` : ""}
                 </p>
-                {a.moment ? (
+                {a.moment && a.moment.score >= 0.35 ? (
                   <button
                     type="button"
                     onClick={() => onSeek(a.moment.timestamp)}
@@ -212,9 +224,14 @@ export function AiAssistantRail({
                   >
                     {a.moment.timestamp} ↗
                   </button>
-                ) : null}
+                ) : (
+                  <p className="mt-2 text-[11px] text-[var(--ink-tertiary)]">
+                    לא נמצא רגע מדויק בהקלטה
+                  </p>
+                )}
               </div>
-            ))}
+              ))
+            )}
           </div>
         )}
 

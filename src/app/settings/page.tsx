@@ -4,21 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Bell, CheckCircle2, Crown, Shield, Wallet } from "lucide-react";
-import { IntegrationBridge } from "@/features/integrations";
-import { WebhooksSettingsCard } from "@/features/webhooks";
-import { PayPalCheckout } from "@/components/billing/PayPalCheckout";
+import { PayPalSubscribeButton } from "@/components/billing/PayPalSubscribeButton";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { PricingTable } from "@/components/billing/PricingTable";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
-import { SaleCountdown } from "@/components/billing/SaleCountdown";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
-import {
-  getProLifetimePriceLabel,
-  isLaunchWeekActive,
-  PRO_LIFETIME_PRICE_LABEL,
-} from "@/lib/constants";
+import { getProPlanPriceLabel } from "@/lib/constants";
 import { markStepComplete } from "@/lib/onboarding-store";
 import { scrollToUpgradeWithRetry } from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
@@ -144,11 +137,6 @@ export default function SettingsPage() {
     scrollToUpgradeWithRetry();
   }, []);
 
-  const handleCheckoutSuccess = useCallback(async () => {
-    await syncPlan();
-    await loadPlanDetails();
-  }, [syncPlan, loadPlanDetails]);
-
   const needsPayPalSetup = Boolean(planDetails?.needsPayPalSetup);
   const hasSubscription = Boolean(planDetails?.hasSubscription);
   const proLifetime = Boolean(planDetails?.proLifetime);
@@ -167,12 +155,6 @@ export default function SettingsPage() {
               {t.settingsPlan}
             </h2>
           </div>
-
-          {showCheckout && isLaunchWeekActive() && (
-            <div className="mb-8">
-              <SaleCountdown />
-            </div>
-          )}
 
           <PricingTable
             currentPlan={plan}
@@ -215,64 +197,26 @@ export default function SettingsPage() {
 
           {showCheckout && (
             <div className="mt-8 scroll-mt-24 space-y-4" id="upgrade" data-paypal-section>
-              {needsPayPalSetup && (
-                <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-4">
-                  <p className="text-sm font-semibold text-amber-900">
-                    {t.billingSetupRequiredTitle}
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-amber-800/90">
-                    {t.billingSetupRequiredDesc.replace(
-                      "{price}",
-                      getProLifetimePriceLabel(),
-                    )}
-                  </p>
-                </div>
-              )}
-
-              {isLaunchWeekActive() && !needsPayPalSetup && (
-                <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">
-                    {t.trialTitle.replace("{intro}", getProLifetimePriceLabel())}
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-emerald-800/90">
-                    {t.trialDesc.replace("{intro}", getProLifetimePriceLabel())}
-                  </p>
-                </div>
-              )}
-
               <div className="premium-card rounded-xl p-5 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <Wallet className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
-                    {isLaunchWeekActive()
-                      ? t.paypalSubscribeTitle.replace(
-                          "{intro}",
-                          getProLifetimePriceLabel(),
-                        )
-                      : t.paypalTitle}
+                    Staz Pro — {getProPlanPriceLabel()} לחודש
                   </h3>
                 </div>
                 <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
-                  {(isLaunchWeekActive() ? t.paypalSubscribeDesc : t.paypalDesc)
-                    .replace("{intro}", getProLifetimePriceLabel())
-                    .replace("{regular}", PRO_LIFETIME_PRICE_LABEL)}
+                  כל פגישה נשמרת בספרייה, עם יותר נפח וסגירה מקצועית לשליחה.
                 </p>
                 <div className="mb-4">
-                  <ProPlanPrice size="sm" showBadge />
+                  <ProPlanPrice size="sm" />
                 </div>
-                <PayPalCheckout onSuccess={handleCheckoutSuccess} />
+                <PayPalSubscribeButton />
               </div>
             </div>
           )}
         </section>
 
         <div className="mx-auto max-w-2xl space-y-6">
-          <section className="glass-card rounded-xl p-6 sm:p-8">
-            <IntegrationBridge />
-          </section>
-
-          <WebhooksSettingsCard />
-
           <section className="glass-card rounded-xl p-6">
             <h2 className="mb-4 text-base font-semibold text-foreground">
               {t.settingsProfile}
@@ -328,7 +272,7 @@ export default function SettingsPage() {
                 {isPro
                   ? t.settingsProPlanLine.replace(
                       "{price}",
-                      getProLifetimePriceLabel(),
+                      getProPlanPriceLabel(),
                     )
                   : t.settingsBasicPlan}
               </p>

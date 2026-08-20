@@ -11,11 +11,12 @@ interface ProcessingStateProps {
   uploadProgress?: unknown;
 }
 
-export function ProcessingState({ fileName, stage }: ProcessingStateProps) {
+export function ProcessingState({ fileName, stage, onCancel }: ProcessingStateProps & { onCancel?: () => void }) {
   return (
     <ProcessingTheatre
       fileName={fileName}
       stage={stage}
+      onCancel={onCancel}
       className="-mx-2 sm:-mx-4"
     />
   );

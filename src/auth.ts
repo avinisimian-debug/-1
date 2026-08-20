@@ -6,6 +6,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { getGoogleClientIdFromEnv } from "@/lib/auth-oauth";
 import { registerOrUpdateUser } from "@/lib/users-store";
 import { verifyGoogleIdToken } from "@/lib/verify-google-token";
+import { verifyEmailOtp } from "@/lib/email-otp";
 
 const providers: Provider[] = [
   Credentials({
@@ -13,20 +14,26 @@ const providers: Provider[] = [
     credentials: {
       name: { label: "Name", type: "text" },
       email: { label: "Email", type: "email" },
+      otp: { label: "Code", type: "text" },
     },
-    authorize(credentials) {
+    async authorize(credentials) {
       const name = credentials?.name as string | undefined;
       const email = credentials?.email as string | undefined;
+      const otp = credentials?.otp as string | undefined;
 
-      if (!name?.trim() || !email?.trim()) return null;
+      if (!name?.trim() || !email?.trim() || !otp?.trim()) return null;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) return null;
 
+      const normalized = email.trim().toLowerCase();
+      const otpValid = await verifyEmailOtp(normalized, otp);
+      if (!otpValid) return null;
+
       return {
-        id: email,
+        id: normalized,
         name: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: normalized,
       };
     },
   }),
@@ -83,7 +90,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               : "email",
         });
       } catch (err) {
-        // Don't block login if user persistence fails (e.g. read-only FS)
         console.error("Failed to persist user on sign-in:", err);
       }
     },
@@ -91,9 +97,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.sub = user.id ?? token.sub;
+        const email = user.email?.trim().toLowerCase();
+        token.email = email;
+        token.sub = email ?? user.id ?? token.sub;
         token.name = user.name;
-        token.email = user.email;
         token.picture = user.image;
       }
       token.isAdmin = isAdminEmail(token.email as string);
@@ -105,6 +112,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.email = token.email as string;
         session.user.image = token.picture as string | undefined;
         session.user.isAdmin = Boolean(token.isAdmin);
+        session.user.id = (token.sub as string) ?? session.user.email ?? "";
       }
       return session;
     },

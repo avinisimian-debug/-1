@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "./AppHeader";
 import { CommandPalette } from "./CommandPalette";
-import { GlobalAiAssistant } from "./GlobalAiAssistant";
 import { MobileSidebar, Sidebar } from "./Sidebar";
 
 interface AppShellProps {
@@ -59,7 +58,6 @@ export function AppShell({
       </div>
 
       <CommandPalette />
-      <GlobalAiAssistant />
     </div>
   );
 }

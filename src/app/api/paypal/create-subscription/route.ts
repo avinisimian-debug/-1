@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import {
   createPayPalSubscription,
-  formatPayPalError,
   getAppBaseUrl,
   isPayPalConfigured,
 } from "@/lib/paypal-subscriptions";
@@ -12,12 +11,12 @@ export async function POST() {
     const session = await auth();
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json({ error: "נדרשת התחברות." }, { status: 401 });
     }
 
     if (!isPayPalConfigured()) {
       return NextResponse.json(
-        { error: "PayPal is not configured on the server." },
+        { error: "תשלום PayPal אינו מוגדר. פנו לתמיכה." },
         { status: 500 },
       );
     }
@@ -36,7 +35,7 @@ export async function POST() {
   } catch (error) {
     console.error("Create subscription error:", error);
     return NextResponse.json(
-      { error: formatPayPalError(error) },
+      { error: "לא ניתן לפתוח תשלום. נסו שוב או פנו לתמיכה." },
       { status: 500 },
     );
   }

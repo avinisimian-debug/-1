@@ -17,7 +17,7 @@ export async function POST() {
       );
     }
 
-    const orderId = await createPayPalOrder();
+    const orderId = await createPayPalOrder(session.user.email.toLowerCase());
 
     return NextResponse.json({ orderId });
   } catch (error) {

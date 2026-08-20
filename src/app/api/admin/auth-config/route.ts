@@ -5,7 +5,7 @@ import {
   getRuntimeAuthConfig,
   saveRuntimeAuthConfig,
 } from "@/lib/auth-config-store";
-import { getGoogleAuthMode } from "@/lib/auth-oauth";
+import { getGoogleAuthMode, inspectGoogleClientId } from "@/lib/auth-oauth";
 
 export const runtime = "nodejs";
 
@@ -26,10 +26,10 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     configured: mode !== "none",
     mode,
-    hasClientId: Boolean(config.googleClientId),
+    hasClientId: Boolean(inspectGoogleClientId(config.googleClientId).usable),
     hasClientSecret: Boolean(config.googleClientSecret),
-    googleClientIdPreview: config.googleClientId
-      ? `${config.googleClientId.slice(0, 12)}...`
+    googleClientIdPreview: inspectGoogleClientId(config.googleClientId).usable
+      ? `${config.googleClientId!.slice(0, 12)}...`
       : null,
     origins,
     consoleUrl:
@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
     googleClientSecret?: string;
   };
 
-  if (!body.googleClientId?.trim()) {
+  if (!inspectGoogleClientId(body.googleClientId).usable) {
     return NextResponse.json(
-      { error: "Google Client ID is required." },
+      { error: "Google Client ID is invalid (placeholder values are not accepted)." },
       { status: 400 },
     );
   }

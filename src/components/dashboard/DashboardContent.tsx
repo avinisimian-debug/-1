@@ -4,20 +4,15 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { DashboardWorkspace } from "@/components/dashboard/DashboardWorkspace";
-import { DashboardInspector } from "@/components/dashboard/DashboardInspector";
-import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
-import { DemoWorkspaceEntry } from "@/features/staz-workspace";
 import {
   ErrorState,
   ProcessingState,
   ResultsView,
 } from "@/features/transcription";
-import { useLocale } from "@/context/LocaleContext";
 import { useDashboardController } from "@/hooks/useDashboardController";
 import { SETTINGS_UPGRADE_PATH } from "@/lib/upgrade-navigation";
 
 export function DashboardContent() {
-  const { t } = useLocale();
   const dash = useDashboardController();
   const router = useRouter();
 
@@ -33,45 +28,26 @@ export function DashboardContent() {
   }, [router]);
 
   return (
-    <DashboardShell title={t.dashTitle} description={t.dashDesc}>
-      {dash.onboarding.showOnboarding && (
-        <OnboardingChecklist
-          open={dash.onboarding.modalOpen}
-          progress={dash.onboarding.progress}
-          completed={dash.onboarding.completed}
-          isStepComplete={dash.onboarding.isStepComplete}
-          onDismiss={dash.onboarding.dismiss}
-          onGoToStep={dash.onboarding.goToStep}
-        />
-      )}
-
+    <DashboardShell
+      title="סגירת פגישה"
+      description="העלו הקלטה — קבלו תמצית, החלטות ומשימות."
+    >
       {dash.phase === "idle" && (
-        <div className="flex items-start gap-6">
-          <div className="min-w-0 flex-1">
-            <DemoWorkspaceEntry />
-            <DashboardWorkspace
-              language={dash.language}
-              onLanguageChange={dash.setLanguage}
-              onPromptLanguageUpgrade={dash.promptLanguageUpgrade}
-              usageCount={dash.usageCount}
-              usageLimit={dash.usageLimit}
-              canTranscribe={dash.canTranscribe}
-              onFileSelect={dash.processFile}
-              onUrlSubmit={dash.processUrl}
-              showHero={!dash.showCompactHero}
-              onboarding={{
-                show: dash.onboarding.showOnboarding,
-                dismissed: dash.onboarding.dismissed,
-                progress: dash.onboarding.progress,
-                completed: dash.onboarding.completed,
-                isStepComplete: dash.onboarding.isStepComplete,
-                onDismiss: dash.onboarding.dismiss,
-                onGoToStep: dash.onboarding.goToStep,
-                onOpenModal: dash.onboarding.openModal,
-              }}
-            />
-          </div>
-          <DashboardInspector />
+        <div className="mx-auto max-w-3xl">
+          <p className="mb-4 text-sm text-muted-foreground">
+            תנו ל-Staz פגישה. קבלו בהירות.
+          </p>
+          <DashboardWorkspace
+            language={dash.language}
+            onLanguageChange={dash.setLanguage}
+            onPromptLanguageUpgrade={dash.promptLanguageUpgrade}
+            usageCount={dash.usageCount}
+            usageLimit={dash.usageLimit}
+            canTranscribe={dash.canTranscribe}
+            onFileSelect={dash.processFile}
+            onUrlSubmit={dash.processUrl}
+            showHero
+          />
         </div>
       )}
 
@@ -82,6 +58,7 @@ export function DashboardContent() {
           stage={dash.stage}
           stageIndex={dash.stageIndex}
           uploadProgress={dash.uploadProgress}
+          onCancel={dash.resetAll}
         />
       )}
 

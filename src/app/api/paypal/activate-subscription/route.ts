@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import {
   activatePayPalSubscription,
-  formatPayPalError,
   isPayPalConfigured,
   mapPayPalSubscriptionStatus,
 } from "@/lib/paypal-subscriptions";
@@ -16,12 +15,12 @@ export async function POST(request: NextRequest) {
     const session = await auth();
 
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json({ error: "נדרשת התחברות." }, { status: 401 });
     }
 
     if (!isPayPalConfigured()) {
       return NextResponse.json(
-        { error: "PayPal is not configured on the server." },
+        { error: "תשלום PayPal אינו מוגדר. פנו לתמיכה." },
         { status: 500 },
       );
     }
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (!subscriptionId) {
       return NextResponse.json(
-        { error: "Missing subscription ID" },
+        { error: "חסר מזהה מנוי." },
         { status: 400 },
       );
     }
@@ -40,7 +39,7 @@ export async function POST(request: NextRequest) {
     const existingOwner = await findUserBySubscriptionId(subscriptionId);
     if (existingOwner && existingOwner.email !== session.user.email.toLowerCase()) {
       return NextResponse.json(
-        { error: "Subscription already linked to another account." },
+        { error: "המנוי משויך לחשבון אחר." },
         { status: 403 },
       );
     }
@@ -53,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (status === "cancelled") {
       return NextResponse.json(
-        { error: "Subscription was not activated." },
+        { error: "המנוי לא הופעל." },
         { status: 400 },
       );
     }
@@ -66,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     if (!saved) {
       return NextResponse.json(
-        { error: "User account not found." },
+        { error: "החשבון לא נמצא." },
         { status: 404 },
       );
     }
@@ -80,7 +79,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Activate subscription error:", error);
     return NextResponse.json(
-      { error: formatPayPalError(error) },
+      { error: "התשלום נכשל או ממתין. נסו שוב מההגדרות." },
       { status: 500 },
     );
   }

@@ -45,18 +45,17 @@ export function getProLifetimePriceLabel(): string {
   return isLaunchWeekActive() ? PRO_PLAN_INTRO_PRICE_LABEL : PRO_LIFETIME_PRICE_LABEL;
 }
 
-/** @deprecated Use getProLifetimePrice — kept for legacy imports */
+/** Public Pro offer — $24.90/month. Single source for marketing + checkout copy. */
 export function getProPlanPrice(): string {
-  return getProLifetimePrice();
+  return PRO_PLAN_REGULAR_PRICE;
 }
 
 export function getProPlanPriceLabel(): string {
-  return getProLifetimePriceLabel();
+  return PRO_PLAN_REGULAR_PRICE_LABEL;
 }
 
-/** Headline price shown in marketing UI during launch week. */
 export function getProPlanDisplayPriceLabel(): string {
-  return getProLifetimePriceLabel();
+  return PRO_PLAN_REGULAR_PRICE_LABEL;
 }
 
 export const WHISPER_MAX_BYTES = 25 * 1024 * 1024;

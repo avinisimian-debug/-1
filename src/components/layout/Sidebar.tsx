@@ -80,7 +80,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 py-4">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((item) => item.href !== "/live").map((item) => {
           const Icon = iconMap[item.icon];
           const label = t[item.labelKey as keyof Translations] as string;
           const isActive =

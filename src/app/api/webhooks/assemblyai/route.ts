@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { del } from "@vercel/blob";
 import { analyzeTranscriptWithOpenAI } from "@/features/transcription/server/analyze-transcript.use-case";
 import { finalizeMeetingDigest } from "@/features/live/server/ingest-recording";
 import {
@@ -19,6 +18,8 @@ import {
 } from "@/features/webhooks/server/trigger-webhook";
 import { hasFeature } from "@/lib/plan-features";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
+import { incrementServerUsage } from "@/lib/usage-server";
+import { saveMeetingForUser, recoverableFailedResult } from "@/features/library/server/meetings-store";
 import { waitUntil } from "@/lib/wait-until";
 import { isFailure } from "@/shared/lib/result";
 
@@ -175,6 +176,21 @@ async function completeJobFromAssemblyAI(
     });
 
     if (isFailure(analyzed)) {
+      try {
+        await saveMeetingForUser({
+          ownerEmail: job.ownerEmail,
+          result: recoverableFailedResult(
+            job.fileName,
+            "הניתוח נכשל. ההקלטה נשמרה.",
+          ),
+          mediaBlobUrl: job.audioBlobUrl,
+          mediaKind: job.contentType?.startsWith("video/") ? "video" : "audio",
+          plan: job.plan,
+          persistStatus: "failed_recoverable",
+        });
+      } catch (error) {
+        console.error("[assemblyai-webhook] recoverable save failed", error);
+      }
       const failed = await markJobFailed(job, analyzed.error.message);
       if (failed.meetingId) {
         await finalizeMeetingDigest(
@@ -197,7 +213,23 @@ async function completeJobFromAssemblyAI(
       error: undefined,
     });
 
+    try {
+      await saveMeetingForUser({
+        ownerEmail: job.ownerEmail,
+        result: analyzed.data,
+        mediaBlobUrl: job.audioBlobUrl,
+        mediaKind: job.contentType?.startsWith("video/") ? "video" : "audio",
+        plan: job.plan,
+        persistStatus: "complete",
+      });
+    } catch (error) {
+      console.error("[assemblyai-webhook] library save failed", error);
+      await markJobFailed(job, "העיבוד הצליח אך הספרייה בענן לא נשמרה.");
+      return;
+    }
+
     await incrementTranscriptionsToday();
+    await incrementServerUsage(job.ownerEmail);
 
     if (job.meetingId) {
       await finalizeMeetingDigest(job.meetingId, analyzed.data, "ready");
@@ -209,10 +241,6 @@ async function completeJobFromAssemblyAI(
       plan: job.plan,
       result: analyzed.data,
     }).catch(() => {});
-
-    if (job.audioBlobUrl && process.env.BLOB_READ_WRITE_TOKEN && !job.meetingId) {
-      await del(job.audioBlobUrl).catch(() => {});
-    }
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Webhook completion failed";

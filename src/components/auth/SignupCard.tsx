@@ -1,7 +1,8 @@
 "use client";
 
-import { forwardRef } from "react";
-import { ArrowRight, CheckCircle2, Mail, User } from "lucide-react";
+import { forwardRef, useEffect, useState } from "react";
+import { ArrowRight, CheckCircle2, Mail, ShieldCheck, User } from "lucide-react";
+import { signIn } from "next-auth/react";
 import { Logo } from "@/components/brand/Logo";
 import { useLocale } from "@/context/LocaleContext";
 import { cn } from "@/lib/utils";
@@ -9,10 +10,13 @@ import { cn } from "@/lib/utils";
 interface SignupCardProps {
   name: string;
   email: string;
+  otp: string;
+  otpSent: boolean;
   error: string | null;
   loading: boolean;
   onNameChange: (v: string) => void;
   onEmailChange: (v: string) => void;
+  onOtpChange: (v: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   className?: string;
 }
@@ -22,24 +26,31 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
     {
       name,
       email,
+      otp,
+      otpSent,
       error,
       loading,
       onNameChange,
       onEmailChange,
+      onOtpChange,
       onSubmit,
       className,
     },
     ref,
   ) {
     const { t } = useLocale();
+    const [google, setGoogle] = useState(false);
     const benefits = [t.authBenefit1, t.authBenefit2, t.authBenefit3];
 
+    useEffect(() => {
+      void fetch("/api/auth/config")
+        .then((r) => r.json())
+        .then((d: { google?: boolean }) => setGoogle(Boolean(d.google)))
+        .catch(() => setGoogle(false));
+    }, []);
+
     return (
-      <div
-        ref={ref}
-        id="signup-form"
-        className={cn("scroll-mt-24", className)}
-      >
+      <div ref={ref} id="signup-form" className={cn("scroll-mt-24", className)}>
         <div className="premium-signup-card mx-auto max-w-md p-8 sm:max-w-lg sm:p-9">
           <div className="mb-6 flex justify-center">
             <Logo size="md" />
@@ -72,6 +83,22 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
               </li>
             ))}
           </ul>
+
+          {google ? (
+            <button
+              type="button"
+              onClick={() => void signIn("google", { callbackUrl: "/" })}
+              className="btn-secondary mb-4 flex min-h-[48px] w-full items-center justify-center gap-2 px-5 py-3 text-sm font-medium"
+            >
+              {t.authGoogle}
+            </button>
+          ) : null}
+
+          {google ? (
+            <p className="mb-4 text-center text-xs text-muted-foreground">
+              {t.authEmailOr}
+            </p>
+          ) : null}
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
@@ -112,6 +139,27 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
               />
             </div>
 
+            {otpSent ? (
+              <div>
+                <label
+                  htmlFor="login-otp"
+                  className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
+                >
+                  <ShieldCheck className="h-3 w-3" aria-hidden />
+                  קוד אימות מהאימייל
+                </label>
+                <input
+                  id="login-otp"
+                  inputMode="numeric"
+                  value={otp}
+                  onChange={(e) => onOtpChange(e.target.value)}
+                  className="input-field"
+                  placeholder="000000"
+                  autoComplete="one-time-code"
+                />
+              </div>
+            ) : null}
+
             {error && (
               <p
                 role="alert"
@@ -130,15 +178,22 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
               )}
             >
               <span className="whitespace-nowrap">
-                {loading ? t.authLoading : t.authSubmit}
+                {loading
+                  ? t.authLoading
+                  : otpSent
+                    ? "אימות כניסה"
+                    : "שלחו קוד והמשיכו לפגישה"}
               </span>
               {!loading && (
-                <ArrowRight className="h-4 w-4 shrink-0 rtl:rotate-180" aria-hidden />
+                <ArrowRight
+                  className="h-4 w-4 shrink-0 rtl:rotate-180"
+                  aria-hidden
+                />
               )}
             </button>
 
             <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-              {t.authUpdates}
+              לא נכנסים לחשבון של מישהו אחר לפי אימייל בלבד — נדרש קוד או Google.
             </p>
           </form>
         </div>

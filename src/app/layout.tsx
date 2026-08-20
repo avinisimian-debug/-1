@@ -7,6 +7,7 @@ import {
   Manrope,
 } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { auth } from "@/auth";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { buildSiteMetadata } from "@/lib/seo";
 import { I18N_BOOTSTRAP_SCRIPT } from "@/lib/i18n/bootstrap-script";
@@ -46,11 +47,14 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  const showMarketingChrome = !session?.user;
+
   return (
     <html
       lang="he"
@@ -62,23 +66,29 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{ __html: I18N_BOOTSTRAP_SCRIPT }}
         />
-        <meta
-          name="google-adsense-account"
-          content="ca-pub-1517251000751283"
-        />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1517251000751283"
-          crossOrigin="anonymous"
-        />
+        {showMarketingChrome ? (
+          <>
+            <meta
+              name="google-adsense-account"
+              content="ca-pub-1517251000751283"
+            />
+            <script
+              async
+              src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1517251000751283"
+              crossOrigin="anonymous"
+            />
+          </>
+        ) : null}
       </head>
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>{children}</AppProviders>
         <Analytics />
-        <Script
-          src="https://code.tidio.co/rxthk18hhvew8n55ixhfsgutafyhwwyc.js"
-          strategy="afterInteractive"
-        />
+        {showMarketingChrome ? (
+          <Script
+            src="https://code.tidio.co/rxthk18hhvew8n55ixhfsgutafyhwwyc.js"
+            strategy="afterInteractive"
+          />
+        ) : null}
       </body>
     </html>
   );

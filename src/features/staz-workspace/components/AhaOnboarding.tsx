@@ -5,13 +5,11 @@ import { DEMO_AHA_TIMESTAMP } from "../data/demo-meeting";
 interface AhaOnboardingProps {
   targetTimestamp?: string;
   onJump: () => void;
-  onSkip: () => void;
 }
 
 export function AhaOnboarding({
   targetTimestamp = DEMO_AHA_TIMESTAMP,
   onJump,
-  onSkip,
 }: AhaOnboardingProps) {
   return (
     <div
@@ -40,9 +38,6 @@ export function AhaOnboarding({
         <div className="mt-5 flex flex-col gap-2">
           <button type="button" onClick={onJump} className="lat-btn-primary w-full">
             {targetTimestamp} ↗ לרגע ההחלטה
-          </button>
-          <button type="button" onClick={onSkip} className="lat-btn-ghost w-full text-sm">
-            דלגו
           </button>
         </div>
       </div>
