@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import {
   Fraunces,
   Heebo,
@@ -83,12 +82,7 @@ export default async function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>{children}</AppProviders>
         <Analytics />
-        {showMarketingChrome ? (
-          <Script
-            src="https://code.tidio.co/rxthk18hhvew8n55ixhfsgutafyhwwyc.js"
-            strategy="afterInteractive"
-          />
-        ) : null}
+        {/* Chat widget removed from public landing — competed with demo/CTA conversion. */}
       </body>
     </html>
   );

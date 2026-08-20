@@ -6,7 +6,11 @@ import {
   OtpDeliveryError,
   OtpRateLimitError,
 } from "@/lib/email-otp";
-import { CloudStorageUnavailableError } from "@/lib/runtime-env";
+import {
+  CloudStorageUnavailableError,
+  resendFromIsTestDomain,
+} from "@/lib/runtime-env";
+import { registerOrUpdateUser } from "@/lib/users-store";
 
 export const runtime = "nodejs";
 
@@ -14,6 +18,19 @@ const Body = z.object({
   email: z.string().email(),
   name: z.string().min(1).max(120).optional(),
 });
+
+function resendFailureMessage(status: number, bodyText: string): string {
+  const lower = bodyText.toLowerCase();
+  if (
+    status === 403 ||
+    lower.includes("verify a domain") ||
+    lower.includes("only send testing emails") ||
+    lower.includes("domain is not verified")
+  ) {
+    return "שליחת המייל חסומה: צריך לאמת את הדומיין ב-Resend (לא resend.dev) ולהגדיר RESEND_FROM_EMAIL כמו Staz AI <noreply@1stazai.com>.";
+  }
+  return "שליחת הקוד נכשלה. נסו שוב או התחברו עם Google.";
+}
 
 export async function POST(request: Request) {
   let raw: unknown;
@@ -38,7 +55,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 503 });
   }
 
+  if (resendFromIsTestDomain()) {
+    return NextResponse.json(
+      {
+        error:
+          "שליחת קוד דורשת דומיין מאומת ב-Resend. הגדירו RESEND_FROM_EMAIL עם @1stazai.com (לא resend.dev).",
+      },
+      { status: 503 },
+    );
+  }
+
   const email = parsed.data.email.trim().toLowerCase();
+  const name = parsed.data.name?.trim() || email.split("@")[0] || "User";
+
+  // Persist signup contact for product updates even if delivery fails later.
+  try {
+    await registerOrUpdateUser({ name, email, provider: "email" });
+  } catch (error) {
+    console.error("[otp] contact persist failed");
+    void error;
+  }
 
   let code: string;
   try {
@@ -74,9 +110,10 @@ export async function POST(request: Request) {
       }),
     });
     if (!res.ok) {
-      console.error("[otp] resend HTTP", res.status);
+      const bodyText = await res.text().catch(() => "");
+      console.error("[otp] resend HTTP", res.status, bodyText.slice(0, 300));
       return NextResponse.json(
-        { error: "שליחת הקוד נכשלה. נסו שוב או התחברו עם Google." },
+        { error: resendFailureMessage(res.status, bodyText) },
         { status: 502 },
       );
     }

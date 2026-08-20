@@ -242,6 +242,25 @@ Vercel Production env updated for PayPal Client ID/Secret/Mode/Plan IDs.
 Placeholder Google Client ID/Secret removed from Production (Google button stays off until a real `….apps.googleusercontent.com` is set).
 Resend keys already present on Vercel Production.
 
+**Post-deploy live health (2026-08-20):**
+
+`GET https://1stazai.com/api/health/paypal`:
+- `authOk: true`
+- `billing.planId: P-6S363313S0138591YNI4UXPQ`
+- `billing.billedAmount: "24.9"`
+- `billing.currency: "USD"`
+- `billing.cycle: "MONTH/1"`
+- `billing.priceMatchesUi: true`
+- `ok: true`
+- `webhookIdConfigured: false` — **add a non-empty `PAYPAL_WEBHOOK_ID`** after creating the Live webhook (cancel/past_due sync will not apply until set)
+
+`GET https://1stazai.com/api/health/ops`:
+- `resend.ok: true`
+- `blob.ok: true`
+- `google.ok: false` (expected until real Google OAuth credentials are added)
+
+`GET https://1stazai.com/api/auth/config`: `google: false` (no placeholder leak)
+
 After git push / Redeploy, re-check `GET https://1stazai.com/api/health/paypal`.
 
 ## Remaining manual production tests

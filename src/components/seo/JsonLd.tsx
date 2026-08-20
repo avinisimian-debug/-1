@@ -4,6 +4,7 @@ import {
 } from "@/lib/constants";
 import { SITE_DESCRIPTION, SITE_URL } from "@/lib/seo";
 import { BRAND_NAME } from "@/lib/brand";
+import { LANDING } from "@/lib/landing-copy";
 
 export function JsonLd() {
   const proPrice = getProPlanPrice();
@@ -43,16 +44,16 @@ export function JsonLd() {
     "@type": "SoftwareApplication",
     name: BRAND_NAME,
     applicationCategory: "BusinessApplication",
-    applicationSubCategory: "Meeting Transcription",
+    applicationSubCategory: "Meeting Closeout",
     operatingSystem: "Web",
     url: SITE_URL,
     description: SITE_DESCRIPTION,
     image: `${SITE_URL}/icon-512.png`,
     featureList: [
-      "AI meeting transcription",
-      "Hebrew and English support",
-      "Action items and summaries",
-      "Speaker insights",
+      "תמצית מנהלים בעברית",
+      "החלטות ומשימות",
+      "קפיצה לרגע בתמלול",
+      "ספריית פגישות בענן",
     ],
     offers: [
       {
@@ -60,7 +61,7 @@ export function JsonLd() {
         name: "Free",
         price: "0",
         priceCurrency: "USD",
-        description: "Trial plan with monthly transcription quota",
+        description: "התחלה חינם — תמצית, החלטות ומשימות",
         url: `${SITE_URL}/#pricing`,
       },
       {
@@ -68,7 +69,7 @@ export function JsonLd() {
         name: "Pro monthly",
         price: proPrice,
         priceCurrency: "USD",
-        description: `Staz Pro — $${PRO_PLAN_REGULAR_PRICE} per month`,
+        description: `Staz Pro — $${PRO_PLAN_REGULAR_PRICE} לחודש`,
         url: `${SITE_URL}/#pricing`,
         priceValidUntil: "2027-12-31",
       },
@@ -78,32 +79,14 @@ export function JsonLd() {
   const faq = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "האם Staz AI תומך בתמלול בעברית?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "כן. Staz AI מתמחה בתמלול וסיכום פגישות בעברית ובאנגלית, כולל Zoom, Teams ו-Google Meet.",
-        },
+    mainEntity: LANDING.faq.items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
       },
-      {
-        "@type": "Question",
-        name: "כמה עולה תוכנית Pro?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `תוכנית Pro היא מנוי חודשי ב־$${PRO_PLAN_REGULAR_PRICE} לחודש.`,
-        },
-      },
-      {
-        "@type": "Question",
-        name: "מה גודל הקובץ המקסימלי?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "בתוכנית החינמית יש מגבלת גודל נמוכה יותר. ב-Pro ניתן להעלות קבצים עד 500 MB והקלטות של 3 שעות ומעלה.",
-        },
-      },
-    ],
+    })),
   };
 
   return (

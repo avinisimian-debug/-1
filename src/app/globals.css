@@ -1211,10 +1211,133 @@
 }
 
 /* =============================================================================
-   LATITUDE — Wave 1 premium workspace patterns
+   STAZ public landing — cinematic conversion surface
    ============================================================================= */
 
+:root {
+  --staz-bg: #070b0a;
+  --staz-surface: #0b1714;
+  --staz-surface-elevated: #101a17;
+  --staz-green: #1f6b5c;
+  --staz-green-bright: #2e8b78;
+  --staz-green-soft: #5fb7a0;
+  --staz-text: #f5f3ee;
+  --staz-muted: #a7ada9;
+  --staz-border: rgba(255, 255, 255, 0.08);
+}
+
 @layer components {
+  .landing-shell {
+    background:
+      radial-gradient(80% 50% at 50% -5%, rgba(31, 107, 92, 0.22) 0%, transparent 55%),
+      radial-gradient(50% 40% at 100% 20%, rgba(46, 139, 120, 0.08) 0%, transparent 50%),
+      linear-gradient(180deg, var(--staz-bg) 0%, var(--staz-surface) 48%, var(--staz-bg) 100%);
+    color: var(--staz-text);
+  }
+
+  .landing-hero-glow {
+    background:
+      radial-gradient(ellipse 55% 40% at 50% 18%, rgba(46, 139, 120, 0.2), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 60%, rgba(31, 107, 92, 0.12), transparent 65%);
+  }
+
+  .landing-hero-copy {
+    animation: landing-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .landing-theatre-hero {
+    animation: landing-rise 1s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .landing-header {
+    animation: landing-fade 0.65s ease both;
+  }
+
+  .staz-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0 1.35rem;
+    border-radius: 0.85rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+    background: var(--staz-text);
+    color: var(--staz-bg);
+    transition:
+      transform 160ms ease,
+      opacity 160ms ease,
+      box-shadow 160ms ease;
+  }
+  .staz-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 32px -16px rgba(245, 243, 238, 0.45);
+  }
+  .staz-btn-primary:focus-visible {
+    outline: 2px solid var(--staz-green-soft);
+    outline-offset: 2px;
+  }
+
+  .staz-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border-radius: 0.85rem;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    color: var(--staz-text);
+    border: 1px solid var(--staz-border);
+    background: rgba(255, 255, 255, 0.02);
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+  .staz-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+  .staz-btn-secondary:focus-visible {
+    outline: 2px solid var(--staz-green-soft);
+    outline-offset: 2px;
+  }
+
+  .staz-panel {
+    border: 1px solid var(--staz-border);
+    background: color-mix(in srgb, var(--staz-surface-elevated) 92%, black);
+    border-radius: 1.25rem;
+  }
+
+  @keyframes landing-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes landing-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-hero-copy,
+    .landing-theatre-hero,
+    .landing-header {
+      animation: none;
+    }
+  }
+
   .lat-stage {
     background:
       radial-gradient(100% 70% at 80% -20%, rgba(31, 107, 92, 0.22) 0%, transparent 45%),

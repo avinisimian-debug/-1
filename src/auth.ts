@@ -10,6 +10,7 @@ import { verifyEmailOtp } from "@/lib/email-otp";
 
 const providers: Provider[] = [
   Credentials({
+    id: "email-otp",
     name: "Email",
     credentials: {
       name: { label: "Name", type: "text" },

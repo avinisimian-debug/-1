@@ -25,6 +25,23 @@ export function resendConfigured(): boolean {
   );
 }
 
+/** Extract domain from `Name <user@domain>` or bare `user@domain`. */
+export function resendFromDomain(): string | null {
+  const from = process.env.RESEND_FROM_EMAIL?.trim() ?? "";
+  const match = from.match(/@([^>\s]+)/i);
+  return match?.[1]?.toLowerCase() ?? null;
+}
+
+/** resend.dev is test-only and cannot email arbitrary recipients. */
+export function resendFromIsTestDomain(): boolean {
+  const domain = resendFromDomain();
+  return !domain || domain === "resend.dev" || domain.endsWith(".resend.dev");
+}
+
+export function resendReadyForProductionRecipients(): boolean {
+  return resendConfigured() && !resendFromIsTestDomain();
+}
+
 export class CloudStorageUnavailableError extends Error {
   constructor() {
     super(

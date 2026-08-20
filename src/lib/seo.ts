@@ -7,25 +7,20 @@ export const SITE_URL =
   "https://1stazai.com";
 
 export const SITE_TITLE =
-  "Staz AI — תמלול וסיכום פגישות ב-AI | עברית ואנגלית";
+  "Staz AI — מסכמים פגישות ומוציאים מהן החלטות";
 
 export const SITE_DESCRIPTION =
-  "תמלול מדויק לפגישות Zoom, Teams ו-Google Meet. סיכומי מנהלים, משימות ותובנות תוך דקות — בעברית ובאנגלית. ניסיון חינם בשבוע ההשקה.";
+  "Staz הופך פגישות בעברית לתמצית מנהלים, החלטות ומשימות — עם קפיצה לרגע המדויק שבו הדברים נאמרו.";
 
 export const SITE_KEYWORDS = [
-  "תמלול פגישות",
-  "תמלול בעברית",
   "סיכום פגישות",
-  "תמלול AI",
-  "תמלול Zoom",
-  "תמלול Teams",
-  "meeting transcription",
-  "AI transcription Hebrew",
+  "תמצית מנהלים",
+  "החלטות מפגישה",
+  "תמלול בעברית",
+  "סגירת פגישה",
   "Staz AI",
   "1stazai",
-  "סיכום פגישות AI",
-  "תמלול אוטומטי",
-  "speech to text Hebrew",
+  "meeting closeout Hebrew",
 ];
 
 const ogImage = `${SITE_URL}/icon-512.png`;

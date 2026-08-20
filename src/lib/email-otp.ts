@@ -72,7 +72,11 @@ async function writeRecord(email: string, record: OtpRecord): Promise<void> {
 async function readRecord(email: string): Promise<OtpRecord | null> {
   try {
     if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const result = await get(otpPath(email), { access: "private" });
+      // Bypass CDN — stale OTP hashes make valid codes fail after send.
+      const result = await get(otpPath(email), {
+        access: "private",
+        useCache: false,
+      });
       if (!result || result.statusCode !== 200) return null;
       return JSON.parse(await new Response(result.stream).text()) as OtpRecord;
     }

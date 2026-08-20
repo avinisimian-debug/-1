@@ -2,27 +2,30 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useRef, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { LandingPricing } from "@/components/auth/LandingPricing";
 import { SignupCard } from "@/components/auth/SignupCard";
-import {
-  LandingProductTheatre,
-  PublicDemoWorkspace,
-} from "@/features/staz-workspace";
+import { FinalCta } from "@/components/landing/FinalCta";
+import { LandingFaq } from "@/components/landing/LandingFaq";
+import { OutcomeSection } from "@/components/landing/OutcomeSection";
+import { PainOutcomeSection } from "@/components/landing/PainOutcomeSection";
+import { StazFooter } from "@/components/landing/StazFooter";
+import { StazHero } from "@/components/landing/StazHero";
+import { StazNav } from "@/components/landing/StazNav";
+import { PublicDemoWorkspace } from "@/features/staz-workspace";
 import { useLocale } from "@/context/LocaleContext";
-import type { Locale } from "@/lib/i18n/translations";
+import { LANDING } from "@/lib/landing-copy";
 
 const TrustSection = dynamic(
   () =>
     import("@/components/trust/TrustSection").then((m) => ({
       default: m.TrustSection,
     })),
-  { loading: () => <div className="h-24" /> },
+  { loading: () => <div className="h-16" /> },
 );
 
 export function LoginScreen() {
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
-  const { update } = useSession();
   const signupRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -30,9 +33,18 @@ export function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const copy = LANDING;
 
   const scrollToDemo = useCallback(() => {
     document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const scrollToHow = useCallback(() => {
+    document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const scrollToPricing = useCallback(() => {
+    document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
   const scrollToSignup = useCallback(() => {
@@ -100,7 +112,7 @@ export function LoginScreen() {
 
     setLoading(true);
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn("email-otp", {
         name: trimmedName,
         email: normalizedEmail,
         otp: otp.trim(),
@@ -109,7 +121,7 @@ export function LoginScreen() {
       });
 
       if (result?.ok) {
-        await update();
+        window.location.assign("/");
         return;
       }
 
@@ -122,105 +134,61 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="lat-stage min-h-screen pb-24 text-[#ededea] lg:pb-0">
-      <header className="sticky top-0 z-40 border-b border-white/5 bg-[#0c0e0d]/75 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
-          <span className="font-brand text-xl tracking-[0.12em] text-[#ededea] sm:text-2xl">
-            STAZ
-          </span>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <select
-              value={locale}
-              onChange={(e) => setLocale(e.target.value as Locale)}
-              aria-label={t.langLabel}
-              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-[#c5cbc5] sm:text-sm"
-            >
-              {locales.map((l) => (
-                <option key={l} value={l} className="text-black">
-                  {localeLabels[l]}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={scrollToDemo}
-              className="lat-btn-ghost hidden text-sm sm:inline-flex"
-            >
-              ראו דמו
-            </button>
-            <button
-              type="button"
-              onClick={scrollToSignup}
-              className="lat-btn-inverse !min-h-9 !px-3 !text-xs sm:!min-h-10 sm:!px-4 sm:!text-sm"
-            >
-              העלו פגישה
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="landing-shell min-h-screen pb-24 text-[var(--staz-text)] lg:pb-0">
+      <StazNav
+        locale={locale}
+        locales={locales}
+        localeLabels={localeLabels}
+        langLabel={t.langLabel}
+        onLocaleChange={(l) => setLocale(l)}
+        onDemo={scrollToDemo}
+        onHow={scrollToHow}
+        onPricing={scrollToPricing}
+        onLogin={scrollToSignup}
+      />
 
-      <main className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 sm:pt-14">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-[13px] font-medium tracking-wide text-[#7eb8ab]">
-            עוזר מנהלים אחרי פגישה
-          </p>
-          <h1 className="mt-4 text-balance font-brand text-[1.85rem] leading-[1.2] tracking-tight text-[#ededea] sm:text-5xl">
-            יוצאים מהפגישה עם החלטות, לא עם קובץ טקסט.
-          </h1>
-          <p className="mt-5 text-pretty text-base leading-relaxed text-[#b4bab4] sm:text-lg">
-            תמצית מנהלים, משימות, ורגע מדויק בתמלול — בעברית.
-          </p>
-          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={scrollToDemo}
-              className="lat-btn-inverse w-full sm:w-auto"
-            >
-              חוו את הדמו
-            </button>
-            <a
-              href="#signup-form"
-              className="lat-btn-ghost w-full border border-white/10 sm:w-auto"
-            >
-              העלו פגישה ראשונה
-            </a>
-          </div>
-        </div>
+      <StazHero onDemo={scrollToDemo} onSignup={scrollToSignup} />
 
-        <div id="theatre" className="mx-auto mt-14 max-w-4xl lat-fade-rise">
-          <LandingProductTheatre />
-        </div>
-
-        <section className="mx-auto mt-16 max-w-5xl">
-          <PublicDemoWorkspace />
+      <main className="relative z-10 mx-auto max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pt-20">
+        <section aria-labelledby="demo-heading">
+          <PublicDemoWorkspace onSignup={scrollToSignup} />
         </section>
 
-        <section className="mx-auto mt-16 max-w-3xl text-center">
-          <p className="text-[13px] font-medium text-[#7eb8ab]">איך זה עובד</p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {[
-              { n: "01", t: "מעלים", d: "הקלטה קצרה של הפגישה." },
-              { n: "02", t: "מקבלים בהירות", d: "תמצית, החלטות ומשימות." },
-              { n: "03", t: "שולחים", d: "סיכום מוכן לצוות תוך דקות." },
-            ].map((step) => (
-              <div
-                key={step.t}
-                className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-6 text-start"
-              >
-                <p className="font-mono-time text-[11px] text-[#c4a35a]">{step.n}</p>
-                <p className="mt-2 font-semibold text-[#ededea]">{step.t}</p>
-                <p className="mt-2 text-sm leading-relaxed text-[#b4bab4]">{step.d}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <PainOutcomeSection />
+        <OutcomeSection />
 
-        <section className="lat-landing-sheet mx-auto mt-20 max-w-3xl p-6 sm:p-10">
-          <p className="mb-6 text-center text-sm leading-relaxed text-[var(--ink-secondary)]">
-            כדי לעבד את הפגישה שלכם (לא רק את הדמו) — צרו חשבון חינמי.
-          </p>
+        <div className="mt-20 sm:mt-24">
+          <TrustSection variant="landing" />
+        </div>
+
+        <div className="mt-16 sm:mt-20">
+          <LandingPricing
+            variant="landing"
+            onFreeSignup={scrollToSignup}
+            onProSignup={scrollToSignupForPro}
+          />
+        </div>
+
+        <LandingFaq />
+
+        <section
+          className="mx-auto mt-20 max-w-xl sm:mt-24"
+          aria-labelledby="signup-heading"
+        >
+          <div className="mb-8 text-center">
+            <h2
+              id="signup-heading"
+              className="font-brand text-2xl tracking-tight text-[var(--staz-text)] sm:text-3xl"
+            >
+              {copy.signup.headline}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[var(--staz-muted)] sm:text-base">
+              {copy.signup.subhead}
+            </p>
+          </div>
           <SignupCard
             ref={signupRef}
+            variant="landing"
             name={name}
             email={email}
             otp={otp}
@@ -234,21 +202,14 @@ export function LoginScreen() {
           />
         </section>
 
-        <div className="lat-landing-sheet mx-auto mt-10 max-w-4xl">
-          <LandingPricing
-            onFreeSignup={scrollToSignup}
-            onProSignup={scrollToSignupForPro}
-          />
-        </div>
-
-        <div className="mt-14 border-t border-white/10 pt-10">
-          <TrustSection variant="landing" />
-        </div>
+        <FinalCta onDemo={scrollToDemo} onSignup={scrollToSignup} />
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#0c0e0d]/95 p-3 backdrop-blur-md lg:hidden">
-        <button type="button" onClick={scrollToDemo} className="lat-btn-inverse w-full">
-          חוו את הדמו
+      <StazFooter />
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--staz-border)] bg-[color-mix(in_srgb,var(--staz-bg)_92%,transparent)] p-3 backdrop-blur-md lg:hidden">
+        <button type="button" onClick={scrollToDemo} className="staz-btn-primary w-full">
+          {copy.hero.primaryCta}
         </button>
       </div>
     </div>
