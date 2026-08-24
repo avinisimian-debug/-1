@@ -242,7 +242,7 @@ export function MeetingWorkspace({
         : t.workspaceTranscriptUnsaved;
 
   return (
-    <div className="space-y-4 [font-family:var(--font-inter),var(--font-geist-sans),system-ui,sans-serif]">
+    <div className="space-y-4 font-ui">
       <MeetingValueIndicator durationLabel={result.duration} />
 
       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">

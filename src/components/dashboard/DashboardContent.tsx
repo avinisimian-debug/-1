@@ -10,6 +10,7 @@ import {
   ProcessingState,
   ResultsView,
 } from "@/features/transcription";
+import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { useDashboardController } from "@/hooks/useDashboardController";
 import { SETTINGS_UPGRADE_PATH } from "@/lib/upgrade-navigation";
@@ -18,6 +19,7 @@ export function DashboardContent() {
   const dash = useDashboardController();
   const router = useRouter();
   const { isPro } = usePlan();
+  const { t } = useLocale();
 
   useEffect(() => {
     try {
@@ -30,17 +32,16 @@ export function DashboardContent() {
     }
   }, [router]);
 
+  const idle = dash.phase === "idle";
+
   return (
     <DashboardShell
-      title="סגירת פגישה"
-      description="העלו הקלטה — קבלו תמצית, החלטות ומשימות."
+      title={idle ? t.dashTitle : t.resComplete}
+      description={idle ? t.dashDesc : t.resExecutive}
     >
-      {dash.phase === "idle" && (
-        <div className="mx-auto max-w-3xl">
+      {idle && (
+        <div className="mx-auto max-w-2xl">
           <LaunchDashboardCard isPro={isPro} />
-          <p className="mb-4 text-sm text-muted-foreground">
-            תנו ל-Staz פגישה. קבלו בהירות.
-          </p>
           <DashboardWorkspace
             language={dash.language}
             onLanguageChange={dash.setLanguage}

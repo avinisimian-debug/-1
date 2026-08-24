@@ -33,17 +33,17 @@ export default function WebhooksSettingsPage() {
         </Link>
 
         {unlocked ? (
-          <section className="glass-card overflow-hidden rounded-xl">
-            <div className="border-b border-border/60 bg-gradient-to-r from-violet-500/5 via-transparent to-amber-500/5 px-6 py-5 sm:px-8">
+          <section className="lat-panel overflow-hidden">
+            <div className="border-b border-[var(--line-subtle)] bg-[color-mix(in_srgb,var(--accent)_5%,transparent)] px-6 py-5 sm:px-8">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-muted">
-                  <Webhook className="h-5 w-5 text-accent" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-soft)]">
+                  <Webhook className="h-5 w-5 text-[var(--accent)]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">
+                  <h2 className="text-lg font-semibold text-[var(--ink-primary)]">
                     {t.webhooksSectionTitle}
                   </h2>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--ink-secondary)]">
                     {t.webhooksSectionDesc}
                   </p>
                 </div>

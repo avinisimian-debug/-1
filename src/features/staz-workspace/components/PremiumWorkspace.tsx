@@ -1,21 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { TranscriptionResult } from "@/features/transcription/types";
 import {
   findActiveLineIndex,
   timestampToSeconds,
 } from "@/features/workspace/lib/timestamp";
 import { useMediaPlayback } from "@/features/workspace/hooks/useMediaPlayback";
-import { Pause, Play, Share2, Upload } from "lucide-react";
+import {
+  Copy,
+  Download,
+  Loader2,
+  Pause,
+  Play,
+  Share2,
+  Upload,
+} from "lucide-react";
 import { AiAssistantRail } from "./AiAssistantRail";
 import { TranscriptTimeline } from "./TranscriptTimeline";
 import { AhaOnboarding } from "./AhaOnboarding";
 import { ShareSheet } from "./ShareSheet";
+import { ExecutiveBriefPdfDocument } from "./ExecutiveBriefPdfDocument";
 import {
   DEMO_AHA_TIMESTAMP,
   DEMO_MEETING_ID,
 } from "../data/demo-meeting";
+import { buildSummaryText, copyToClipboard } from "@/lib/export";
+import { downloadPdfReport } from "@/lib/export-pdf";
+import { usePlan } from "@/context/PlanContext";
+import { useFeatureGate } from "@/context/FeatureGateContext";
+import { hasFeature } from "@/lib/plan-features";
 import { cn } from "@/lib/utils";
 
 type MobileTab = "summary" | "transcript" | "ask";
@@ -39,6 +53,9 @@ export function PremiumWorkspace({
   onReset,
   className,
 }: PremiumWorkspaceProps) {
+  const { plan } = usePlan();
+  const { promptUpgrade } = useFeatureGate();
+  const canPdf = hasFeature(plan, "pdfExport");
   const demo =
     isDemo ??
     (result.fileName.includes("Demo") || result.fileName.includes("Staz Demo"));
@@ -49,6 +66,9 @@ export function PremiumWorkspace({
   const [shareOpen, setShareOpen] = useState(false);
   const [ahaOpen, setAhaOpen] = useState(false);
   const [ahaPulse, setAhaPulse] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   const currentSeconds = mediaSrc ? playback.currentTime : seekSeconds;
 
@@ -96,6 +116,28 @@ export function PremiumWorkspace({
     window.setTimeout(() => setAhaPulse(false), 4000);
   }, [seekTimestamp]);
 
+  const copyBrief = useCallback(async () => {
+    await copyToClipboard(buildSummaryText(result));
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }, [result]);
+
+  const downloadPdf = useCallback(async () => {
+    if (!canPdf) {
+      promptUpgrade("pdfExport");
+      return;
+    }
+    if (pdfBusy || !pdfRef.current) return;
+    setPdfBusy(true);
+    try {
+      await downloadPdfReport(pdfRef.current, result.fileName);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPdfBusy(false);
+    }
+  }, [canPdf, pdfBusy, promptUpgrade, result.fileName]);
+
   const activeLabel = result.transcript[
     Math.max(
       0,
@@ -114,37 +156,74 @@ export function PremiumWorkspace({
       )}
       data-demo={demo ? DEMO_MEETING_ID : undefined}
     >
-      {/* Header */}
-      <header className="flex flex-wrap items-center gap-2 border-b border-[var(--line-subtle)] bg-[var(--bg-elevated)] px-3 py-2.5 sm:px-4">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed top-0 -start-[9999px] z-[-1] opacity-0"
+      >
+        <div ref={pdfRef}>
+          <ExecutiveBriefPdfDocument result={result} />
+        </div>
+      </div>
+
+      {/* Header — clear export actions, sticky tools */}
+      <header className="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b border-[var(--line-subtle)] bg-[color-mix(in_srgb,var(--bg-elevated)_92%,transparent)] px-3 py-2.5 backdrop-blur-md sm:gap-2.5 sm:px-4">
         <div className="min-w-0 flex-1">
-          <p className="truncate font-brand text-lg tracking-tight text-[var(--brand-ink)]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
             STAZ
           </p>
-          <h1 className="truncate text-sm font-semibold text-[var(--ink-primary)] sm:text-base">
+          <h1 className="mt-0.5 truncate text-sm font-semibold leading-snug text-[var(--ink-primary)] sm:text-[0.9375rem]">
             {result.fileName}
           </h1>
         </div>
-        <span className="rounded-full bg-[var(--ok-soft,rgba(47,111,78,0.1))] px-2.5 py-1 text-[11px] font-semibold text-[var(--ok,#2F6F4E)]">
+        <span className="hidden rounded-full bg-[var(--ok-soft,rgba(47,111,78,0.1))] px-2.5 py-1 text-[11px] font-semibold text-[var(--ok,#2F6F4E)] sm:inline-flex">
           מוכן
         </span>
-        <button
-          type="button"
-          onClick={() => setShareOpen(true)}
-          className="lat-btn-primary !min-h-10 !text-sm"
-        >
-          <Share2 className="size-3.5" />
-          שתף
-        </button>
-        {onReset && (
-          <button type="button" onClick={onReset} className="lat-btn-ghost !min-h-10 !text-sm">
-            <Upload className="size-3.5" />
-            חדש
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            onClick={() => void copyBrief()}
+            className="lat-btn-ghost !min-h-10 !rounded-full !px-3 !text-sm"
+          >
+            <Copy className="size-3.5" />
+            <span className="hidden sm:inline">{copied ? "הועתק" : "העתק"}</span>
           </button>
-        )}
+          <button
+            type="button"
+            onClick={() => void downloadPdf()}
+            disabled={pdfBusy}
+            className="lat-btn-ghost !min-h-10 !rounded-full !px-3 !text-sm disabled:opacity-50"
+            title={canPdf ? "הורדת PDF" : "PDF כלול ב-Pro"}
+          >
+            {pdfBusy ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Download className="size-3.5" />
+            )}
+            <span className="hidden sm:inline">PDF</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            className="lat-btn-primary !min-h-10 !rounded-full !px-3.5 !text-sm"
+          >
+            <Share2 className="size-3.5" />
+            שתף
+          </button>
+          {onReset ? (
+            <button
+              type="button"
+              onClick={onReset}
+              className="lat-btn-ghost !min-h-10 !rounded-full !px-3 !text-sm"
+            >
+              <Upload className="size-3.5" />
+              <span className="hidden sm:inline">חדש</span>
+            </button>
+          ) : null}
+        </div>
       </header>
 
       {/* Mobile tabs — default סיכום */}
-      <div className="flex border-b border-[var(--line-subtle)] bg-[var(--bg-elevated)] lg:hidden">
+      <div className="sticky top-[3.25rem] z-[9] flex border-b border-[var(--line-subtle)] bg-[color-mix(in_srgb,var(--bg-elevated)_94%,transparent)] backdrop-blur-md lg:hidden">
         {(
           [
             ["summary", "סיכום"],
@@ -157,10 +236,10 @@ export function PremiumWorkspace({
             type="button"
             onClick={() => setMobileTab(id)}
             className={cn(
-              "flex-1 py-2.5 text-sm font-semibold",
+              "min-h-11 flex-1 py-2.5 text-sm font-semibold transition-colors duration-150",
               mobileTab === id
                 ? "border-b-2 border-[var(--accent)] text-[var(--accent)]"
-                : "text-[var(--ink-tertiary)]",
+                : "border-b-2 border-transparent text-[var(--ink-tertiary)] hover:text-[var(--ink-secondary)]",
             )}
           >
             {label}

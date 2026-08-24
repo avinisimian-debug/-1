@@ -129,9 +129,9 @@ export default function AdminAuthSetupPage() {
           </div>
         )}
 
-        <section className="glass-card space-y-4 rounded-lg p-6">
+        <section className="lat-panel space-y-4 rounded-lg p-6">
           <div className="flex items-center gap-2 text-zinc-900">
-            <Shield className="h-5 w-5 text-indigo-600" />
+            <Shield className="h-5 w-5 text-[var(--accent)]" />
             <h2 className="text-lg font-semibold">שלב 1 — צור Client ID ב-Google</h2>
           </div>
           <ol className="list-decimal space-y-2 ps-5 text-sm leading-relaxed text-zinc-600">
@@ -150,7 +150,7 @@ export default function AdminAuthSetupPage() {
                 <button
                   type="button"
                   onClick={() => void copyText(origin, origin)}
-                  className="inline-flex shrink-0 items-center gap-1 rounded px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-xs text-[var(--accent)] hover:bg-[var(--accent-soft)]"
                 >
                   <Copy className="h-3 w-3" />
                   {copied === origin ? "הועתק" : "העתק"}
@@ -175,7 +175,7 @@ export default function AdminAuthSetupPage() {
           </a>
         </section>
 
-        <section className="glass-card space-y-4 rounded-lg p-6">
+        <section className="lat-panel space-y-4 rounded-lg p-6">
           <h2 className="text-lg font-semibold text-zinc-900">
             שלב 2 — הדבק את ה-Client ID כאן
           </h2>

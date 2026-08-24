@@ -33,7 +33,7 @@ export function LandingProductTheatre({ className }: { className?: string }) {
   return (
     <div className={cn("landing-theatre-hero relative", className)}>
       <div
-        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 hidden rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(31,107,92,0.12),transparent_70%)] sm:block"
+        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 hidden rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(45,212,191,0.18),transparent_70%)] sm:block"
         aria-hidden
       />
 
@@ -56,7 +56,7 @@ export function LandingProductTheatre({ className }: { className?: string }) {
                 {demo.fileName}
               </p>
             </div>
-            <span className="shrink-0 rounded-[var(--staz-radius-sm)] bg-[color-mix(in_srgb,var(--staz-evidence)_14%,white)] px-2.5 py-1 font-mono-time text-[11px] text-[var(--staz-evidence)]">
+            <span className="shrink-0 rounded-[var(--staz-radius-sm)] border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 font-mono-time text-[11px] text-[#38bdf8]">
               {DEMO_AHA_TIMESTAMP}
             </span>
           </div>

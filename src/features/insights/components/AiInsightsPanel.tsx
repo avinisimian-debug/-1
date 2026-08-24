@@ -161,7 +161,7 @@ export function AiInsightsPanel({
 
       <section className="rounded-xl border border-border bg-card shadow-sm">
         <div className="flex items-center gap-2 border-b border-border/70 px-5 py-3">
-          <Tag className="h-4 w-4 text-violet-500" />
+          <Tag className="h-4 w-4 text-[var(--accent)]" />
           <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             {t.aiInsightsTopics}
           </h3>
@@ -172,8 +172,8 @@ export function AiInsightsPanel({
               <span
                 key={index}
                 className={cn(
-                  "rounded-full border border-violet-200/80 bg-violet-50 px-3 py-1",
-                  "text-xs font-medium text-violet-800",
+                  "rounded-full border border-[color-mix(in_srgb,var(--accent)_22%,transparent)] bg-[var(--accent-soft)] px-3 py-1",
+                  "text-xs font-medium text-[var(--accent)]",
                 )}
               >
                 {topic}

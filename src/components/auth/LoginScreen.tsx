@@ -263,11 +263,11 @@ export function LoginScreen() {
         source={launchModalOpen ? "manual" : "auto"}
       />
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--staz-border)] bg-[color-mix(in_srgb,var(--staz-bg-warm)_92%,white)] p-3 backdrop-blur-md lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#05080a]/90 p-3 backdrop-blur-xl lg:hidden">
         <StazButton
           onClick={
             pastDemo
-              ? isLaunchCampaignActive()
+              ? launchSnap.active
                 ? openLaunchOffer
                 : scrollToSignup
               : scrollToDemo

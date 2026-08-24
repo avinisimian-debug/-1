@@ -53,11 +53,11 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
     }, []);
 
     const fieldClass = isLanding
-      ? "w-full rounded-xl border border-[var(--staz-border)] bg-white px-3.5 py-3 text-sm text-[var(--staz-ink)] outline-none placeholder:text-[var(--staz-muted)] focus:border-[var(--staz-primary)]"
+      ? "w-full rounded-xl border border-white/12 bg-white/[0.04] px-3.5 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-teal-400/50 focus:bg-white/[0.06]"
       : "input-field";
 
     const labelClass = isLanding
-      ? "mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--staz-muted)]"
+      ? "mb-1.5 flex items-center gap-1.5 text-xs font-medium text-white/50"
       : "mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground";
 
     return (
@@ -86,7 +86,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
               className={cn(
                 "flex min-h-[48px] w-full items-center justify-center gap-2 px-5 py-3 text-sm font-medium",
                 isLanding
-                  ? "mt-0 rounded-xl border border-[var(--staz-border)] bg-[var(--staz-surface-muted)] text-[var(--staz-ink)]"
+                  ? "mt-0 rounded-full border border-white/12 bg-white/[0.04] text-white hover:bg-white/[0.08]"
                   : "btn-secondary mt-6",
               )}
             >
@@ -164,7 +164,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
                 className={cn(
                   "rounded-lg px-3 py-2 text-sm",
                   isLanding
-                    ? "bg-red-50 text-red-700 ring-1 ring-red-100"
+                    ? "bg-red-500/10 text-red-300 ring-1 ring-red-500/25"
                     : "bg-red-50 text-red-700 ring-1 ring-red-100",
                 )}
               >

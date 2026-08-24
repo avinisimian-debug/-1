@@ -72,8 +72,9 @@ const config: Config = {
         xl: "var(--radius-xl)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+        sans: ["var(--font-rubik)", "Rubik Fallback", "sans-serif"],
+        heading: ["var(--font-rubik)", "Rubik Fallback", "sans-serif"],
+        mono: ["var(--font-ibm-plex-mono)", "ui-monospace", "monospace"],
       },
       fontSize: {
         /* rem-based type scale — 1rem = 16px */

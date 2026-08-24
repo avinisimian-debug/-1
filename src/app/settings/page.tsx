@@ -150,7 +150,7 @@ export default function SettingsPage() {
   return (
     <DashboardShell title={t.settingsTitle} description={t.settingsDesc}>
       <div className="mx-auto w-full max-w-5xl space-y-6">
-        <section className="glass-card rounded-xl p-6 sm:p-8">
+        <section className="lat-panel rounded-xl p-6 sm:p-8">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-md bg-accent-muted">
               <Crown className="h-4 w-4 text-accent" />
@@ -201,7 +201,7 @@ export default function SettingsPage() {
 
           {showCheckout && (
             <div className="mt-8 scroll-mt-24 space-y-4" id="upgrade" data-paypal-section>
-              <div className="premium-card rounded-xl p-5 sm:p-6">
+              <div className="lat-panel rounded-xl p-5 sm:p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <Wallet className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
@@ -223,7 +223,7 @@ export default function SettingsPage() {
         </section>
 
         <div className="mx-auto max-w-2xl space-y-6">
-          <section className="glass-card rounded-xl p-6">
+          <section className="lat-panel rounded-xl p-6">
             <h2 className="mb-4 text-base font-semibold text-foreground">
               {t.settingsProfile}
             </h2>
@@ -251,7 +251,7 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section className="glass-card rounded-xl p-6">
+          <section className="lat-panel rounded-xl p-6">
             <div className="mb-4 flex items-center gap-3">
               <Bell className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">
@@ -266,7 +266,7 @@ export default function SettingsPage() {
             </p>
           </section>
 
-          <section className="glass-card rounded-xl p-6">
+          <section className="lat-panel rounded-xl p-6">
             <div className="mb-4 flex items-center gap-3">
               <Wallet className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">
@@ -285,7 +285,7 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section className="glass-card rounded-xl p-6">
+          <section className="lat-panel rounded-xl p-6">
             <div className="flex items-center gap-3">
               <Shield className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">

@@ -29,10 +29,14 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const VARIANT_STYLES: Record<ToastVariant, string> = {
-  default: "border-border bg-card text-foreground",
-  success: "border-success/30 bg-success/10 text-foreground",
-  error: "border-destructive/30 bg-destructive/10 text-foreground",
-  warning: "border-warning/30 bg-warning/10 text-foreground",
+  default:
+    "border-[var(--line-subtle)] bg-[var(--bg-elevated)] text-[var(--ink-primary)]",
+  success:
+    "border-[color-mix(in_srgb,var(--ok,#2F6F4E)_28%,transparent)] bg-[var(--ok-soft,rgba(47,111,78,0.08))] text-[var(--ink-primary)]",
+  error:
+    "border-destructive/30 bg-destructive/10 text-[var(--ink-primary)]",
+  warning:
+    "border-warning/30 bg-warning/10 text-[var(--ink-primary)]",
 };
 
 const VARIANT_ICONS: Record<ToastVariant, typeof Info> = {
@@ -57,21 +61,25 @@ function ToastItem({
       role="status"
       aria-live="polite"
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border p-4 shadow-lg backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-300",
+        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-[1rem] border p-3.5 shadow-[var(--shadow-premium)] animate-in fade-in slide-in-from-top-2 duration-200",
         VARIANT_STYLES[variant],
       )}
     >
-      <Icon className="mt-0.5 h-4 w-4 shrink-0 opacity-80" aria-hidden />
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)] opacity-90" aria-hidden />
       <div className="min-w-0 flex-1 text-start">
-        <p className="text-sm font-medium leading-snug">{toast.title}</p>
+        <p className="text-sm font-medium leading-snug text-[var(--ink-primary)]">
+          {toast.title}
+        </p>
         {toast.description && (
-          <p className="mt-1 text-xs text-muted-foreground">{toast.description}</p>
+          <p className="mt-1 text-xs leading-relaxed text-[var(--ink-tertiary)]">
+            {toast.description}
+          </p>
         )}
       </div>
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
-        className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="shrink-0 rounded-lg p-1 text-[var(--ink-tertiary)] transition-colors hover:bg-[var(--bg-subtle)] hover:text-[var(--ink-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]"
         aria-label="Dismiss"
       >
         <X className="h-3.5 w-3.5" />

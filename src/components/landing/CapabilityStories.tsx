@@ -87,9 +87,10 @@ export function CapabilityStories() {
             <article
               key={item.title}
               className={cn(
-                "grid items-center gap-8 lg:grid-cols-2 lg:gap-12",
+                "landing-reveal grid items-center gap-8 lg:grid-cols-2 lg:gap-12",
                 reverse && "lg:[&>*:first-child]:order-2",
               )}
+              style={{ animationDelay: `${Math.min(i, 4) * 60}ms` }}
             >
               <div>
                 <p className="font-mono-time text-xs text-[var(--staz-primary)]">

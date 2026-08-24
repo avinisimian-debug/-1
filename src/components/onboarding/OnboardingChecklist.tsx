@@ -67,7 +67,7 @@ function ProgressBar({ progress }: { progress: number }) {
   return (
     <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
       <div
-        className="onboarding-progress-fill h-full rounded-full bg-foreground transition-all duration-700 ease-out"
+        className="onboarding-progress-fill h-full rounded-full bg-[var(--accent)] transition-all duration-700 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>

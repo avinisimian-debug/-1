@@ -149,17 +149,17 @@ export default function AdminUsersPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-indigo-50">
-                <Users className="h-5 w-5 text-indigo-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-soft)]">
+                <Users className="h-5 w-5 text-[var(--accent)]" />
               </div>
-              <p className="text-sm text-zinc-500">
-                <span className="text-2xl font-semibold text-zinc-900">
+              <p className="text-sm text-[var(--ink-tertiary)]">
+                <span className="text-2xl font-semibold text-[var(--ink-primary)]">
                   {users.length}
                 </span>{" "}
                 {t.adminTotal}
               </p>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+            <div className="flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-medium text-[var(--accent)]">
               <Crown className="h-3.5 w-3.5" />
               {proCount} {t.adminProCount}
             </div>
@@ -217,8 +217,8 @@ export default function AdminUsersPage() {
               className={cn(
                 "rounded-full px-3 py-1 text-xs font-medium transition-colors",
                 filter === key
-                  ? "bg-zinc-900 text-white"
-                  : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",
+                  ? "bg-[var(--ink-primary)] text-white"
+                  : "border border-[var(--line-subtle)] bg-[var(--bg-elevated)] text-[var(--ink-secondary)] hover:bg-[var(--bg-subtle)]",
               )}
             >
               {key === "all"
@@ -235,13 +235,13 @@ export default function AdminUsersPage() {
         )}
 
         {filteredUsers.length === 0 && (
-          <div className="glass-card rounded-lg p-12 text-center text-sm text-zinc-500">
+          <div className="lat-panel rounded-lg p-12 text-center text-sm text-zinc-500">
             {t.adminEmpty}
           </div>
         )}
 
         {filteredUsers.length > 0 && (
-          <div className="glass-card overflow-hidden rounded-lg">
+          <div className="lat-panel overflow-hidden rounded-lg">
             <div className="hidden grid-cols-[minmax(0,1.2fr)_minmax(0,1.4fr)_auto_auto_auto_auto] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3 text-xs font-medium uppercase tracking-wider text-zinc-500 lg:grid">
               <span>{t.adminName}</span>
               <span>{t.adminEmail}</span>
@@ -272,7 +272,7 @@ export default function AdminUsersPage() {
 
                   <a
                     href={`mailto:${user.email}`}
-                    className="flex min-w-0 items-center gap-1.5 truncate text-sm text-indigo-600 hover:underline"
+                    className="flex min-w-0 items-center gap-1.5 truncate text-sm text-[var(--accent)] hover:underline"
                   >
                     <Mail className="h-3.5 w-3.5 shrink-0" />
                     {user.email}
@@ -282,8 +282,8 @@ export default function AdminUsersPage() {
                     className={cn(
                       "inline-flex w-fit items-center gap-1 rounded-md px-2.5 py-0.5 text-xs font-medium capitalize",
                       user.plan === "pro"
-                        ? "bg-indigo-50 text-indigo-700"
-                        : "bg-zinc-100 text-zinc-500",
+                        ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                        : "bg-[var(--bg-subtle)] text-[var(--ink-tertiary)]",
                     )}
                   >
                     {user.plan === "pro" && (

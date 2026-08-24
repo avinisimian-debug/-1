@@ -59,7 +59,7 @@ export function AudioTranscriptPlayer({
     <div
       className={cn(
         "overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm",
-        "[font-family:var(--font-inter),var(--font-geist-sans),system-ui,sans-serif]",
+        "font-ui",
         className,
       )}
     >

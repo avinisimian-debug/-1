@@ -26,7 +26,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       role="group"
       aria-label={t.themeLabel}
       className={cn(
-        "flex items-center rounded-lg border border-border bg-muted/40 p-0.5",
+        "flex items-center rounded-full border border-[var(--line-subtle)] bg-[var(--bg-subtle)] p-0.5",
         className,
       )}
     >
@@ -39,10 +39,10 @@ export function ThemeToggle({ className }: { className?: string }) {
           aria-pressed={theme === value}
           title={labels[value]}
           className={cn(
-            "rounded-md p-1.5 transition-colors",
+            "rounded-full p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]",
             theme === value
-              ? "bg-card text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground",
+              ? "bg-[var(--bg-elevated)] text-[var(--ink-primary)] shadow-xs"
+              : "text-[var(--ink-tertiary)] hover:text-[var(--ink-primary)]",
           )}
         >
           <Icon className="h-3.5 w-3.5" />

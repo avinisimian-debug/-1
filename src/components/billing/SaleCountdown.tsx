@@ -76,7 +76,7 @@ export function SaleCountdown({ compact = false }: { compact?: boolean }) {
     <div
       className={
         compact
-          ? "sale-countdown rounded-lg border border-indigo-200 bg-indigo-50 p-4"
+          ? "sale-countdown rounded-xl border border-[color-mix(in_srgb,var(--accent)_28%,transparent)] bg-[var(--accent-soft)] p-4"
           : "sale-countdown rounded-lg p-5 sm:p-6"
       }
     >

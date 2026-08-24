@@ -32,7 +32,7 @@ export const SITE_KEYWORDS = [
   "meeting closeout Hebrew",
 ];
 
-const ogImage = `${SITE_URL}/icon-512.png`;
+const ogImage = `${SITE_URL}/marketing/staz-hero-cinema.webp`;
 const ogLogo = `${SITE_URL}/logo.png`;
 
 export function buildSiteMetadata(overrides?: Partial<Metadata>): Metadata {
@@ -86,8 +86,8 @@ export function buildSiteMetadata(overrides?: Partial<Metadata>): Metadata {
       images: [
         {
           url: ogImage,
-          width: 512,
-          height: 512,
+          width: 1920,
+          height: 1080,
           alt: SITE_TITLE,
         },
         {
@@ -105,7 +105,7 @@ export function buildSiteMetadata(overrides?: Partial<Metadata>): Metadata {
       images: [ogImage],
     },
     other: {
-      "theme-color": "#09090b",
+      "theme-color": "#05080a",
     },
     ...(googleVerification
       ? { verification: { google: googleVerification } }

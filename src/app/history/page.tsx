@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Clock, Trash2 } from "lucide-react";
+import { Clock, FolderOpen, Trash2, Upload } from "lucide-react";
 import { HISTORY_VIEW_KEY } from "@/features/transcription";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
@@ -101,37 +102,59 @@ export default function HistoryPage() {
   return (
     <DashboardShell
       title={t.historyTitle}
-      description="הפגישות שלכם בענן — זמינות גם ממכשיר אחר."
+      description={t.historyDesc}
     >
-      <div className="mx-auto w-full max-w-4xl space-y-6 page-enter">
+      <div className="mx-auto w-full max-w-4xl space-y-5 page-enter">
         {loading ? (
-          <p className="text-sm text-muted-foreground">טוען ספרייה…</p>
+          <div className="space-y-3" aria-busy="true" aria-label="טוען ספרייה">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-[4.25rem] animate-pulse rounded-[1.15rem] border border-[var(--line-subtle)] bg-[var(--bg-subtle)]"
+              />
+            ))}
+          </div>
         ) : null}
         {error ? (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p
+            role="alert"
+            className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive"
+          >
             {error}
           </p>
         ) : null}
         {!loading && items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
-            <p className="text-sm text-muted-foreground">{t.historyEmpty}</p>
+          <div className="flex flex-col items-center rounded-[1.15rem] border border-dashed border-[var(--line-strong)] bg-[var(--bg-subtle)]/40 px-6 py-16 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]">
+              <FolderOpen className="h-6 w-6" strokeWidth={1.75} aria-hidden />
+            </div>
+            <p className="text-base font-semibold text-[var(--ink-primary)]">
+              {t.historyTitle}
+            </p>
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-[var(--ink-tertiary)]">
+              {t.historyEmpty}
+            </p>
+            <Link href="/" className="lat-btn-primary mt-6 !min-h-10 !px-5 !text-sm">
+              <Upload className="h-4 w-4" aria-hidden />
+              {t.onboardStep2Cta}
+            </Link>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {items.map((item) => (
               <li
                 key={item.id}
-                className={cn(
-                  "flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm",
-                )}
+                className="lat-panel lat-panel-interactive flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4"
               >
                 <button
                   type="button"
-                  className="min-w-0 flex-1 text-start"
+                  className="min-w-0 flex-1 rounded-lg text-start outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]"
                   onClick={() => void handleView(item.id)}
                 >
-                  <p className="truncate font-semibold text-foreground">{item.title}</p>
-                  <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                  <p className="truncate text-sm font-semibold leading-snug text-[var(--ink-primary)] sm:text-[0.9375rem]">
+                    {item.title}
+                  </p>
+                  <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--ink-tertiary)]">
                     <span className="inline-flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
                       {new Date(item.createdAt).toLocaleString("he-IL")}
@@ -142,8 +165,8 @@ export default function HistoryPage() {
                         item.persistStatus === "failed_recoverable"
                           ? "bg-amber-100 text-amber-800"
                           : item.hasMedia
-                            ? "bg-emerald-50 text-emerald-800"
-                            : "bg-muted text-muted-foreground",
+                            ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                            : "bg-[var(--bg-subtle)] text-[var(--ink-tertiary)]",
                       )}
                     >
                       {statusLabel(item)}
@@ -153,7 +176,7 @@ export default function HistoryPage() {
                 <button
                   type="button"
                   onClick={() => void handleDelete(item.id)}
-                  className="lat-btn-ghost !min-h-10"
+                  className="lat-btn-ghost !min-h-10 !min-w-10 !px-2.5"
                   aria-label="מחיקה"
                 >
                   <Trash2 className="h-4 w-4" />

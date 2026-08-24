@@ -17,8 +17,8 @@ export function WebhooksSettingsCard() {
       )}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/15 to-amber-500/15 ring-1 ring-accent/15">
-          <Webhook className="h-5 w-5 text-accent" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-soft)] ring-1 ring-[color-mix(in_srgb,var(--accent)_18%,transparent)]">
+          <Webhook className="h-5 w-5 text-[var(--accent)]" />
         </div>
         <div className="min-w-0">
           <h2 className="text-base font-semibold text-foreground">

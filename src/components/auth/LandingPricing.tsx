@@ -65,14 +65,14 @@ export function LandingPricing({
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 md:items-stretch md:gap-6">
-          <div className="flex flex-col rounded-[var(--staz-radius)] border border-[var(--staz-border)] bg-[var(--staz-surface-muted)] p-7 text-start sm:p-8">
+          <div className="landing-reveal flex flex-col rounded-[var(--staz-radius)] border border-white/10 bg-white/[0.03] p-7 text-start backdrop-blur-sm transition duration-300 hover:border-white/18 hover:bg-white/[0.05] sm:p-8">
             <div className="mb-6">
-              <p className="text-xs font-medium text-[var(--staz-muted)]">{copy.freeTag}</p>
-              <h3 className="mt-2 text-lg font-semibold text-[var(--staz-ink)]">
+              <p className="text-xs font-medium text-white/45">{copy.freeTag}</p>
+              <h3 className="mt-2 text-lg font-semibold text-white">
                 {copy.freeTitle}
               </h3>
               <p className="mt-3 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-[var(--staz-ink)]">
+                <span className="text-4xl font-bold tracking-tight text-white">
                   $0
                 </span>
               </p>
@@ -82,9 +82,9 @@ export function LandingPricing({
               {copy.freeBullets.map((line) => (
                 <li
                   key={line}
-                  className="flex items-start gap-3 text-sm leading-relaxed text-[var(--staz-muted)]"
+                  className="flex items-start gap-3 text-sm leading-relaxed text-white/55"
                 >
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[var(--staz-primary-soft)] text-[var(--staz-primary)]">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-teal-400/10 text-[#5eead4]">
                     <Check className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
                   </span>
                   {line}
@@ -95,38 +95,38 @@ export function LandingPricing({
             <StazButton variant="secondary" onClick={onFreeSignup} className="w-full">
               {copy.freeCta}
             </StazButton>
-            <p className="mt-3 text-center text-xs text-[var(--staz-muted)]">{copy.freeNote}</p>
+            <p className="mt-3 text-center text-xs text-white/40">{copy.freeNote}</p>
           </div>
 
-          <div className="landing-section-forest relative flex flex-col overflow-hidden rounded-[var(--staz-radius)] border-2 border-[color-mix(in_srgb,var(--staz-sage)_45%,transparent)] p-7 text-start shadow-[0_0_0_1px_rgba(255,255,255,0.06)_inset] transition duration-300 hover:shadow-[0_18px_50px_-28px_rgba(15,61,46,0.55)] sm:p-8">
+          <div className="landing-reveal landing-section-forest relative flex flex-col overflow-hidden rounded-[var(--staz-radius)] border border-teal-400/25 p-7 text-start shadow-[0_0_60px_-24px_rgba(45,212,191,0.45)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_80px_-20px_rgba(45,212,191,0.55)] sm:p-8" style={{ animationDelay: "80ms" }}>
             {snap.active ? (
-              <span className="absolute end-4 top-4 rounded-full bg-[var(--staz-sage)]/20 px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-[var(--staz-sage)]">
+              <span className="absolute end-4 top-4 rounded-full border border-teal-400/30 bg-teal-400/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-[#5eead4]">
                 {snap.discountPercent}% OFF
               </span>
             ) : (
-              <span className="absolute end-4 top-4 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-[var(--staz-on-dark-muted)]">
+              <span className="absolute end-4 top-4 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-white/60">
                 BEST VALUE
               </span>
             )}
             <div className="relative mb-6">
-              <p className="text-xs font-semibold tracking-[0.14em] text-[color-mix(in_srgb,var(--staz-sage)_90%,white)]">
+              <p className="text-xs font-semibold tracking-[0.18em] text-[#5eead4]">
                 PRO
               </p>
-              <h3 className="mt-2 text-lg font-semibold text-[var(--staz-on-dark)]">
+              <h3 className="mt-2 text-lg font-semibold text-white">
                 {copy.proTitle}
               </h3>
-              <p className="mt-2 text-sm text-[var(--staz-on-dark-muted)]">
+              <p className="mt-2 text-sm text-white/55">
                 {copy.proValue}
               </p>
               <div className="mt-4">
                 {snap.active ? (
-                  <LaunchPriceStack size="lg" tone="dark" />
+                  <LaunchPriceStack size="lg" tone="dark" className="text-start" />
                 ) : (
                   <p className="flex flex-wrap items-baseline gap-x-2">
-                    <span className="text-4xl font-bold tracking-tight text-[var(--staz-on-dark)]">
+                    <span className="text-4xl font-bold tracking-tight text-white">
                       {proPrice}
                     </span>
-                    <span className="text-sm text-[var(--staz-on-dark-muted)]">
+                    <span className="text-sm text-white/50">
                       {copy.perMonth}
                     </span>
                   </p>
@@ -138,9 +138,9 @@ export function LandingPricing({
               {copy.proBullets.map((line) => (
                 <li
                   key={line}
-                  className="flex items-start gap-3 text-sm leading-relaxed text-[color-mix(in_srgb,var(--staz-on-dark)_88%,transparent)]"
+                  className="flex items-start gap-3 text-sm leading-relaxed text-white/75"
                 >
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/10 text-[color-mix(in_srgb,var(--staz-sage)_90%,white)]">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/10 text-[#5eead4]">
                     <Check className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
                   </span>
                   {line}
@@ -153,7 +153,7 @@ export function LandingPricing({
                 ? `התחילו PRO · ${snap.launchPriceLabel}`
                 : copy.proCta}
             </StazButton>
-            <p className="mt-3 text-center text-xs text-[var(--staz-on-dark-muted)]">
+            <p className="mt-3 text-center text-xs text-white/45">
               {snap.active ? snap.billingNoteHe : copy.proNote(proPrice)}
             </p>
           </div>

@@ -1,10 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Fraunces,
-  Heebo,
-  IBM_Plex_Mono,
-  Manrope,
-} from "next/font/google";
+import { IBM_Plex_Mono, Rubik } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { auth } from "@/auth";
 import { AppProviders } from "@/components/providers/AppProviders";
@@ -12,37 +7,35 @@ import { buildSiteMetadata } from "@/lib/seo";
 import { I18N_BOOTSTRAP_SCRIPT } from "@/lib/i18n/bootstrap-script";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const heebo = Heebo({
-  variable: "--font-heebo",
+/**
+ * Rubik — modern geometric sans with full Hebrew + Latin.
+ * Single family keeps hierarchy via weight/size/tracking (not mixed faces).
+ */
+const rubik = Rubik({
+  variable: "--font-rubik",
   subsets: ["hebrew", "latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
+  adjustFontFallback: true,
 });
 
+/** Monospace for timestamps / technical chips only (Latin numerals). */
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   weight: ["400", "500"],
   subsets: ["latin"],
   display: "swap",
+  preload: false,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = buildSiteMetadata();
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f2eb" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c1a16" },
+    { media: "(prefers-color-scheme: light)", color: "#05080a" },
+    { media: "(prefers-color-scheme: dark)", color: "#05080a" },
   ],
 };
 
@@ -59,7 +52,7 @@ export default async function RootLayout({
       lang="he"
       dir="rtl"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${manrope.variable} ${heebo.variable} ${ibmPlexMono.variable} h-full antialiased font-ui`}
+      className={`${rubik.variable} ${ibmPlexMono.variable} h-full antialiased font-ui`}
     >
       <head>
         <script
@@ -82,7 +75,6 @@ export default async function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <AppProviders>{children}</AppProviders>
         <Analytics />
-        {/* Chat widget removed from public landing — competed with demo/CTA conversion. */}
       </body>
     </html>
   );

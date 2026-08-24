@@ -46,7 +46,7 @@ export function LockedFeatureTrigger({
       )}
     >
       {children}
-      <Lock className="h-3 w-3 shrink-0 text-zinc-400 transition-colors group-hover:text-indigo-600" />
+      <Lock className="h-3 w-3 shrink-0 text-[var(--ink-tertiary)] transition-colors group-hover:text-[var(--accent)]" />
     </button>
   );
 }

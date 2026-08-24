@@ -31,11 +31,11 @@ export function StazNav({
   const copy = LANDING.nav;
 
   return (
-    <header className="landing-header border-b border-[var(--staz-border)] bg-[color-mix(in_srgb,var(--staz-bg-warm)_90%,white)] backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+    <header className="landing-header sticky top-0 z-40 border-b border-white/[0.06] bg-[#05080a]/78 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
         <Link
           href="/"
-          className="font-brand text-lg tracking-[0.18em] text-[var(--staz-ink)] sm:text-xl"
+          className="font-brand text-xl tracking-[0.28em] text-white transition-opacity hover:opacity-90 sm:text-2xl"
         >
           STAZ
         </Link>
@@ -44,28 +44,28 @@ export function StazNav({
           <button
             type="button"
             onClick={onHow}
-            className="hidden rounded-lg px-2 py-1.5 text-sm text-[var(--staz-muted)] transition-colors hover:text-[var(--staz-ink)] md:inline-flex"
+            className="hidden rounded-lg px-2.5 py-1.5 text-sm text-white/55 transition-colors hover:bg-white/[0.06] hover:text-white md:inline-flex"
           >
             {copy.how}
           </button>
           <button
             type="button"
             onClick={onPricing}
-            className="hidden rounded-lg px-2 py-1.5 text-sm text-[var(--staz-muted)] transition-colors hover:text-[var(--staz-ink)] md:inline-flex"
+            className="hidden rounded-lg px-2.5 py-1.5 text-sm text-white/55 transition-colors hover:bg-white/[0.06] hover:text-white md:inline-flex"
           >
             {copy.pricing}
           </button>
           <button
             type="button"
             onClick={onDemo}
-            className="hidden rounded-lg px-2 py-1.5 text-sm text-[var(--staz-muted)] transition-colors hover:text-[var(--staz-ink)] md:inline-flex"
+            className="hidden rounded-lg px-2.5 py-1.5 text-sm text-white/55 transition-colors hover:bg-white/[0.06] hover:text-white md:inline-flex"
           >
             {copy.demo}
           </button>
           <button
             type="button"
             onClick={onLogin}
-            className="hidden rounded-lg px-2 py-1.5 text-sm text-[var(--staz-muted)] transition-colors hover:text-[var(--staz-ink)] sm:inline-flex"
+            className="hidden rounded-lg px-2.5 py-1.5 text-sm text-white/55 transition-colors hover:bg-white/[0.06] hover:text-white sm:inline-flex"
           >
             {copy.login}
           </button>
@@ -73,7 +73,7 @@ export function StazNav({
             value={locale}
             onChange={(e) => onLocaleChange(e.target.value as Locale)}
             aria-label={langLabel}
-            className="rounded-lg border border-[var(--staz-border)] bg-white/80 px-2 py-1.5 text-xs text-[var(--staz-muted)] sm:text-sm"
+            className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-xs text-white/70 transition-colors hover:border-white/20 focus:border-[#2dd4bf]/50 focus:outline-none sm:text-sm"
           >
             {locales.map((l) => (
               <option key={l} value={l} className="text-black">

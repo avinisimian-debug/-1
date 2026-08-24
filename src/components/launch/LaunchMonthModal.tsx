@@ -54,7 +54,7 @@ export function LaunchMonthModal({
       <button
         type="button"
         aria-label="סגירה"
-        className="absolute inset-0 bg-[rgba(12,26,22,0.55)] backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
         onClick={onClose}
       />
       <div
@@ -62,46 +62,55 @@ export function LaunchMonthModal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "relative w-full max-w-md overflow-hidden rounded-t-2xl border border-[var(--staz-border)] bg-[var(--staz-surface,#fff)] shadow-[var(--staz-shadow)] sm:rounded-2xl",
+          "relative w-full max-w-md overflow-hidden rounded-t-2xl border border-white/10 bg-[#080c0b] shadow-[0_0_80px_-20px_rgba(45,212,191,0.35)] sm:rounded-2xl",
           "animate-in fade-in zoom-in-95 duration-200",
         )}
       >
-        <div className="bg-[linear-gradient(165deg,#0c1a16_0%,#16352c_100%)] px-6 py-5 text-[var(--staz-on-dark,#f4f1ea)]">
-          <div className="flex items-start justify-between gap-3">
+        <div className="relative overflow-hidden px-6 py-6">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(45,212,191,0.18),transparent_60%)]"
+            aria-hidden
+          />
+          <div className="relative flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-[#5fb7a0]">
+              <p className="text-[11px] font-semibold tracking-[0.2em] text-[#5eead4]">
                 LAUNCH MONTH
               </p>
-              <h2 id={titleId} className="mt-2 font-brand text-2xl tracking-tight">
+              <h2
+                id={titleId}
+                className="mt-2 font-brand text-2xl tracking-tight text-white"
+              >
                 PRO ב־{snap.launchPriceLabel}
               </h2>
+              <p className="mt-2 text-sm text-white/55">
+                <span className="line-through opacity-60">{snap.originalPriceLabel}</span>
+                {" → "}
+                <span className="font-semibold text-white">
+                  {snap.launchPriceLabel}/חודש
+                </span>
+              </p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+              className="rounded-lg p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
               aria-label="סגירה"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-2 text-sm text-white/70">
-            <span className="line-through opacity-70">{snap.originalPriceLabel}</span>
-            {" → "}
-            <span className="font-semibold text-white">{snap.launchPriceLabel}/חודש</span>
-          </p>
         </div>
 
-        <div className="px-6 py-5 text-start">
-          <ul className="space-y-2 text-sm text-[var(--staz-muted)]">
+        <div className="border-t border-white/8 px-6 py-5 text-start">
+          <ul className="space-y-2.5 text-sm text-white/65">
             {[
               "תמצית מנהלים והחלטות",
               "משימות עם בעלים",
               "ספריית פגישות בענן",
               "PDF מקצועי וגישה מכל מכשיר",
             ].map((line) => (
-              <li key={line} className="flex gap-2">
-                <span className="text-[var(--staz-primary)]" aria-hidden>
+              <li key={line} className="flex gap-2.5">
+                <span className="text-[#5eead4]" aria-hidden>
                   ✓
                 </span>
                 {line}
@@ -109,7 +118,7 @@ export function LaunchMonthModal({
             ))}
           </ul>
 
-          <p className="mt-4 text-xs text-[var(--staz-muted)]">{snap.billingNoteHe}</p>
+          <p className="mt-4 text-xs text-white/40">{snap.billingNoteHe}</p>
 
           <button
             type="button"
@@ -118,7 +127,7 @@ export function LaunchMonthModal({
           >
             קבלו PRO ב־{snap.launchPriceLabel}
           </button>
-          <p className="mt-3 text-center text-[11px] text-[var(--staz-muted)]">
+          <p className="mt-3 text-center text-[11px] text-white/35">
             מחיר השקה במהלך חודש ההשקה · ביטול דרך PayPal בכל עת
           </p>
         </div>

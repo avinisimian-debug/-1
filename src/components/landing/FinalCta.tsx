@@ -22,24 +22,22 @@ export function FinalCta({ onDemo, onSignup, onLaunchOffer }: FinalCtaProps) {
 
   return (
     <LandingChapter tone="forest">
-      <div className="mx-auto max-w-3xl text-center">
-        <p className="text-sm text-[color-mix(in_srgb,var(--staz-sage)_90%,white)]">
-          {copy.line}
-        </p>
-        <h2 className="mt-4 font-brand text-3xl tracking-tight text-[var(--staz-on-dark)] sm:text-4xl">
+      <div className="mx-auto max-w-3xl text-center landing-reveal">
+        <p className="text-sm tracking-[0.12em] text-[#5eead4]">{copy.line}</p>
+        <h2 className="mt-4 font-brand text-3xl tracking-tight text-white sm:text-4xl md:text-[2.75rem]">
           {copy.headline}
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-[var(--staz-on-dark-muted)] sm:text-lg">
+        <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/55 sm:text-lg">
           {copy.subhead}
         </p>
 
         {snap.active ? (
-          <div className="mx-auto mt-6 max-w-xs rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-            <LaunchPriceStack size="sm" tone="dark" className="text-center [&]:items-center" />
+          <div className="landing-offer-glass mx-auto mt-8 max-w-xs rounded-2xl px-5 py-4">
+            <LaunchPriceStack size="sm" tone="dark" className="text-center" />
           </div>
         ) : null}
 
-        <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+        <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
           {snap.active ? (
             <StazButton
               variant="onDark"
