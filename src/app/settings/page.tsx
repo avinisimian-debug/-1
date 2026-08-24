@@ -12,6 +12,7 @@ import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { getProPlanPriceLabel } from "@/lib/constants";
+import { getLaunchCampaignSnapshot } from "@/lib/launch-campaign";
 import { markStepComplete } from "@/lib/onboarding-store";
 import { scrollToUpgradeWithRetry } from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
@@ -107,6 +108,9 @@ export default function SettingsPage() {
           await syncPlan();
           await loadPlanDetails();
           setSubMessage({ type: "success", text: t.paypalSuccess });
+          void import("@/lib/launch-campaign").then(({ trackLaunchEvent }) => {
+            trackLaunchEvent("checkout_completed");
+          });
         } else {
           sessionStorage.removeItem(activationKey);
           setSubMessage({
@@ -201,7 +205,9 @@ export default function SettingsPage() {
                 <div className="mb-4 flex items-center gap-2">
                   <Wallet className="h-4 w-4 text-accent" />
                   <h3 className="text-sm font-semibold text-foreground">
-                    Staz Pro — {getProPlanPriceLabel()} לחודש
+                    {getLaunchCampaignSnapshot().active
+                      ? `חודש ההשקה — Staz Pro ב־${getProPlanPriceLabel()}`
+                      : `Staz Pro — ${getProPlanPriceLabel()} לחודש`}
                   </h3>
                 </div>
                 <p className="mb-4 text-xs leading-relaxed text-muted-foreground">

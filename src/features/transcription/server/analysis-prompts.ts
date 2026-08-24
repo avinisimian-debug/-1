@@ -1,41 +1,53 @@
-/** System prompts for GPT meeting analysis — structured JSON + professional Markdown report. */
+/**
+ * GPT meeting closeout prompts — Hebrew-first, grounded, actionable.
+ * Decisions/actions must be supported by the transcript; never invent.
+ */
 
 const JSON_SCHEMA_FREE = `{
   "headline": "one outcome-focused sentence",
-  "topics": ["3-5 topic tags"],
-  "decisions": ["decision with owner/context when possible"],
-  "overview": "2-3 executive paragraphs",
-  "executive": ["5-7 outcome bullets — lead with verb"],
+  "topics": ["3-5 short topic tags"],
+  "decisions": ["clear decision as stated or clearly agreed in the meeting"],
+  "overview": "2-3 short executive paragraphs",
+  "executive": ["5-7 outcome bullets — lead with a strong verb"],
   "keyTakeaways": ["4-6 memorable takeaways"],
   "actionItems": [
-    { "task": "specific task", "owner": "name or Unassigned", "deadline": "date or TBD" }
+    {
+      "task": "specific actionable task",
+      "owner": "person name from transcript, or לא צוין / Unassigned",
+      "deadline": "explicit deadline from transcript, or לא צוין / TBD"
+    }
   ],
   "markdownReport": "full meeting brief in Markdown (see format below)"
 }`;
 
 const JSON_SCHEMA_PRO = `{
   "headline": "one outcome-focused sentence",
-  "topics": ["3-5 topic tags"],
-  "decisions": ["decision with rationale"],
-  "overview": "2-3 executive paragraphs",
+  "topics": ["3-5 short topic tags"],
+  "decisions": ["clear decision with short rationale when present"],
+  "overview": "2-3 short executive paragraphs",
   "executive": ["5-7 outcome bullets"],
   "keyTakeaways": ["4-6 takeaways"],
   "sentiment": { "overall": "positive|neutral|mixed|negative", "label": "2-3 words", "description": "one sentence" },
-  "chapters": [{ "timestamp": "MM:SS", "title": "section title" }],
-  "keyQuotes": [{ "quote": "verbatim quote", "context": "speaker/topic" }],
-  "risks": [{ "risk": "risk or blocker", "severity": "high|medium|low" }],
-  "followUpEmail": { "subject": "email subject", "body": "ready-to-send email" },
+  "chapters": [{ "timestamp": "MM:SS from transcript lines", "title": "section title" }],
+  "keyQuotes": [{ "quote": "verbatim from transcript", "context": "speaker / topic" }],
+  "risks": [{ "risk": "risk or blocker stated or clearly implied", "severity": "high|medium|low" }],
+  "followUpEmail": { "subject": "email subject", "body": "ready-to-send follow-up email" },
   "actionItems": [
-    { "task": "specific task", "owner": "name", "deadline": "date or TBD", "priority": "high|medium|low" }
+    {
+      "task": "specific actionable task",
+      "owner": "person name from transcript, or לא צוין / Unassigned",
+      "deadline": "explicit deadline from transcript, or לא צוין / TBD",
+      "priority": "high|medium|low"
+    }
   ],
   "markdownReport": "full meeting brief in Markdown (see format below)"
 }`;
 
 const MARKDOWN_FORMAT = `
 ## markdownReport format (required)
-Write a polished, publication-ready Markdown document in the SAME language as the transcript:
+Write a polished Markdown document in the SAME language as the transcript:
 
-# [Meeting title from context]
+# [Meeting title]
 
 > **TL;DR** — one powerful sentence
 
@@ -43,7 +55,7 @@ Write a polished, publication-ready Markdown document in the SAME language as th
 2-3 short paragraphs.
 
 ## Key decisions
-- Decision — owner / rationale
+- Decision — owner / rationale when known
 
 ## Action items
 | Priority | Task | Owner | Due |
@@ -57,46 +69,88 @@ Write a polished, publication-ready Markdown document in the SAME language as th
 > "quote" — context
 
 ## Next steps
-Numbered list of immediate follow-ups.
+Numbered immediate follow-ups.
 
-Use clean Markdown only — no code fences around the report.`;
+Clean Markdown only — no code fences around the report.`;
+
+export function detectTranscriptLanguageHint(text: string): "he" | "en" | "mixed" {
+  const hebrew = (text.match(/[\u0590-\u05FF]/g) ?? []).length;
+  const latin = (text.match(/[A-Za-z]/g) ?? []).length;
+  if (hebrew === 0 && latin === 0) return "en";
+  if (hebrew > latin * 1.2) return "he";
+  if (latin > hebrew * 1.2) return "en";
+  return "mixed";
+}
 
 export function buildAnalysisSystemPrompt(isPro: boolean): string {
   const schema = isPro ? JSON_SCHEMA_PRO : JSON_SCHEMA_FREE;
 
-  return `You are a principal meeting intelligence analyst at a top-tier consulting firm.
-Your output must be accurate, structured, and immediately actionable for executives.
+  return `You are a principal meeting intelligence analyst specializing in post-meeting executive closeout.
+Your job is NOT to rewrite the transcript. Your job is to extract:
+1) What was decided
+2) Who must do what
+3) What happens next
+4) A short executive brief leaders can trust
 
 Return a single JSON object matching this schema:
 ${schema}
 
 ${MARKDOWN_FORMAT}
 
-Rules:
-- Write in the same language as the transcript (Hebrew meetings → Hebrew output).
-- Never invent facts, names, or dates not supported by the transcript.
-- Prefer specific verbs: Decide, Approve, Escalate, Ship, Block.
-- Action items must be SMART (specific task, clear owner, realistic deadline).
-- markdownReport must be complete and standalone — suitable for Notion/Confluence export.
-- executive bullets: max 1 line each, no fluff.
-${isPro ? "- Include 4-8 chapters with accurate MM:SS timestamps from the transcript.\n- Include 3-5 key quotes verbatim when possible." : ""}`;
+Hard rules:
+- Match the transcript language. Hebrew transcript → Hebrew output (headline, overview, executive, decisions, actions, markdownReport).
+- Never invent facts, names, budgets, dates, or commitments that are not in the transcript.
+- If something is unclear, omit it or mark owner/deadline as לא צוין (Hebrew) / Unassigned or TBD (English) — do not guess.
+- Decisions must be real agreements, approvals, or explicit choices — not vague discussion topics.
+- Prefer concrete decision verbs: מאשרים / סוגרים / מחליטים / מעבירים / דוחים / Decide / Approve / Ship / Block.
+- Action items must be SMART: specific task, clear owner when named, realistic deadline when spoken.
+- Separate decisions from action items. A decision is what was agreed; an action item is who executes next.
+- executive bullets: max one line each, outcome-first, no fluff, no filler adjectives.
+- Prefer 4–7 strong action items over many weak ones. Drop duplicates.
+- Do not invent speaker names. Use names/labels that appear in the transcript.
+${isPro ? "- chapters timestamps MUST come from transcript line timestamps (MM:SS), never invent times.\n- keyQuotes must be verbatim substrings from the transcript.\n- Include 3–6 risks only when blockers/concerns are actually discussed." : ""}`;
 }
+
+export type AnalysisTranscriptLine = {
+  timestamp?: string;
+  speaker: string;
+  text: string;
+};
 
 export function buildAnalysisUserPrompt(
   transcriptText: string,
   fileName?: string,
-  labeledLines?: Array<{ speaker: string; text: string }>,
+  labeledLines?: AnalysisTranscriptLine[],
 ): string {
+  const langHint = detectTranscriptLanguageHint(
+    labeledLines?.map((l) => l.text).join(" ") || transcriptText,
+  );
+
   const formatted =
     labeledLines && labeledLines.length > 0
-      ? labeledLines.map((line) => `${line.speaker}: ${line.text}`).join("\n")
+      ? labeledLines
+          .map((line, i) => {
+            const ts = line.timestamp?.trim() ? line.timestamp : "??:??";
+            return `[L${i + 1}] ${ts} | ${line.speaker} | ${line.text}`;
+          })
+          .join("\n")
       : transcriptText;
 
-  return `Analyze this meeting recording.
+  const languageInstruction =
+    langHint === "he"
+      ? "Language: HEBREW dominant. Write the entire JSON in Hebrew (except schema keys)."
+      : langHint === "mixed"
+        ? "Language: mixed Hebrew/English. Prefer Hebrew for executive closeout fields when the meeting is mostly Hebrew."
+        : "Language: match the transcript (likely English).";
+
+  return `Analyze this meeting for executive closeout.
 
 File: ${fileName ?? "meeting"}
-Duration context: use timestamps from segments when present.
-${labeledLines?.length ? "The transcript includes speaker diarization labels — use them for quotes, action owners, and context." : ""}
+${languageInstruction}
+Use the [L#] MM:SS anchors when reasoning about decisions, quotes, and chapters.
+Extract only what the meeting actually closed on.
+
+${labeledLines?.length ? "Speaker labels are present — use them for owners and quotes when reliable." : "Speaker labels may be generic — do not invent real names."}
 
 --- TRANSCRIPT ---
 ${formatted}

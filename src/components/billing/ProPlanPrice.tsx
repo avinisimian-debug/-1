@@ -1,6 +1,7 @@
 "use client";
 
-import { getProPlanPriceLabel } from "@/lib/constants";
+import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
+import { getLaunchCampaignSnapshot } from "@/lib/launch-campaign";
 import { cn } from "@/lib/utils";
 
 interface ProPlanPriceProps {
@@ -13,12 +14,22 @@ export function ProPlanPrice({
   size = "lg",
   className,
 }: ProPlanPriceProps) {
+  const snap = getLaunchCampaignSnapshot();
+  if (snap.active) {
+    return (
+      <LaunchPriceStack
+        size={size === "lg" ? "md" : "sm"}
+        className={className}
+      />
+    );
+  }
+
   const priceClass =
     size === "lg" ? "text-2xl font-bold" : "text-sm font-semibold";
 
   return (
     <p className={cn(priceClass, "text-zinc-900", className)}>
-      {getProPlanPriceLabel()}
+      {snap.originalPriceLabel}
       <span className="text-sm font-normal text-zinc-500"> / month</span>
     </p>
   );

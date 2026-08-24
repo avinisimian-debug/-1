@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
 import { BRAND_NAME } from "@/lib/brand";
+import {
+  getProPlanPriceLabel,
+  getProPlanRegularPriceLabel,
+  isLaunchWeekActive,
+  PRO_PLAN_INTRO_PRICE_LABEL,
+} from "@/lib/constants";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
   process.env.AUTH_URL?.replace(/\/$/, "") ??
   "https://1stazai.com";
 
-export const SITE_TITLE =
-  "Staz AI — מסכמים פגישות ומוציאים מהן החלטות";
+export const SITE_TITLE = isLaunchWeekActive()
+  ? `Staz AI — Launch Month · PRO ${PRO_PLAN_INTRO_PRICE_LABEL}`
+  : "Staz AI — עוזר הסגירה של הפגישה";
 
-export const SITE_DESCRIPTION =
-  "Staz הופך פגישות בעברית לתמצית מנהלים, החלטות ומשימות — עם קפיצה לרגע המדויק שבו הדברים נאמרו.";
+export const SITE_DESCRIPTION = isLaunchWeekActive()
+  ? `Staz AI Launch Month: PRO ב־${getProPlanPriceLabel()} (במקום ${getProPlanRegularPriceLabel()} לחודש ראשון). תמלול, סיכום, החלטות ומשימות מפגישות.`
+  : "Staz הופך פגישות בעברית לתמצית מנהלים, החלטות ומשימות — ומחבר כל החלטה לרגע המדויק שבו היא נאמרה.";
 
 export const SITE_KEYWORDS = [
-  "סיכום פגישות",
+  "סגירת פגישה",
   "תמצית מנהלים",
   "החלטות מפגישה",
+  "משימות מפגישה",
   "תמלול בעברית",
-  "סגירת פגישה",
+  "עוזר סגירת פגישות",
   "Staz AI",
   "1stazai",
   "meeting closeout Hebrew",

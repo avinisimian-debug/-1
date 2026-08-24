@@ -1,8 +1,13 @@
 "use client";
 
 import { Check, ArrowRight } from "lucide-react";
+import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
 import { useLocale } from "@/context/LocaleContext";
 import { getProPlanPriceLabel } from "@/lib/constants";
+import {
+  getLaunchCampaignSnapshot,
+  trackLaunchEvent,
+} from "@/lib/launch-campaign";
 import {
   type PricingTierId,
   appPlanToPricingTier,
@@ -66,6 +71,7 @@ export function PricingTable({
 }: PricingTableProps) {
   const { t } = useLocale();
   const activeTier = landing ? null : appPlanToPricingTier(currentPlan);
+  const snap = getLaunchCampaignSnapshot();
   const proLabel = getProPlanPriceLabel();
 
   const handleBasicCta = () => {
@@ -74,6 +80,7 @@ export function PricingTable({
   };
 
   const handleProCta = () => {
+    trackLaunchEvent("pricing_cta_click", { source: "pricing_table" });
     if (landing) onLandingSignup?.();
     else onSelectPro?.();
   };
@@ -86,8 +93,9 @@ export function PricingTable({
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">{t.pricingSubtitle}</p>
         <p className="mt-3 text-sm font-medium text-foreground">
-          Staz Pro הוא {proLabel} לחודש: ספריית פגישות בענן, יותר נפח, וסגירה
-          מקצועית שאפשר לשלוח.
+          {snap.active
+            ? `חודש ההשקה: Pro ב־${proLabel} (במקום ${snap.originalPriceLabel})`
+            : `Staz Pro הוא ${proLabel} לחודש: ספריית פגישות בענן, יותר נפח, וסגירה מקצועית שאפשר לשלוח.`}
         </p>
       </div>
 
@@ -106,6 +114,11 @@ export function PricingTable({
                 isCurrent && "ring-1 ring-border",
               )}
             >
+              {tier.id === "pro" && snap.active ? (
+                <span className="absolute end-4 top-4 rounded-full bg-accent-muted px-2 py-0.5 text-[10px] font-bold tracking-wide text-accent">
+                  LAUNCH · {snap.discountPercent}% OFF
+                </span>
+              ) : null}
               <div className="mb-5">
                 <h3 className="text-base font-semibold text-foreground">
                   {t[tier.nameKey] as string}
@@ -115,15 +128,21 @@ export function PricingTable({
                 </p>
               </div>
 
-              <p className="mb-1 text-3xl font-semibold text-foreground">
-                {formatPrice(amount)}
-                {tier.id === "pro" ? (
-                  <span className="text-sm font-normal text-muted-foreground">
-                    {" "}
-                    / mo
-                  </span>
-                ) : null}
-              </p>
+              {tier.id === "pro" && snap.active ? (
+                <div className="mb-4">
+                  <LaunchPriceStack size="md" />
+                </div>
+              ) : (
+                <p className="mb-1 text-3xl font-semibold text-foreground">
+                  {formatPrice(amount)}
+                  {tier.id === "pro" ? (
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {" "}
+                      / mo
+                    </span>
+                  ) : null}
+                </p>
+              )}
 
               <ul className="mb-6 flex-1 space-y-3 border-t border-border/60 pt-5">
                 {tier.outcomeKeys.map((key) => (
@@ -146,7 +165,11 @@ export function PricingTable({
                   isPopular ? "btn-cinema" : "btn-secondary",
                 )}
               >
-                {isCurrent ? t.pricingCurrentPlan : (t[tier.ctaKey] as string)}
+                {isCurrent
+                  ? t.pricingCurrentPlan
+                  : tier.id === "pro" && snap.active
+                    ? `התחילו PRO · ${proLabel}`
+                    : (t[tier.ctaKey] as string)}
                 {!isCurrent && <ArrowRight className="h-4 w-4" />}
               </button>
             </div>

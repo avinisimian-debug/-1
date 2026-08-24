@@ -1,21 +1,15 @@
 import { AssemblyAI } from "assemblyai";
-import OpenAI from "openai";
-import { formatDuration } from "@/lib/format";
 import { hasFeature } from "@/lib/plan-features";
 import type { PlanTier } from "@/lib/constants";
-import { normalizeSecret } from "@/lib/transcription-ready";
 import {
   BadRequestError,
   InternalServerError,
   normalizeApiError,
   type ApiError,
 } from "@/shared/api";
-import { failure, success, type Result } from "@/shared/lib/result";
+import { failure, isFailure, success, type Result } from "@/shared/lib/result";
 import type { TranscriptionResult } from "../types";
-import {
-  buildAnalysisSystemPrompt,
-  buildAnalysisUserPrompt,
-} from "./analysis-prompts";
+import { analyzeTranscriptWithOpenAI } from "./analyze-transcript.use-case";
 import type { DiarizationUtterance } from "./align-speakers";
 import { utterancesToTranscript } from "./align-speakers";
 import { isDiarizationConfigured } from "./diarize-audio";
@@ -23,14 +17,6 @@ import {
   attachWordsToEntries,
   mapAssemblyAIWordsToTimedWords,
 } from "./build-word-timestamps";
-
-function getOpenAIClient() {
-  const apiKey = normalizeSecret(process.env.OPENAI_API_KEY);
-  if (!apiKey) {
-    throw new InternalServerError("OPENAI_API_KEY is not configured.");
-  }
-  return new OpenAI({ apiKey });
-}
 
 /**
  * Transcribe a public platform URL (YouTube, etc.) via AssemblyAI's audio_url.
@@ -60,7 +46,7 @@ export async function transcribeRemoteUrlWithAssemblyAI(input: {
     const transcript = await client.transcripts.transcribe({
       audio_url: input.url,
       speaker_labels: isPro && hasFeature("pro", "speakerDiarization"),
-      ...(languageCode ? { language_code: languageCode } : {}),
+      ...(languageCode ? { language_code: languageCode } : { language_detection: true }),
     });
 
     if (transcript.status === "error") {
@@ -143,52 +129,6 @@ export async function transcribeRemoteUrlWithAssemblyAI(input: {
           ? utterances[utterances.length - 1].endMs / 1000
           : 0;
 
-    const openai = getOpenAIClient();
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      response_format: { type: "json_object" },
-      temperature: 0.2,
-      messages: [
-        { role: "system", content: buildAnalysisSystemPrompt(isPro) },
-        {
-          role: "user",
-          content: buildAnalysisUserPrompt(
-            text,
-            "remote-url",
-            lines.map((l) => ({ speaker: l.speaker, text: l.text })),
-          ),
-        },
-      ],
-    });
-
-    const rawAnalysis = completion.choices[0]?.message?.content;
-    if (!rawAnalysis) {
-      return failure(
-        new InternalServerError("GPT-4o did not return an analysis."),
-      );
-    }
-
-    const analysis = JSON.parse(rawAnalysis) as {
-      headline?: string;
-      topics?: string[];
-      decisions?: string[];
-      overview?: string;
-      executive: string[];
-      keyTakeaways: string[];
-      actionItems: Array<{
-        task: string;
-        owner: string;
-        deadline: string;
-        priority?: "high" | "medium" | "low";
-      }>;
-      sentiment?: TranscriptionResult["sentiment"];
-      chapters?: TranscriptionResult["chapters"];
-      keyQuotes?: TranscriptionResult["keyQuotes"];
-      risks?: TranscriptionResult["risks"];
-      followUpEmail?: TranscriptionResult["followUpEmail"];
-      markdownReport?: string;
-    };
-
     const host = (() => {
       try {
         return new URL(input.url).hostname.replace(/^www\./, "");
@@ -197,45 +137,18 @@ export async function transcribeRemoteUrlWithAssemblyAI(input: {
       }
     })();
 
-    return success({
+    const analyzed = await analyzeTranscriptWithOpenAI({
       fileName: `link-${host}`,
-      duration: formatDuration(durationSeconds),
-      processedAt: new Date().toLocaleString("en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }),
-      ...(analysis.headline?.trim() ? { headline: analysis.headline.trim() } : {}),
-      ...(analysis.topics?.length ? { topics: analysis.topics } : {}),
-      ...(analysis.decisions?.length ? { decisions: analysis.decisions } : {}),
-      summary: {
-        overview: analysis.overview?.trim() ?? "",
-        executive: analysis.executive ?? [],
-        keyTakeaways: analysis.keyTakeaways ?? [],
-        ...(analysis.markdownReport?.trim()
-          ? { markdown: analysis.markdownReport.trim() }
-          : {}),
-      },
-      actionItems: (analysis.actionItems ?? []).map((item, index) => ({
-        id: String(index + 1),
-        task: item.task,
-        owner: item.owner || "Unassigned",
-        deadline: item.deadline || "TBD",
-        completed: false,
-        ...(isPro && item.priority ? { priority: item.priority } : {}),
-      })),
+      plan: input.plan,
+      transcriptText: text,
+      durationSeconds,
       transcript: lines,
       ...(timedWords.length > 0 ? { timedWords } : {}),
       ...(utterances.length > 0 ? { diarizationEnabled: true } : {}),
-      ...(isPro && analysis.chapters?.length ? { chapters: analysis.chapters } : {}),
-      ...(isPro && analysis.sentiment ? { sentiment: analysis.sentiment } : {}),
-      ...(isPro && analysis.keyQuotes?.length
-        ? { keyQuotes: analysis.keyQuotes }
-        : {}),
-      ...(isPro && analysis.risks?.length ? { risks: analysis.risks } : {}),
-      ...(isPro && analysis.followUpEmail
-        ? { followUpEmail: analysis.followUpEmail }
-        : {}),
     });
+
+    if (isFailure(analyzed)) return analyzed;
+    return success(analyzed.data);
   } catch (error) {
     return failure(normalizeApiError(error));
   }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { isLaunchWeekActive } from "@/lib/constants";
 import {
   createPayPalSubscription,
   getAppBaseUrl,
@@ -31,11 +32,23 @@ export async function POST() {
     return NextResponse.json({
       subscriptionId: subscription.id,
       approveUrl: subscription.approveUrl,
+      launchOffer: isLaunchWeekActive(),
     });
   } catch (error) {
     console.error("Create subscription error:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to create subscription.";
+    const offerExpired =
+      /launch|expired|not active|campaign/i.test(message) &&
+      !isLaunchWeekActive();
+
     return NextResponse.json(
-      { error: "לא ניתן לפתוח תשלום. נסו שוב או פנו לתמיכה." },
+      {
+        error: offerExpired
+          ? "מבצע ההשקה הסתיים. רעננו את הדף ונסו שוב במחיר הרגיל."
+          : "לא ניתן לפתוח תשלום. נסו שוב או פנו לתמיכה.",
+        offerExpired,
+      },
       { status: 500 },
     );
   }

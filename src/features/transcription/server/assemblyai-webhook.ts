@@ -77,7 +77,9 @@ export async function submitAssemblyAIWithWebhook(
     const submitted = await client.transcripts.submit({
       audio: uploadUrl,
       speaker_labels: Boolean(options.speakerLabels),
-      ...(languageCode ? { language_code: languageCode } : {}),
+      ...(languageCode
+        ? { language_code: languageCode }
+        : { language_detection: true }),
       webhook_url: buildAssemblyAIWebhookUrl(jobId),
       webhook_auth_header_name: ASSEMBLYAI_WEBHOOK_HEADER,
       webhook_auth_header_value: secret,

@@ -3,9 +3,14 @@
 import { useRouter } from "next/navigation";
 import { Crown, X } from "lucide-react";
 import { LogoMark } from "@/components/brand/Logo";
+import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
 import { useLocale } from "@/context/LocaleContext";
 import { getProPlanPriceLabel } from "@/lib/constants";
 import { getFeatureGateMeta } from "@/lib/feature-gate";
+import {
+  getLaunchCampaignSnapshot,
+  trackLaunchEvent,
+} from "@/lib/launch-campaign";
 import type { FeatureKey } from "@/lib/plan-features";
 import { SETTINGS_UPGRADE_PATH } from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
@@ -19,6 +24,7 @@ interface UpgradeModalProps {
 export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
   const { t } = useLocale();
   const router = useRouter();
+  const snap = getLaunchCampaignSnapshot();
 
   if (!open || !feature) return null;
 
@@ -28,6 +34,7 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
   const Icon = meta.icon;
 
   const handleTrial = () => {
+    trackLaunchEvent("pro_upgrade_click", { source: "feature_gate" });
     onClose();
     router.push(SETTINGS_UPGRADE_PATH);
   };
@@ -53,9 +60,13 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
               <LogoMark size={28} />
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Staz AI Pro
+                  {snap.active ? "Launch Month · Staz Pro" : "Staz AI Pro"}
                 </p>
-                <p className="text-sm font-semibold text-foreground">{t.gateEyebrow}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {snap.active
+                    ? "פתחו את הפיצ'ר עם PRO"
+                    : t.gateEyebrow}
+                </p>
               </div>
             </div>
             <button
@@ -87,12 +98,18 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
             </p>
           </div>
 
-          <div className="mt-5 flex items-center gap-2 rounded-lg border border-accent/20 bg-accent-muted/50 px-3 py-2">
-            <Crown className="h-3.5 w-3.5 text-accent" />
-            <p className="text-xs text-foreground">
-              {t.gatePriceHint.replace("{price}", getProPlanPriceLabel())}
-            </p>
-          </div>
+          {snap.active ? (
+            <div className="mt-5 rounded-xl border border-accent/20 bg-accent-muted/40 p-3">
+              <LaunchPriceStack size="sm" />
+            </div>
+          ) : (
+            <div className="mt-5 flex items-center gap-2 rounded-lg border border-accent/20 bg-accent-muted/50 px-3 py-2">
+              <Crown className="h-3.5 w-3.5 text-accent" />
+              <p className="text-xs text-foreground">
+                {t.gatePriceHint.replace("{price}", getProPlanPriceLabel())}
+              </p>
+            </div>
+          )}
 
           <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <button
@@ -100,7 +117,9 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
               onClick={handleTrial}
               className="btn-cinema flex-1 px-4 py-2.5 text-sm font-medium"
             >
-              {t.gateStartTrial}
+              {snap.active
+                ? `שדרגו ל-PRO · ${snap.launchPriceLabel}`
+                : t.gateStartTrial}
             </button>
             <button
               type="button"

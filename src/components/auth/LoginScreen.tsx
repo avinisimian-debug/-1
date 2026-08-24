@@ -1,20 +1,33 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { LandingPricing } from "@/components/auth/LandingPricing";
 import { SignupCard } from "@/components/auth/SignupCard";
+import { AhaEvidenceSection } from "@/components/landing/AhaEvidenceSection";
+import { AudienceValueSection } from "@/components/landing/AudienceValueSection";
+import { CapabilityStories } from "@/components/landing/CapabilityStories";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { LandingFaq } from "@/components/landing/LandingFaq";
-import { OutcomeSection } from "@/components/landing/OutcomeSection";
-import { PainOutcomeSection } from "@/components/landing/PainOutcomeSection";
 import { StazFooter } from "@/components/landing/StazFooter";
 import { StazHero } from "@/components/landing/StazHero";
 import { StazNav } from "@/components/landing/StazNav";
+import { TransformationFlow } from "@/components/landing/TransformationFlow";
+import { WalkthroughSection } from "@/components/landing/WalkthroughSection";
+import { WhyNotJustChat } from "@/components/landing/WhyNotJustChat";
+import { WhyStazSection } from "@/components/landing/WhyStazSection";
+import { LandingChapter } from "@/components/landing/ui/LandingChapter";
+import { StazButton } from "@/components/landing/ui/StazButton";
 import { PublicDemoWorkspace } from "@/features/staz-workspace";
 import { useLocale } from "@/context/LocaleContext";
 import { LANDING } from "@/lib/landing-copy";
+import { LaunchAnnouncementBar } from "@/components/launch/LaunchAnnouncementBar";
+import {
+  LaunchMonthModal,
+  useLaunchMonthAutoModal,
+} from "@/components/launch/LaunchMonthModal";
+import { isLaunchCampaignActive, getLaunchCampaignSnapshot } from "@/lib/launch-campaign";
 
 const TrustSection = dynamic(
   () =>
@@ -33,7 +46,14 @@ export function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pastDemo, setPastDemo] = useState(false);
+  const [launchModalOpen, setLaunchModalOpen] = useState(false);
+  const autoLaunch = useLaunchMonthAutoModal(isLaunchCampaignActive());
   const copy = LANDING;
+
+  const openLaunchOffer = useCallback(() => {
+    setLaunchModalOpen(true);
+  }, []);
 
   const scrollToDemo = useCallback(() => {
     document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" });
@@ -59,6 +79,19 @@ export function LoginScreen() {
     }
     scrollToSignup();
   }, [scrollToSignup]);
+
+  useEffect(() => {
+    const demoEl = document.getElementById("demo");
+    if (!demoEl) return;
+    const onScroll = () => {
+      const rect = demoEl.getBoundingClientRect();
+      // Switch sticky CTA after the demo stage has been scrolled through.
+      setPastDemo(rect.bottom < window.innerHeight * 0.45);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const requestOtp = async () => {
     const trimmedName = name.trim();
@@ -133,52 +166,66 @@ export function LoginScreen() {
     }
   };
 
+  const showLaunchModal = launchModalOpen || autoLaunch.open;
+  const closeLaunchModal = () => {
+    setLaunchModalOpen(false);
+    autoLaunch.close();
+  };
+  const launchSnap = getLaunchCampaignSnapshot();
+
   return (
-    <div className="landing-shell min-h-screen pb-24 text-[var(--staz-text)] lg:pb-0">
-      <StazNav
-        locale={locale}
-        locales={locales}
-        localeLabels={localeLabels}
-        langLabel={t.langLabel}
-        onLocaleChange={(l) => setLocale(l)}
+    <div className="landing-shell min-h-screen overflow-x-hidden pb-24 text-[var(--staz-ink)] lg:pb-0">
+      <div className="sticky top-0 z-40">
+        <LaunchAnnouncementBar onOpenOffer={openLaunchOffer} />
+        <StazNav
+          locale={locale}
+          locales={locales}
+          localeLabels={localeLabels}
+          langLabel={t.langLabel}
+          onLocaleChange={(l) => setLocale(l)}
+          onDemo={scrollToDemo}
+          onHow={scrollToHow}
+          onPricing={scrollToPricing}
+          onLogin={scrollToSignup}
+        />
+      </div>
+
+      <StazHero
         onDemo={scrollToDemo}
-        onHow={scrollToHow}
-        onPricing={scrollToPricing}
-        onLogin={scrollToSignup}
+        onSignup={scrollToSignup}
+        onLaunchOffer={openLaunchOffer}
       />
 
-      <StazHero onDemo={scrollToDemo} onSignup={scrollToSignup} />
+      <WhyStazSection />
+      <TransformationFlow />
 
-      <main className="relative z-10 mx-auto max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pt-20">
-        <section aria-labelledby="demo-heading">
-          <PublicDemoWorkspace onSignup={scrollToSignup} />
-        </section>
+      <LandingChapter tone="product">
+        <PublicDemoWorkspace onSignup={scrollToSignup} />
+      </LandingChapter>
 
-        <PainOutcomeSection />
-        <OutcomeSection />
+      <AhaEvidenceSection />
+      <WalkthroughSection />
+      <CapabilityStories />
+      <WhyNotJustChat />
+      <TrustSection variant="landing" />
+      <AudienceValueSection />
 
-        <div className="mt-20 sm:mt-24">
-          <TrustSection variant="landing" />
-        </div>
+      <LandingChapter tone="sand" className="!py-10 sm:!py-14">
+        <LandingPricing
+          variant="landing"
+          onFreeSignup={scrollToSignup}
+          onProSignup={scrollToSignupForPro}
+        />
+      </LandingChapter>
 
-        <div className="mt-16 sm:mt-20">
-          <LandingPricing
-            variant="landing"
-            onFreeSignup={scrollToSignup}
-            onProSignup={scrollToSignupForPro}
-          />
-        </div>
+      <LandingFaq />
 
-        <LandingFaq />
-
-        <section
-          className="mx-auto mt-20 max-w-xl sm:mt-24"
-          aria-labelledby="signup-heading"
-        >
+      <LandingChapter tone="quiet" id="signup">
+        <div className="mx-auto max-w-xl" aria-labelledby="signup-heading">
           <div className="mb-8 text-center">
             <h2
               id="signup-heading"
-              className="font-brand text-2xl tracking-tight text-[var(--staz-text)] sm:text-3xl"
+              className="font-brand text-2xl tracking-tight text-[var(--staz-ink)] sm:text-3xl"
             >
               {copy.signup.headline}
             </h2>
@@ -200,17 +247,39 @@ export function LoginScreen() {
             onOtpChange={setOtp}
             onSubmit={handleSubmit}
           />
-        </section>
+        </div>
+      </LandingChapter>
 
-        <FinalCta onDemo={scrollToDemo} onSignup={scrollToSignup} />
-      </main>
-
+      <FinalCta
+        onDemo={scrollToDemo}
+        onSignup={scrollToSignup}
+        onLaunchOffer={openLaunchOffer}
+      />
       <StazFooter />
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--staz-border)] bg-[color-mix(in_srgb,var(--staz-bg)_92%,transparent)] p-3 backdrop-blur-md lg:hidden">
-        <button type="button" onClick={scrollToDemo} className="staz-btn-primary w-full">
-          {copy.hero.primaryCta}
-        </button>
+      <LaunchMonthModal
+        open={showLaunchModal}
+        onClose={closeLaunchModal}
+        source={launchModalOpen ? "manual" : "auto"}
+      />
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--staz-border)] bg-[color-mix(in_srgb,var(--staz-bg-warm)_92%,white)] p-3 backdrop-blur-md lg:hidden">
+        <StazButton
+          onClick={
+            pastDemo
+              ? isLaunchCampaignActive()
+                ? openLaunchOffer
+                : scrollToSignup
+              : scrollToDemo
+          }
+          className="w-full"
+        >
+          {pastDemo
+            ? launchSnap.active
+              ? `קבלו PRO ב־${launchSnap.launchPriceLabel}`
+              : copy.hero.secondaryCta
+            : copy.hero.primaryCta}
+        </StazButton>
       </div>
     </div>
   );

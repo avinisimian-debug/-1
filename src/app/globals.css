@@ -1211,46 +1211,160 @@
 }
 
 /* =============================================================================
-   STAZ public landing — cinematic conversion surface
+   STAZ public landing — brand world (editorial × executive × product)
    ============================================================================= */
 
 :root {
-  --staz-bg: #070b0a;
-  --staz-surface: #0b1714;
-  --staz-surface-elevated: #101a17;
-  --staz-green: #1f6b5c;
-  --staz-green-bright: #2e8b78;
-  --staz-green-soft: #5fb7a0;
-  --staz-text: #f5f3ee;
-  --staz-muted: #a7ada9;
-  --staz-border: rgba(255, 255, 255, 0.08);
+  /* Brand hierarchy */
+  --staz-forest: #0c1a16;
+  --staz-cedar: #16352c;
+  --staz-primary: #1f6b5c;
+  --staz-primary-hover: #18574a;
+  --staz-accent: #2e8b78;
+  --staz-sage: #8fad9f;
+  --staz-primary-soft: #e4f0ec;
+
+  /* Surfaces */
+  --staz-bg: #f6f2eb;
+  --staz-bg-warm: #f6f2eb;
+  --staz-bg-cool: #eef3f0;
+  --staz-surface: #ffffff;
+  --staz-surface-muted: #f1ebe3;
+  --staz-sand: #e8dfd2;
+  --staz-stone: #c9c2b6;
+
+  /* Text */
+  --staz-ink: #13201b;
+  --staz-muted: #5a6a63;
+  --staz-on-dark: #f4f1ea;
+  --staz-on-dark-muted: #a8b0ab;
+
+  /* Semantic product meaning */
+  --staz-decision: #1f6b5c;
+  --staz-action: #2f7d4f;
+  --staz-evidence: #2a7a8c;
+  --staz-warn: #b08a3c;
+
+  /* Borders / depth / radius */
+  --staz-border: rgba(19, 32, 27, 0.1);
+  --staz-border-strong: rgba(19, 32, 27, 0.16);
+  --staz-shadow: 0 28px 70px -32px rgba(12, 26, 22, 0.35);
+  --staz-shadow-soft: 0 12px 40px -24px rgba(12, 26, 22, 0.22);
+  --staz-radius: 1.15rem;
+  --staz-radius-sm: 0.7rem;
+  --staz-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer components {
   .landing-shell {
-    background:
-      radial-gradient(80% 50% at 50% -5%, rgba(31, 107, 92, 0.22) 0%, transparent 55%),
-      radial-gradient(50% 40% at 100% 20%, rgba(46, 139, 120, 0.08) 0%, transparent 50%),
-      linear-gradient(180deg, var(--staz-bg) 0%, var(--staz-surface) 48%, var(--staz-bg) 100%);
-    color: var(--staz-text);
+    background: var(--staz-bg-warm);
+    color: var(--staz-ink);
   }
 
   .landing-hero-glow {
     background:
-      radial-gradient(ellipse 55% 40% at 50% 18%, rgba(46, 139, 120, 0.2), transparent 70%),
-      radial-gradient(ellipse 40% 30% at 20% 60%, rgba(31, 107, 92, 0.12), transparent 65%);
+      radial-gradient(ellipse 55% 40% at 70% 0%, rgba(31, 107, 92, 0.14), transparent 65%),
+      radial-gradient(ellipse 45% 35% at 10% 30%, rgba(232, 223, 210, 0.95), transparent 55%),
+      linear-gradient(180deg, #f8f5ef 0%, var(--staz-bg-warm) 100%);
   }
 
   .landing-hero-copy {
-    animation: landing-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: landing-rise 0.85s var(--staz-ease) both;
   }
 
   .landing-theatre-hero {
-    animation: landing-rise 1s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: landing-enter 1.05s 0.06s var(--staz-ease) both;
   }
 
   .landing-header {
     animation: landing-fade 0.65s ease both;
+  }
+
+  .landing-section-forest {
+    background:
+      radial-gradient(55% 45% at 50% 0%, rgba(46, 139, 120, 0.2), transparent 62%),
+      linear-gradient(165deg, var(--staz-cedar) 0%, var(--staz-forest) 100%);
+    color: var(--staz-on-dark);
+  }
+
+  .landing-chapter {
+    width: 100%;
+  }
+
+  .landing-chapter-inner {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 72rem;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .landing-chapter-inner {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .landing-chapter--warm {
+    background: var(--staz-bg-warm);
+    color: var(--staz-ink);
+  }
+
+  .landing-chapter--cool {
+    background:
+      linear-gradient(180deg, var(--staz-bg-cool) 0%, #e8f0ec 100%);
+    color: var(--staz-ink);
+  }
+
+  .landing-chapter--forest {
+    background:
+      radial-gradient(55% 45% at 50% 0%, rgba(46, 139, 120, 0.2), transparent 62%),
+      linear-gradient(165deg, var(--staz-cedar) 0%, var(--staz-forest) 100%);
+    color: var(--staz-on-dark);
+  }
+
+  .landing-chapter--product {
+    background:
+      radial-gradient(80% 60% at 50% 0%, rgba(31, 107, 92, 0.08), transparent 55%),
+      var(--staz-surface);
+    color: var(--staz-ink);
+  }
+
+  .landing-chapter--quiet {
+    background: color-mix(in srgb, var(--staz-bg-warm) 88%, white);
+    color: var(--staz-ink);
+  }
+
+  .landing-chapter--sand {
+    background:
+      linear-gradient(180deg, var(--staz-sand) 0%, #efe7db 100%);
+    color: var(--staz-ink);
+  }
+
+  .staz-product-surface {
+    border: 1px solid var(--staz-border);
+    background: var(--staz-surface);
+    border-radius: var(--staz-radius);
+    box-shadow: var(--staz-shadow);
+  }
+
+  .staz-decision-chip {
+    color: var(--staz-decision);
+  }
+
+  .staz-action-chip {
+    color: var(--staz-action);
+  }
+
+  .staz-evidence-chip {
+    color: var(--staz-evidence);
+  }
+
+  .landing-aha-pulse {
+    animation: landing-pulse 1.4s var(--staz-ease) both;
+  }
+
+  .landing-timeline-fill {
+    transition: width 700ms var(--staz-ease);
   }
 
   .staz-btn-primary {
@@ -1264,19 +1378,21 @@
     font-weight: 600;
     font-size: 0.9375rem;
     letter-spacing: -0.01em;
-    background: var(--staz-text);
-    color: var(--staz-bg);
+    background: var(--staz-primary);
+    color: #fff;
+    box-shadow: 0 10px 28px -14px rgba(31, 107, 92, 0.65);
     transition:
       transform 160ms ease,
-      opacity 160ms ease,
+      background 160ms ease,
       box-shadow 160ms ease;
   }
   .staz-btn-primary:hover {
+    background: var(--staz-primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 12px 32px -16px rgba(245, 243, 238, 0.45);
+    box-shadow: 0 14px 34px -14px rgba(31, 107, 92, 0.7);
   }
   .staz-btn-primary:focus-visible {
-    outline: 2px solid var(--staz-green-soft);
+    outline: 2px solid var(--staz-accent);
     outline-offset: 2px;
   }
 
@@ -1290,24 +1406,40 @@
     border-radius: 0.85rem;
     font-weight: 500;
     font-size: 0.9375rem;
-    color: var(--staz-text);
+    color: var(--staz-ink);
     border: 1px solid var(--staz-border);
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.65);
     transition: background 160ms ease, border-color 160ms ease;
   }
   .staz-btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.14);
+    background: #fff;
+    border-color: rgba(20, 32, 28, 0.18);
   }
   .staz-btn-secondary:focus-visible {
-    outline: 2px solid var(--staz-green-soft);
+    outline: 2px solid var(--staz-accent);
     outline-offset: 2px;
+  }
+
+  .staz-btn-on-dark {
+    background: #f5f3ee;
+    color: var(--staz-forest);
+    box-shadow: none;
+  }
+  .staz-btn-on-dark:hover {
+    background: #fff;
   }
 
   .staz-panel {
     border: 1px solid var(--staz-border);
-    background: color-mix(in srgb, var(--staz-surface-elevated) 92%, black);
-    border-radius: 1.25rem;
+    background: var(--staz-surface);
+    border-radius: var(--staz-radius);
+    box-shadow: var(--staz-shadow-soft);
+  }
+
+  .staz-panel-soft {
+    border: 1px solid var(--staz-border);
+    background: var(--staz-surface-muted);
+    border-radius: var(--staz-radius);
   }
 
   @keyframes landing-rise {
@@ -1321,6 +1453,17 @@
     }
   }
 
+  @keyframes landing-enter {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
   @keyframes landing-fade {
     from {
       opacity: 0;
@@ -1330,10 +1473,20 @@
     }
   }
 
+  @keyframes landing-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--staz-evidence) 35%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 12px transparent;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .landing-hero-copy,
     .landing-theatre-hero,
-    .landing-header {
+    .landing-header,
+    .landing-aha-pulse {
       animation: none;
     }
   }

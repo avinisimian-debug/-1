@@ -210,6 +210,12 @@ export async function getSubscriptionPlanId(): Promise<string> {
   const productId = await ensureProductId(cached);
 
   if (launch) {
+    // Prefer pinned Live plan ID from env (source of truth) over Blob auto-create.
+    const envLaunch = process.env.PAYPAL_LAUNCH_PLAN_ID?.trim();
+    if (envLaunch) {
+      return resolveActivePlanId(envLaunch);
+    }
+
     const needsNewPlan =
       !cached.launchPlanId ||
       cached.launchPlanSchemaVersion !== LAUNCH_PLAN_SCHEMA_VERSION;
@@ -224,10 +230,6 @@ export async function getSubscriptionPlanId(): Promise<string> {
 
     if (cached.launchPlanId) {
       return cached.launchPlanId;
-    }
-
-    if (process.env.PAYPAL_LAUNCH_PLAN_ID?.trim()) {
-      return resolveActivePlanId(process.env.PAYPAL_LAUNCH_PLAN_ID.trim());
     }
 
     throw new Error("Failed to resolve launch subscription plan.");

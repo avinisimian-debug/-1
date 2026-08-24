@@ -78,7 +78,7 @@ export function getDemoMeetingResult(): TranscriptionResult {
         timestamp: "01:05",
         speaker: "נועה",
         speakerId: "1",
-        text: "אני מוכנה להכין את מסמכי הפיילוט, אבל רק אחרי עין של משפטים.",
+        text: "אני מוכנה להכין את מסמכי הפיילוט, אבל רק אחרי אישור משפטי.",
       },
       {
         timestamp: "01:28",

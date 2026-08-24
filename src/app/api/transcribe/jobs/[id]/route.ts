@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { completeJobFromAssemblyAI } from "@/features/jobs/server/complete-assemblyai-job";
 import { runTranscriptionJob } from "@/features/jobs/server/process-transcription-job";
 import {
   getRetryDelayMs,
@@ -10,13 +11,10 @@ import { waitUntil } from "@/lib/wait-until";
 import { normalizeApiError } from "@/shared/api";
 
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-/**
- * Reclaim queued jobs that still have attempts left after a failure backoff.
- * Polling clients become the retry dispatcher (no separate worker required).
- */
 async function maybeReclaimQueuedJob(jobId: string): Promise<void> {
   const job = await jobQueue.get(jobId);
   if (!job || job.status !== "queued") return;
@@ -25,15 +23,36 @@ async function maybeReclaimQueuedJob(jobId: string): Promise<void> {
   const updatedAt = Date.parse(job.updatedAt);
   if (!Number.isFinite(updatedAt)) return;
 
-  // Fresh jobs are started by POST waitUntil — only reclaim if stuck.
-  const delay =
-    job.attempts <= 0 ? 30_000 : getRetryDelayMs(job.attempts);
+  const delay = job.attempts <= 0 ? 30_000 : getRetryDelayMs(job.attempts);
   if (Date.now() - updatedAt < delay) return;
 
   console.log(
     `[jobs] reclaiming queued job=${jobId} attempt=${job.attempts}/${job.maxAttempts}`,
   );
   waitUntil(runTranscriptionJob(jobId));
+}
+
+/** If GPT waitUntil died mid-analysis, resume from AssemblyAI transcript id. */
+async function maybeReclaimAnalyzingJob(jobId: string): Promise<void> {
+  const job = await jobQueue.get(jobId);
+  if (!job) return;
+  if (job.status !== "analyzing" && job.status !== "transcribing") return;
+
+  const transcriptId = job.assemblyaiTranscriptId?.trim();
+  if (!transcriptId) return;
+
+  const updatedAt = Date.parse(job.updatedAt);
+  if (!Number.isFinite(updatedAt)) return;
+  if (Date.now() - updatedAt < 90_000) return;
+
+  console.log(
+    `[jobs] reclaiming analyzing job=${jobId} transcript=${transcriptId}`,
+  );
+  await jobQueue.update({
+    ...job,
+    updatedAt: new Date().toISOString(),
+  });
+  waitUntil(completeJobFromAssemblyAI(jobId, transcriptId));
 }
 
 /**
@@ -89,6 +108,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     }
 
     await maybeReclaimQueuedJob(id);
+    await maybeReclaimAnalyzingJob(id);
 
     const fresh = (await jobQueue.get(id)) ?? job;
     return NextResponse.json({ data: toPublicJob(fresh), error: null });

@@ -2,7 +2,7 @@ export type PlanTier = "free" | "pro";
 
 export const PRO_PLAN_REGULAR_PRICE = "24.90";
 export const PRO_PLAN_REGULAR_PRICE_LABEL = "$24.90";
-/** Launch-week intro price (first month), then regular price. */
+/** Launch Month intro price (first month), then regular price. */
 export const PRO_PLAN_INTRO_PRICE = "9.99";
 export const PRO_PLAN_INTRO_PRICE_LABEL = "$9.99";
 /** @deprecated Use PRO_PLAN_INTRO_PRICE — kept for imports during migration */
@@ -10,19 +10,33 @@ export const PRO_PLAN_SALE_PRICE = PRO_PLAN_INTRO_PRICE;
 export const PRO_PLAN_SALE_PRICE_LABEL = PRO_PLAN_INTRO_PRICE_LABEL;
 
 export const PRO_TRIAL_DAYS = 7;
-/** Launch week ends Jun 29, 2026 — $9.99/mo intro pricing until then. */
-export const PRO_LAUNCH_WEEK_END = new Date("2026-06-29T23:59:59");
+
+/**
+ * Launch Month end (UTC). After this date: UI + PayPal use regular $24.90 plan.
+ * Kill-switch: LAUNCH_CAMPAIGN_KILL in env or flip LAUNCH_MONTH_ENABLED below.
+ */
+export const LAUNCH_MONTH_ENABLED = true;
+export const LAUNCH_MONTH_START = new Date("2026-08-01T00:00:00.000Z");
+/** Launch Month ends Sep 30, 2026 */
+export const PRO_LAUNCH_WEEK_END = new Date("2026-09-30T23:59:59.000Z");
 /** @deprecated Use PRO_LAUNCH_WEEK_END */
 export const PRO_PLAN_SALE_END = PRO_LAUNCH_WEEK_END;
 
+/**
+ * True while Launch Month offer is live.
+ * Controls PayPal launch plan selection + marketing display.
+ */
 export function isLaunchWeekActive(now = Date.now()): boolean {
-  return now < PRO_LAUNCH_WEEK_END.getTime();
+  if (!LAUNCH_MONTH_ENABLED) return false;
+  if (process.env.LAUNCH_CAMPAIGN_KILL === "1") return false;
+  if (now < LAUNCH_MONTH_START.getTime()) return false;
+  return now <= PRO_LAUNCH_WEEK_END.getTime();
 }
 
-/** Days remaining in launch week (min 1 while active). Used for PayPal trial length. */
+/** Days remaining in launch campaign (min 1 while active). */
 export function getLaunchTrialDays(now = Date.now()): number {
+  if (!isLaunchWeekActive(now)) return 0;
   const diff = PRO_LAUNCH_WEEK_END.getTime() - now;
-  if (diff <= 0) return 0;
   return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
@@ -45,16 +59,30 @@ export function getProLifetimePriceLabel(): string {
   return isLaunchWeekActive() ? PRO_PLAN_INTRO_PRICE_LABEL : PRO_LIFETIME_PRICE_LABEL;
 }
 
-/** Public Pro offer — $24.90/month. Single source for marketing + checkout copy. */
+/**
+ * Amount string for catalog / health (always regular recurring amount).
+ * Checkout plan selection is separate — see getSubscriptionPlanId().
+ */
 export function getProPlanPrice(): string {
   return PRO_PLAN_REGULAR_PRICE;
 }
 
+/**
+ * Primary price label for CTAs.
+ * During Launch Month: $9.99 (intro). Otherwise: $24.90.
+ */
 export function getProPlanPriceLabel(): string {
-  return PRO_PLAN_REGULAR_PRICE_LABEL;
+  return isLaunchWeekActive()
+    ? PRO_PLAN_INTRO_PRICE_LABEL
+    : PRO_PLAN_REGULAR_PRICE_LABEL;
 }
 
 export function getProPlanDisplayPriceLabel(): string {
+  return getProPlanPriceLabel();
+}
+
+/** Always the recurring list price (for strikethrough / “then”). */
+export function getProPlanRegularPriceLabel(): string {
   return PRO_PLAN_REGULAR_PRICE_LABEL;
 }
 

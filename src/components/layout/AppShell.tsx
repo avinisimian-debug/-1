@@ -6,6 +6,13 @@ import { cn } from "@/lib/utils";
 import { AppHeader } from "./AppHeader";
 import { CommandPalette } from "./CommandPalette";
 import { MobileSidebar, Sidebar } from "./Sidebar";
+import { LaunchAnnouncementBar } from "@/components/launch/LaunchAnnouncementBar";
+import {
+  LaunchMonthModal,
+  useLaunchMonthAutoModal,
+} from "@/components/launch/LaunchMonthModal";
+import { usePlan } from "@/context/PlanContext";
+import { isLaunchCampaignActive } from "@/lib/launch-campaign";
 
 interface AppShellProps {
   title: string;
@@ -21,7 +28,12 @@ export function AppShell({
   contentClassName,
 }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [launchOpen, setLaunchOpen] = useState(false);
   const { data: session } = useSession();
+  const { isPro } = usePlan();
+  const autoLaunch = useLaunchMonthAutoModal(
+    Boolean(session?.user) && !isPro && isLaunchCampaignActive(),
+  );
 
   const initials =
     session?.user?.name
@@ -30,6 +42,12 @@ export function AppShell({
       .join("")
       .slice(0, 2)
       .toUpperCase() ?? "SA";
+
+  const showLaunchModal = launchOpen || autoLaunch.open;
+  const closeLaunch = () => {
+    setLaunchOpen(false);
+    autoLaunch.close();
+  };
 
   return (
     <div className="app-shell-bg flex h-screen overflow-hidden">
@@ -40,6 +58,9 @@ export function AppShell({
       <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {!isPro ? (
+          <LaunchAnnouncementBar onOpenOffer={() => setLaunchOpen(true)} />
+        ) : null}
         <AppHeader
           title={title}
           description={description}
@@ -58,6 +79,11 @@ export function AppShell({
       </div>
 
       <CommandPalette />
+      <LaunchMonthModal
+        open={showLaunchModal}
+        onClose={closeLaunch}
+        source={launchOpen ? "app_banner" : "app_auto"}
+      />
     </div>
   );
 }

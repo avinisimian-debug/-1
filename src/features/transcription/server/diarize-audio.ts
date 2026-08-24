@@ -141,7 +141,9 @@ export async function transcribeWithAssemblyAI(
     const transcript = await client.transcripts.transcribe({
       audio: uploadUrl,
       speaker_labels: Boolean(options.speakerLabels),
-      ...(languageCode ? { language_code: languageCode } : {}),
+      ...(languageCode
+        ? { language_code: languageCode }
+        : { language_detection: true }),
     });
 
     if (transcript.status === "error") {
@@ -184,7 +186,9 @@ export async function transcribeUrlWithAssemblyAI(
     const transcript = await client.transcripts.transcribe({
       audio_url: audioUrl,
       speaker_labels: Boolean(options.speakerLabels),
-      ...(languageCode ? { language_code: languageCode } : {}),
+      ...(languageCode
+        ? { language_code: languageCode }
+        : { language_detection: true }),
     });
 
     if (transcript.status === "error") {

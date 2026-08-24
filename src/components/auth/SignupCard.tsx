@@ -53,11 +53,11 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
     }, []);
 
     const fieldClass = isLanding
-      ? "w-full rounded-xl border border-white/12 bg-black/25 px-3.5 py-3 text-sm text-[#ededea] outline-none placeholder:text-[#6f7670] focus:border-[#7eb8ab]/50"
+      ? "w-full rounded-xl border border-[var(--staz-border)] bg-white px-3.5 py-3 text-sm text-[var(--staz-ink)] outline-none placeholder:text-[var(--staz-muted)] focus:border-[var(--staz-primary)]"
       : "input-field";
 
     const labelClass = isLanding
-      ? "mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[#a8aea8]"
+      ? "mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--staz-muted)]"
       : "mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground";
 
     return (
@@ -65,9 +65,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
         <div
           className={cn(
             "mx-auto max-w-md p-7 sm:max-w-lg sm:p-8",
-            isLanding
-              ? "rounded-2xl border border-white/10 bg-[#121614]/90 backdrop-blur-sm"
-              : "premium-signup-card",
+            isLanding ? "staz-panel" : "premium-signup-card",
           )}
         >
           {!isLanding ? (
@@ -88,7 +86,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
               className={cn(
                 "flex min-h-[48px] w-full items-center justify-center gap-2 px-5 py-3 text-sm font-medium",
                 isLanding
-                  ? "mt-0 rounded-xl border border-white/15 bg-white/5 text-[#ededea]"
+                  ? "mt-0 rounded-xl border border-[var(--staz-border)] bg-[var(--staz-surface-muted)] text-[var(--staz-ink)]"
                   : "btn-secondary mt-6",
               )}
             >
@@ -100,7 +98,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
             <p
               className={cn(
                 "my-4 text-center text-xs",
-                isLanding ? "text-[#6f7670]" : "text-muted-foreground",
+                isLanding ? "text-[var(--staz-muted)]" : "text-muted-foreground",
               )}
             >
               {t.authEmailOr}
@@ -166,7 +164,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
                 className={cn(
                   "rounded-lg px-3 py-2 text-sm",
                   isLanding
-                    ? "bg-red-950/50 text-red-200 ring-1 ring-red-500/30"
+                    ? "bg-red-50 text-red-700 ring-1 ring-red-100"
                     : "bg-red-50 text-red-700 ring-1 ring-red-100",
                 )}
               >
@@ -179,7 +177,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
               disabled={loading}
               className={cn(
                 "flex min-h-[48px] w-full items-center justify-center gap-2 px-5 py-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-60",
-                isLanding ? "lat-btn-inverse" : "btn-cinema",
+                isLanding ? "staz-btn-primary" : "btn-cinema",
               )}
             >
               <span className="whitespace-nowrap">
@@ -200,7 +198,7 @@ export const SignupCard = forwardRef<HTMLDivElement, SignupCardProps>(
             <p
               className={cn(
                 "text-center text-[11px] leading-relaxed",
-                isLanding ? "text-[#6f7670]" : "text-muted-foreground",
+                isLanding ? "text-[var(--staz-muted)]" : "text-muted-foreground",
               )}
             >
               לא נכנסים לחשבון של מישהו אחר לפי אימייל בלבד — נדרש קוד או Google.
