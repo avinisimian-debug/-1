@@ -21,11 +21,11 @@
   "functions": {
     "src/app/api/transcribe/from-url/route.ts": {
       "maxDuration": 300,
-      "memory": 3008
+      "memory": 1024
     },
     "src/app/api/transcribe/jobs/[id]/route.ts": {
       "maxDuration": 300,
-      "memory": 3008
+      "memory": 1024
     },
     "src/app/api/transcribe/jobs/route.ts": {
       "maxDuration": 300,
