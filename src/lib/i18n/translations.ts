@@ -270,6 +270,14 @@ export interface Translations {
   transcriptionErrorTimeout: string;
   transcriptionErrorEmpty: string;
   transcriptionErrorVideo: string;
+  transcriptionErrorYoutubeInvalid: string;
+  transcriptionErrorYoutubeUnavailable: string;
+  transcriptionErrorYoutubePrivate: string;
+  transcriptionErrorYoutubeAge: string;
+  transcriptionErrorYoutubeLive: string;
+  transcriptionErrorYoutubeTemp: string;
+  transcriptionErrorTranscribeFailed: string;
+  transcriptionErrorAnalysisFailed: string;
   transcriptionErrorSize: string;
   transcriptionErrorSizeFree: string;
   transcriptionErrorSizePro: string;
@@ -770,7 +778,7 @@ const en: Translations = {
   uploadLinkSubmit: "Process link",
   uploadLinkSoonTitle: "Link import",
   uploadLinkSoonDesc:
-    "Paste a direct media URL (.mp3/.mp4) or a YouTube link (requires ASSEMBLYAI_API_KEY).",
+    "Paste a direct media URL (.mp3/.mp4) or a public YouTube link.",
   uploadLinkInvalid: "Please paste a valid https:// URL.",
   uploadMicDenied: "Microphone access was denied. Check browser permissions.",
   langSearchPlaceholder: "Search languages…",
@@ -920,7 +928,7 @@ const en: Translations = {
   studioGrade: "Closeout",
   tryAgain: "Try Again",
   transcriptionFailed: "Transcription failed",
-  transcriptionFailedSubtitle: "Your file looks valid — this is usually temporary.",
+  transcriptionFailedSubtitle: "We kept your link — you can retry or try another source.",
   transcriptionErrorGeneric:
     "We couldn't finish processing this recording. Please try again in a moment.",
   transcriptionErrorNetwork:
@@ -930,7 +938,23 @@ const en: Translations = {
   transcriptionErrorEmpty:
     "No speech was detected in this file. Try a recording with clearer audio.",
   transcriptionErrorVideo:
-    "We had trouble reading the audio track in this video. Try MP3/WAV or upgrade to Pro for advanced video processing.",
+    "We had trouble reading the audio track in this video. Try exporting MP3/WAV and upload again.",
+  transcriptionErrorYoutubeInvalid:
+    "The link you entered does not look like a valid YouTube URL.",
+  transcriptionErrorYoutubeUnavailable:
+    "This video is not available for processing. Try a public link, or download the audio and upload an MP3/MP4.",
+  transcriptionErrorYoutubePrivate:
+    "This video is private and cannot be processed. Try a public link.",
+  transcriptionErrorYoutubeAge:
+    "This video is age-restricted and cannot be processed automatically. Download the audio and upload the file.",
+  transcriptionErrorYoutubeLive:
+    "Live streams are not supported yet. Wait until the stream ends, or upload a recording.",
+  transcriptionErrorYoutubeTemp:
+    "We couldn't process this video right now. Please try again in a moment.",
+  transcriptionErrorTranscribeFailed:
+    "We got the media, but transcription failed. Please try again.",
+  transcriptionErrorAnalysisFailed:
+    "Transcription finished, but insight processing failed. Please try again.",
   transcriptionErrorSize:
     "This file exceeds your plan limit. Pro supports uploads up to 500 MB and longer recordings.",
   transcriptionErrorSizeFree:
@@ -1446,7 +1470,7 @@ const he: Translations = {
   uploadLinkSubmit: "עיבוד מהקישור",
   uploadLinkSoonTitle: "ייבוא מקישור",
   uploadLinkSoonDesc:
-    "הדביקו קישור מדיה ישיר (.mp3/.mp4) או YouTube (דורש ASSEMBLYAI_API_KEY).",
+    "הדביקו קישור מדיה ישיר (.mp3/.mp4) או קישור YouTube ציבורי.",
   uploadLinkInvalid: "נא להדביק כתובת https:// תקינה.",
   uploadMicDenied: "הגישה למיקרופון נדחתה. בדקו את הרשאות הדפדפן.",
   langSearchPlaceholder: "חיפוש שפות…",
@@ -1596,7 +1620,7 @@ const he: Translations = {
   studioGrade: "סגירה",
   tryAgain: "נסו שוב",
   transcriptionFailed: "התמלול נכשל",
-  transcriptionFailedSubtitle: "הקובץ נראה תקין — לרוב זו תקלה זמנית.",
+  transcriptionFailedSubtitle: "שמרנו את הקישור — אפשר לנסות שוב או להחליף מקור.",
   transcriptionErrorGeneric:
     "לא הצלחנו לסיים את העיבוד. נסו שוב בעוד רגע.",
   transcriptionErrorNetwork:
@@ -1606,7 +1630,23 @@ const he: Translations = {
   transcriptionErrorEmpty:
     "לא זוהתה דיבור בקובץ. נסו הקלטה עם שמע ברור יותר.",
   transcriptionErrorVideo:
-    "לא הצלחנו לקרוא את ערוץ השמע בסרטון. נסו MP3/WAV, או שדרגו ל-Pro לעיבוד וידאו מתקדם.",
+    "לא הצלחנו לקרוא את ערוץ השמע בסרטון. נסו לייצא MP3/WAV ולהעלות שוב.",
+  transcriptionErrorYoutubeInvalid:
+    "הקישור שהוזן לא נראה כמו קישור YouTube תקין.",
+  transcriptionErrorYoutubeUnavailable:
+    "הסרטון הזה לא זמין לעיבוד. נסו קישור ציבורי אחר, או הורידו את האודיו והעלו MP3/MP4.",
+  transcriptionErrorYoutubePrivate:
+    "הסרטון פרטי ולא זמין לעיבוד. נסו קישור ציבורי אחר.",
+  transcriptionErrorYoutubeAge:
+    "הסרטון מוגבל לגיל ולא ניתן לעיבוד אוטומטי. הורידו את האודיו והעלו קובץ.",
+  transcriptionErrorYoutubeLive:
+    "שידורים חיים לא נתמכים כרגע. המתינו לסיום השידור או העלו הקלטה.",
+  transcriptionErrorYoutubeTemp:
+    "לא הצלחנו לעבד את הסרטון כרגע. נסו שוב בעוד רגע.",
+  transcriptionErrorTranscribeFailed:
+    "הצלחנו לקבל את הסרטון, אבל הייתה בעיה ביצירת התמלול. נסו שוב.",
+  transcriptionErrorAnalysisFailed:
+    "התמלול הושלם, אבל עיבוד התובנות נכשל. נסו שוב.",
   transcriptionErrorSize:
     "הקובץ חורג ממגבלת החבילה. ב-Pro אפשר להעלות עד 500 MB והקלטות ארוכות יותר.",
   transcriptionErrorSizeFree:

@@ -6,6 +6,14 @@ type ErrorKind =
   | "timeout"
   | "empty"
   | "video"
+  | "youtube_invalid"
+  | "youtube_unavailable"
+  | "youtube_private"
+  | "youtube_age"
+  | "youtube_live"
+  | "youtube_temp"
+  | "transcribe_failed"
+  | "analysis_failed"
   | "size_free"
   | "size_pro"
   | "limit"
@@ -15,6 +23,50 @@ type ErrorKind =
 
 function classifyTranscriptionError(message: string): ErrorKind {
   const lower = message.toLowerCase();
+  const raw = message.trim();
+
+  if (raw.startsWith("YT_INVALID_URL") || lower.includes("לא נראה כמו קישור youtube")) {
+    return "youtube_invalid";
+  }
+  if (raw.startsWith("YT_PRIVATE") || lower.includes("סרטון פרטי")) {
+    return "youtube_private";
+  }
+  if (
+    raw.startsWith("YT_AGE_RESTRICTED") ||
+    lower.includes("מוגבל לגיל")
+  ) {
+    return "youtube_age";
+  }
+  if (raw.startsWith("YT_LIVE") || lower.includes("שידורים חיים")) {
+    return "youtube_live";
+  }
+  if (
+    raw.startsWith("YT_UNAVAILABLE") ||
+    raw.startsWith("YT_NO_AUDIO") ||
+    raw.startsWith("YT_TOO_LONG") ||
+    raw.startsWith("YT_EXTRACTOR_MISSING") ||
+    lower.includes("לא זמין לעיבוד")
+  ) {
+    return "youtube_unavailable";
+  }
+  if (
+    raw.startsWith("YT_TEMP_FAILURE") ||
+    lower.includes("לא הצלחנו לעבד את הסרטון כרגע")
+  ) {
+    return "youtube_temp";
+  }
+  if (
+    raw.startsWith("TRANSCRIBE_FAILED") ||
+    lower.includes("בעיה ביצירת התמלול")
+  ) {
+    return "transcribe_failed";
+  }
+  if (
+    raw.startsWith("ANALYSIS_FAILED") ||
+    lower.includes("עיבוד התובנות נכשל")
+  ) {
+    return "analysis_failed";
+  }
 
   if (
     lower.includes("config_openai_missing") ||
@@ -62,7 +114,8 @@ function classifyTranscriptionError(message: string): ErrorKind {
   if (
     lower.includes("monthly") ||
     lower.includes("limit reached") ||
-    lower.includes("transcriptions per month")
+    lower.includes("transcriptions per month") ||
+    lower.includes("quota:")
   ) {
     return "limit";
   }
@@ -96,12 +149,20 @@ function classifyTranscriptionError(message: string): ErrorKind {
     return "size_pro";
   }
 
+  // AssemblyAI often returns "Transcoding failed... mp4" for YouTube page URLs.
+  // Map to a clear YouTube/unavailable message instead of "upgrade to Pro".
   if (
-    lower.includes("video") ||
+    lower.includes("transcoding failed") ||
+    lower.includes("youtube") ||
+    (lower.includes("try a direct") && lower.includes("mp3"))
+  ) {
+    return "youtube_unavailable";
+  }
+
+  if (
     lower.includes("extract audio") ||
     lower.includes("codec") ||
     lower.includes("ffmpeg") ||
-    lower.includes("mp4") ||
     lower.includes("process this recording") ||
     lower.includes("could not process")
   ) {
@@ -132,12 +193,20 @@ function classifyTranscriptionError(message: string): ErrorKind {
   return "generic";
 }
 
+function stripErrorCodePrefix(message: string): string {
+  return message.replace(
+    /^(YT_[A-Z_]+|TRANSCRIBE_FAILED|ANALYSIS_FAILED|PLATFORM_URL|QUOTA|CONFIG_ERROR):\s*/i,
+    "",
+  ).trim();
+}
+
 export function resolveTranscriptionErrorMessage(
   message: string,
   t: Translations,
   isPro = false,
-): { text: string; kind: ErrorKind } {
+): { text: string; kind: ErrorKind; title?: string; subtitle?: string } {
   const kind = classifyTranscriptionError(message);
+  const stripped = stripErrorCodePrefix(message);
 
   const byKind: Record<ErrorKind, string> = {
     generic: t.transcriptionErrorGeneric,
@@ -145,6 +214,14 @@ export function resolveTranscriptionErrorMessage(
     timeout: t.transcriptionErrorTimeout,
     empty: t.transcriptionErrorEmpty,
     video: t.transcriptionErrorVideo,
+    youtube_invalid: t.transcriptionErrorYoutubeInvalid,
+    youtube_unavailable: t.transcriptionErrorYoutubeUnavailable,
+    youtube_private: t.transcriptionErrorYoutubePrivate,
+    youtube_age: t.transcriptionErrorYoutubeAge,
+    youtube_live: t.transcriptionErrorYoutubeLive,
+    youtube_temp: t.transcriptionErrorYoutubeTemp,
+    transcribe_failed: t.transcriptionErrorTranscribeFailed,
+    analysis_failed: t.transcriptionErrorAnalysisFailed,
     size_free: t.transcriptionErrorSizeFree,
     size_pro: t.transcriptionErrorSizePro,
     limit: t.transcriptionErrorLimit,
@@ -157,24 +234,27 @@ export function resolveTranscriptionErrorMessage(
     return { text: t.transcriptionErrorSizePro, kind: "size_pro" };
   }
 
-  if (kind === "size_pro" || kind === "size_free") {
-    return {
-      text: kind === "size_pro" ? t.transcriptionErrorSizePro : byKind[kind],
-      kind,
-    };
-  }
+  // Prefer our classified Hebrew copy; fall back to stripped server message when informative.
+  const text =
+    byKind[kind] ||
+    (stripped.length > 12 && !stripped.toLowerCase().includes("transcoding")
+      ? stripped
+      : byKind.generic);
 
-  return { text: byKind[kind], kind };
+  return { text, kind };
 }
 
 export function shouldShowProUpsell(kind: ErrorKind, isPro: boolean): boolean {
   if (isPro) return false;
   if (kind === "config_openai" || kind === "config_blob") return false;
+  if (kind.startsWith("youtube_")) return false;
+  if (kind === "transcribe_failed" || kind === "analysis_failed") return false;
   // ffmpeg / codec issues are not solved by upgrading alone
   if (kind === "video") return false;
   return (
     kind === "generic" ||
     kind === "size_free" ||
-    kind === "timeout"
+    kind === "timeout" ||
+    kind === "limit"
   );
 }

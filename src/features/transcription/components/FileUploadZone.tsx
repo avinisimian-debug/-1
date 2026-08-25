@@ -152,8 +152,28 @@ export function FileUploadZone({
     if (!url) return;
     try {
       // Basic client validation — server re-validates.
-       
-      new URL(url);
+      const parsed = new URL(url);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        throw new Error("bad protocol");
+      }
+      const host = parsed.hostname.toLowerCase();
+      const looksYoutube =
+        host.includes("youtube.com") ||
+        host === "youtu.be" ||
+        host === "www.youtu.be";
+      if (looksYoutube) {
+        const hasId =
+          Boolean(parsed.searchParams.get("v")) ||
+          /\/(shorts|embed|live)\/[\w-]{11}/.test(parsed.pathname) ||
+          (host.includes("youtu.be") && /^\/[\w-]{11}/.test(parsed.pathname));
+        if (!hasId) {
+          toast({
+            title: t.transcriptionErrorYoutubeInvalid,
+            variant: "error",
+          });
+          return;
+        }
+      }
     } catch {
       toast({
         title: t.uploadLinkInvalid,

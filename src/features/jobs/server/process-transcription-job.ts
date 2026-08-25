@@ -5,6 +5,7 @@ import {
 import { prepareAudioForWhisper } from "@/features/transcription/server/prepare-audio";
 import { transcribeAudio } from "@/features/transcription/server/transcribe.use-case";
 import { isAssemblyAIConfigured } from "@/features/transcription/server/diarize-audio";
+import { transcribeYouTubeUrl } from "@/features/transcription/server/transcribe-from-url";
 import {
   resolveUserId,
   triggerWebhook,
@@ -43,19 +44,23 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
     return;
   }
 
-  if (!job.audioBlobUrl || !job.pathname) {
+  const isYoutube = Boolean(job.sourceUrl && job.sourceKind === "youtube");
+
+  if (!isYoutube && (!job.audioBlobUrl || !job.pathname)) {
     await markJobFailed(job, "Job is missing blob upload reference.");
     return;
   }
 
-  try {
-    assertBlobPathForUser(job.pathname, job.ownerEmail);
-  } catch (error) {
-    await markJobFailed(
-      job,
-      error instanceof Error ? error.message : "Invalid upload reference.",
-    );
-    return;
+  if (!isYoutube && job.pathname) {
+    try {
+      assertBlobPathForUser(job.pathname, job.ownerEmail);
+    } catch (error) {
+      await markJobFailed(
+        job,
+        error instanceof Error ? error.message : "Invalid upload reference.",
+      );
+      return;
+    }
   }
 
   const running: TranscriptionJob = {
@@ -67,8 +72,91 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
   await jobQueue.update(running);
 
   try {
+    if (isYoutube && job.sourceUrl) {
+      await jobQueue.update({
+        ...running,
+        status: "transcribing",
+        updatedAt: new Date().toISOString(),
+      });
+
+      const language =
+        job.language && job.language !== "auto" ? job.language : null;
+
+      const yt = await transcribeYouTubeUrl({
+        url: job.sourceUrl,
+        plan: running.plan,
+        language,
+        requestId: running.id.slice(0, 10),
+      });
+
+      if (isFailure(yt)) {
+        try {
+          await saveMeetingForUser({
+            ownerEmail: running.ownerEmail,
+            result: recoverableFailedResult(
+              running.fileName,
+              yt.error.message,
+            ),
+            plan: running.plan,
+            persistStatus: "failed_recoverable",
+          });
+        } catch (error) {
+          console.error("[jobs] recoverable youtube library save failed", error);
+        }
+        await markJobFailed(running, yt.error.message, {
+          incrementAttempts: false,
+        });
+        await linkMeetingResult(running, "failed", undefined, yt.error.message);
+        return;
+      }
+
+      await jobQueue.update({
+        ...running,
+        status: "analyzing",
+        updatedAt: new Date().toISOString(),
+      });
+
+      await jobQueue.update({
+        ...running,
+        status: "completed",
+        result: yt.data,
+        completedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        error: undefined,
+      });
+
+      try {
+        await saveMeetingForUser({
+          ownerEmail: running.ownerEmail,
+          result: yt.data,
+          plan: running.plan,
+          persistStatus: "media_missing",
+        });
+      } catch (error) {
+        console.error("[jobs] failed to persist youtube meeting", error);
+        await markJobFailed(
+          running,
+          "העיבוד הצליח אך הספרייה בענן לא נשמרה.",
+          { incrementAttempts: false },
+        );
+        return;
+      }
+
+      await incrementTranscriptionsToday();
+      await incrementServerUsage(running.ownerEmail);
+      await linkMeetingResult(running, "ready", yt.data);
+
+      const userId = resolveUserId(running.ownerEmail);
+      await triggerWebhook(userId, {
+        userEmail: running.ownerEmail,
+        plan: running.plan,
+        result: yt.data,
+      }).catch(() => {});
+      return;
+    }
+
     const file = await fileFromBlobUrl(
-      job.audioBlobUrl,
+      job.audioBlobUrl!,
       job.fileName,
       job.contentType ?? "application/octet-stream",
     );

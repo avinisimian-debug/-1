@@ -22,13 +22,20 @@ interface ErrorStateProps {
   message: string;
   fileName?: string;
   onRetry: () => void;
+  onReplaceSource?: () => void;
 }
 
-export function ErrorState({ message, fileName, onRetry }: ErrorStateProps) {
+export function ErrorState({
+  message,
+  fileName,
+  onRetry,
+  onReplaceSource,
+}: ErrorStateProps) {
   const { t } = useLocale();
   const { isPro } = usePlan();
   const { text, kind } = resolveTranscriptionErrorMessage(message, t, isPro);
   const showPro = shouldShowProUpsell(kind, isPro);
+  const isYoutube = kind.startsWith("youtube_");
 
   return (
     <div className="mx-auto w-full max-w-2xl animate-fade-in-up">
@@ -54,14 +61,25 @@ export function ErrorState({ message, fileName, onRetry }: ErrorStateProps) {
           <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-foreground/90">
             {text}
           </p>
-          <button
-            type="button"
-            onClick={onRetry}
-            className="btn-cinema mt-6 inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium"
-          >
-            <RotateCcw className="h-4 w-4" />
-            {t.tryAgain}
-          </button>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={onRetry}
+              className="btn-cinema inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium"
+            >
+              <RotateCcw className="h-4 w-4" />
+              {t.tryAgain}
+            </button>
+            {onReplaceSource ? (
+              <button
+                type="button"
+                onClick={onReplaceSource}
+                className="btn-secondary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium"
+              >
+                {isYoutube ? "החלף קישור" : "החלף מקור"}
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {showPro && (

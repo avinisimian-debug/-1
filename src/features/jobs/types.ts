@@ -18,6 +18,9 @@ export interface TranscriptionJob {
   audioBlobUrl?: string;
   pathname?: string;
   contentType?: string;
+  /** Public YouTube (or media) URL when ingesting from link */
+  sourceUrl?: string;
+  sourceKind?: "youtube" | "url";
   /** AssemblyAI transcript id when using webhook async STT */
   assemblyaiTranscriptId?: string;
   /** Linked Live Hub meeting id (post-meeting pipeline) */
@@ -39,9 +42,11 @@ export interface EnqueueTranscriptionInput {
   fileSize: number;
   plan: "free" | "pro";
   language: string;
-  audioBlobUrl: string;
-  pathname: string;
-  contentType: string;
+  audioBlobUrl?: string;
+  pathname?: string;
+  contentType?: string;
+  sourceUrl?: string;
+  sourceKind?: "youtube" | "url";
   meetingId?: string;
   /** Prefer speaker diarization when plan allows */
   forceDiarization?: boolean;

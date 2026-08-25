@@ -4,10 +4,11 @@ import type { ProcessingStage } from "@/features/transcription/types";
 import { cn } from "@/lib/utils";
 
 const STAGE_LABELS_HE = [
-  "מעלים",
-  "מתמללים",
-  "בונים תמצית מנהלים",
-  "מארגנים מה הוחלט ומי עושה מה",
+  "בודקים את הקישור / מעלים",
+  "מכינים את המקור לעיבוד",
+  "יוצרים תמלול",
+  "מנתחים את הפגישה",
+  "הפגישה מוכנה",
 ] as const;
 
 interface ProcessingTheatreProps {
@@ -20,14 +21,15 @@ interface ProcessingTheatreProps {
 function stageIndex(stage?: ProcessingStage): number {
   switch (stage) {
     case "uploading":
-    case "queued":
       return 0;
-    case "transcribing":
+    case "queued":
       return 1;
-    case "analyzing":
+    case "transcribing":
       return 2;
-    case "completed":
+    case "analyzing":
       return 3;
+    case "completed":
+      return 4;
     default:
       return 1;
   }
@@ -54,7 +56,7 @@ export function ProcessingTheatre({
         <p className="mt-2 max-w-sm truncate text-sm text-[#a8aea8]">{fileName}</p>
       ) : null}
 
-      <ol className="mt-10 w-full max-w-xs space-y-3 text-start">
+      <ol className="mt-10 w-full max-w-sm space-y-3 text-start">
         {STAGE_LABELS_HE.map((label, i) => {
           const done = i < active || (i === active && stage === "completed");
           const current = i === active && stage !== "completed";
@@ -68,7 +70,7 @@ export function ProcessingTheatre({
                   !done && !current && "bg-white/10 text-[#6f7670]",
                 )}
               >
-                {done ? "OK" : String(i + 1)}
+                {done ? "✓" : String(i + 1).padStart(2, "0")}
               </span>
               <span
                 className={cn(

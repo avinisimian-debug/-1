@@ -91,6 +91,8 @@ export async function enqueueTranscriptionJob(
     audioBlobUrl: input.audioBlobUrl,
     pathname: input.pathname,
     contentType: input.contentType,
+    sourceUrl: input.sourceUrl,
+    sourceKind: input.sourceKind,
     meetingId: input.meetingId,
     forceDiarization: input.forceDiarization,
     attempts: 0,

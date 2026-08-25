@@ -71,7 +71,15 @@ export function DashboardContent() {
         <ErrorState
           message={dash.error}
           fileName={dash.uploadedFile?.name}
-          onRetry={dash.resetAll}
+          onRetry={() => {
+            const src = dash.uploadedFile?.name?.trim();
+            if (src && /^https?:\/\//i.test(src)) {
+              dash.processUrl(src);
+              return;
+            }
+            dash.resetAll();
+          }}
+          onReplaceSource={dash.resetAll}
         />
       )}
 

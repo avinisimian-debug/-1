@@ -369,7 +369,9 @@ async function pollTranscriptionJob(
   }
 
   return failure(
-    new Error("Processing timed out. Try a shorter recording or upgrade to Pro."),
+    new Error(
+      "YT_TEMP_FAILURE: העיבוד ארך יותר מהצפוי. נסו שוב או בחרו סרטון קצר יותר.",
+    ),
   );
 }
 
@@ -682,7 +684,10 @@ export async function transcribeFromUrl({
   onUploadProgress,
   onUploadComplete,
   onHeadersReceived,
-}: TranscribeFromUrlOptions): Promise<Result<TranscriptionResult, Error>> {
+  onJobStage,
+}: TranscribeFromUrlOptions & {
+  onJobStage?: (stage: JobProgressStage) => void;
+}): Promise<Result<TranscriptionResult, Error>> {
   const track = createProgressTracker(100, onUploadProgress);
   track(10, 100);
 
@@ -691,8 +696,10 @@ export async function transcribeFromUrl({
   signal?.addEventListener("abort", onAbort);
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+  const ACTIVE_YT_JOB_KEY = "staz-active-youtube-job";
+
   try {
-    track(35, 100);
+    track(25, 100);
     const response = await fetch(TRANSCRIPTION_FROM_URL_PATH, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -705,17 +712,68 @@ export async function transcribeFromUrl({
       }),
     });
 
-    track(90, 100);
-    onUploadComplete?.();
-    onHeadersReceived?.();
+    clearTimeout(timeout);
 
-    const body = (await response.json()) as ApiResponse<TranscriptionResult>;
+    const body = (await response.json()) as ApiResponse<
+      | TranscriptionResult
+      | {
+          async: true;
+          jobId: string;
+          sourceUrl?: string;
+        }
+    >;
+
     if (!response.ok || !body.data) {
       return failure(new Error(parseErrorMessage(body, response.status)));
     }
 
+    // Async YouTube job — poll until complete (survives long extract + STT).
+    if (
+      typeof body.data === "object" &&
+      body.data !== null &&
+      "async" in body.data &&
+      body.data.async === true &&
+      "jobId" in body.data &&
+      typeof body.data.jobId === "string"
+    ) {
+      try {
+        sessionStorage.setItem(
+          ACTIVE_YT_JOB_KEY,
+          JSON.stringify({
+            jobId: body.data.jobId,
+            sourceUrl: body.data.sourceUrl || url,
+            startedAt: Date.now(),
+          }),
+        );
+      } catch {
+        /* ignore */
+      }
+
+      track(40, 100);
+      onUploadComplete?.();
+      onJobStage?.("queued");
+
+      const polled = await pollTranscriptionJob(
+        body.data.jobId,
+        signal,
+        onHeadersReceived,
+        onJobStage,
+      );
+
+      try {
+        sessionStorage.removeItem(ACTIVE_YT_JOB_KEY);
+      } catch {
+        /* ignore */
+      }
+
+      track(100, 100);
+      return polled;
+    }
+
     track(100, 100);
-    return success(body.data);
+    onUploadComplete?.();
+    onHeadersReceived?.();
+    return success(body.data as TranscriptionResult);
   } catch (error) {
     if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
       return failure(new Error("Upload cancelled."));
@@ -730,5 +788,34 @@ export async function transcribeFromUrl({
   } finally {
     clearTimeout(timeout);
     signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+/** Resume an in-flight YouTube job after refresh (if still active). */
+export async function resumeActiveYouTubeJob(options?: {
+  signal?: AbortSignal;
+  onJobStage?: (stage: JobProgressStage) => void;
+  onHeadersReceived?: () => void;
+}): Promise<Result<TranscriptionResult, Error> | null> {
+  try {
+    const raw = sessionStorage.getItem("staz-active-youtube-job");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { jobId?: string; startedAt?: number };
+    if (!parsed.jobId) return null;
+    // Drop stale jobs older than 30 minutes
+    if (parsed.startedAt && Date.now() - parsed.startedAt > 30 * 60_000) {
+      sessionStorage.removeItem("staz-active-youtube-job");
+      return null;
+    }
+    const result = await pollTranscriptionJob(
+      parsed.jobId,
+      options?.signal,
+      options?.onHeadersReceived,
+      options?.onJobStage,
+    );
+    sessionStorage.removeItem("staz-active-youtube-job");
+    return result;
+  } catch {
+    return null;
   }
 }

@@ -8,6 +8,10 @@ import {
 import { transcribeAudio } from "@/features/transcription/server/transcribe.use-case";
 import { isAssemblyAIConfigured } from "@/features/transcription/server/diarize-audio";
 import { transcribeRemoteUrlWithAssemblyAI } from "@/features/transcription/server/transcribe-from-url";
+import {
+  isYouTubeUrl,
+  parseYouTubeUrl,
+} from "@/features/transcription/server/youtube-url";
 import { isWhisperLanguageCode } from "@/lib/whisper-languages";
 import { incrementTranscriptionsToday } from "@/lib/stats-store";
 import { incrementServerUsage, canServerTranscribe } from "@/lib/usage-server";
@@ -21,6 +25,11 @@ import {
   withApiHandler,
 } from "@/shared/api";
 import { isFailure } from "@/shared/lib/result";
+import { randomUUID } from "node:crypto";
+import { enqueueTranscriptionJob } from "@/features/jobs/server/transcription-queue";
+import { runTranscriptionJob } from "@/features/jobs/server/process-transcription-job";
+import { toPublicJob } from "@/features/jobs/types";
+import { waitUntil } from "@/lib/wait-until";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -31,6 +40,7 @@ interface FromUrlBody {
 }
 
 export const POST = withApiHandler(async (request: NextRequest) => {
+  const requestId = randomUUID().slice(0, 10);
   const session = await auth();
   if (!session?.user?.email) {
     throw new UnauthorizedError("נדרשת התחברות כדי לתמלל.");
@@ -63,14 +73,14 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   }
 
   const language =
-    body.language && body.language !== "auto" ? body.language : null;
+    body.language && body.language !== "auto" ? body.language : "auto";
 
   const email = session.user.email.toLowerCase();
   let plan: "free" | "pro" = "free";
   try {
     plan = await syncUserPlanOnAccess(email, session.user.name ?? undefined);
   } catch (error) {
-    console.error("[transcribe-from-url] plan sync failed:", error);
+    console.error(`[transcribe-from-url] requestId=${requestId} plan sync failed:`, error);
   }
 
   try {
@@ -96,13 +106,61 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       : new BadRequestError("Invalid URL.");
   }
 
-  // Prefer AssemblyAI for any remote URL (YouTube/platforms + direct media).
-  // AssemblyAI fetches audio remotely — no full download on our serverless.
+  console.log(
+    `[transcribe-from-url] requestId=${requestId} user=${email} plan=${plan} host=${parsedUrl.hostname} youtube=${isYouTubeUrl(parsedUrl.toString())}`,
+  );
+
+  // YouTube: validate early, enqueue async job (survives refresh / long extract).
+  if (isYouTubeUrl(parsedUrl.toString())) {
+    if (!isAssemblyAIConfigured()) {
+      throw new BadRequestError(
+        "PLATFORM_URL: Set ASSEMBLYAI_API_KEY to transcribe YouTube links, or upload an MP3/MP4 file.",
+      );
+    }
+
+    let parsedYt;
+    try {
+      parsedYt = parseYouTubeUrl(parsedUrl.toString());
+    } catch (error) {
+      throw new BadRequestError(
+        error instanceof Error
+          ? error.message
+          : "YT_INVALID_URL: הקישור שהוזן לא נראה כמו קישור YouTube תקין.",
+      );
+    }
+
+    const job = await enqueueTranscriptionJob({
+      ownerEmail: email,
+      fileName: `youtube-${parsedYt.videoId}`,
+      fileSize: 0,
+      plan,
+      language,
+      sourceUrl: parsedYt.canonicalUrl,
+      sourceKind: "youtube",
+      forceDiarization: true,
+    });
+
+    waitUntil(runTranscriptionJob(job.id));
+
+    console.log(
+      `[transcribe-from-url] requestId=${requestId} youtube_job=${job.id} queued`,
+    );
+
+    // Return 202-style payload via handler (withApiHandler wraps data).
+    return {
+      async: true as const,
+      jobId: job.id,
+      job: toPublicJob(job),
+      sourceUrl: parsedYt.canonicalUrl,
+    };
+  }
+
+  // Prefer AssemblyAI for other remote URLs (direct media).
   if (isAssemblyAIConfigured()) {
     const remote = await transcribeRemoteUrlWithAssemblyAI({
       url: parsedUrl.toString(),
       plan,
-      language,
+      language: language === "auto" ? null : language,
     });
     if (!isFailure(remote)) {
       try {
@@ -123,18 +181,17 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       return remote.data;
     }
 
-    // Platform pages cannot fall back to app-server download.
     if (isPlatformPageUrl(parsedUrl)) {
       throw remote.error;
     }
 
     console.warn(
-      "[transcribe-from-url] AssemblyAI failed; falling back to download + STT:",
+      `[transcribe-from-url] requestId=${requestId} AssemblyAI failed; falling back to download + STT:`,
       remote.error.message,
     );
   } else if (isPlatformPageUrl(parsedUrl)) {
     throw new BadRequestError(
-      "PLATFORM_URL: Set ASSEMBLYAI_API_KEY in Vercel to transcribe YouTube/Zoom page links, or paste a direct .mp3/.mp4 URL.",
+      "PLATFORM_URL: Set ASSEMBLYAI_API_KEY in Vercel to transcribe platform links, or paste a direct .mp3/.mp4 URL.",
     );
   }
 
@@ -148,7 +205,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
         `${message}${
           isAssemblyAIConfigured()
             ? ""
-            : " Or set ASSEMBLYAI_API_KEY in Vercel for YouTube/platform links."
+            : " Or set ASSEMBLYAI_API_KEY in Vercel for platform links."
         }`,
       );
     }
@@ -160,7 +217,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   const result = await transcribeAudio({
     file,
     plan,
-    language,
+    language: language === "auto" ? null : language,
   });
 
   if (isFailure(result)) {

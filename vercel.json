@@ -12,5 +12,24 @@
       "path": "/api/cron/live-bots",
       "schedule": "0 6 * * *"
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "YOUTUBE_DL_SKIP_PYTHON_CHECK": "1"
+    }
+  },
+  "functions": {
+    "src/app/api/transcribe/from-url/route.ts": {
+      "maxDuration": 300,
+      "memory": 3008
+    },
+    "src/app/api/transcribe/jobs/[id]/route.ts": {
+      "maxDuration": 300,
+      "memory": 3008
+    },
+    "src/app/api/transcribe/jobs/route.ts": {
+      "maxDuration": 300,
+      "memory": 1024
+    }
+  }
 }

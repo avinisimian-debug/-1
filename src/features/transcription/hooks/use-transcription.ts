@@ -10,6 +10,7 @@ import { saveToHistory } from "@/lib/history-store";
 import { HISTORY_LIMITS } from "@/lib/plan-features";
 import { isFailure } from "@/shared/lib/result";
 import {
+  resumeActiveYouTubeJob,
   transcribeFromUrl,
   uploadTranscription,
   type UploadProgressInfo,
@@ -52,6 +53,47 @@ export function useTranscription() {
     abortRef.current?.abort();
     revokeAudioUrl();
   }, [revokeAudioUrl]);
+
+  // Resume YouTube job after refresh / reopen while processing.
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    void (async () => {
+      const resumed = await resumeActiveYouTubeJob({
+        signal: controller.signal,
+        onJobStage: (jobStage) => {
+          if (cancelled || jobStage === "completed") return;
+          setStatus("processing");
+          setStage(jobStage);
+        },
+        onHeadersReceived: () => {
+          if (!cancelled) setStage("analyzing");
+        },
+      });
+      if (cancelled || !resumed) return;
+      if (isFailure(resumed)) {
+        if (resumed.error.message === "Upload cancelled.") return;
+        setError(resumed.error.message);
+        setStatus("error");
+        return;
+      }
+      setResult(resumed.data);
+      setStatus("complete");
+      setStage("completed");
+      setUploadedFile({
+        name: resumed.data.fileName,
+        size: 0,
+        type: "text/uri-list",
+      });
+      recordUsage();
+      saveToHistory(resumed.data, HISTORY_LIMITS[plan]);
+    })();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resume once on mount
+  }, []);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -209,11 +251,22 @@ export function useTranscription() {
       setResult(null);
       setError(null);
       setUploadProgress({
-        percent: 5,
-        loadedBytes: 5,
+        percent: 8,
+        loadedBytes: 8,
         totalBytes: 100,
         bytesPerSecond: 0,
       });
+
+      // Fake progressive stages while the sync from-url API runs
+      // (validating → preparing → STT → analysis).
+      const stageTimers = [
+        window.setTimeout(() => {
+          if (abortRef.current === controller) setStage("queued");
+        }, 1200),
+        window.setTimeout(() => {
+          if (abortRef.current === controller) setStage("transcribing");
+        }, 4000),
+      ];
 
       transcribeFromUrl({
         url: trimmed,
@@ -222,18 +275,22 @@ export function useTranscription() {
         signal: controller.signal,
         onUploadProgress: (info) => {
           setUploadProgress(info);
-          setStage("uploading");
         },
         onUploadComplete: () => {
           setUploadProgress((prev) =>
             prev
-              ? { ...prev, percent: 100, loadedBytes: prev.totalBytes }
+              ? { ...prev, percent: 55, loadedBytes: 55 }
               : prev,
           );
-          setStage("transcribing");
+          setStage("queued");
+        },
+        onJobStage: (jobStage) => {
+          if (jobStage === "completed") return;
+          setStage(jobStage);
         },
         onHeadersReceived: () => setStage("analyzing"),
       }).then((uploadResult) => {
+        for (const t of stageTimers) window.clearTimeout(t);
         if (abortRef.current !== controller) return;
 
         if (isFailure(uploadResult)) {
@@ -248,12 +305,13 @@ export function useTranscription() {
           setStatus("error");
           toast({
             title: "העיבוד נכשל",
-            description: message,
+            description: message.replace(/^[A-Z_]+:\s*/, ""),
             variant: "error",
           });
           return;
         }
 
+        setStage("completed");
         setResult(uploadResult.data);
         setStatus("complete");
         setUploadProgress(null);
