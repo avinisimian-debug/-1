@@ -79,7 +79,8 @@ export async function runTranscriptionJob(jobId: string): Promise<void> {
     const useSpeakerLabels =
       job.plan === "pro" &&
       hasFeature("pro", "speakerDiarization") &&
-      isAssemblyAIConfigured();
+      isAssemblyAIConfigured() &&
+      job.forceDiarization !== false;
 
     // Production: submit to AssemblyAI with webhook — frees the serverless function.
     if (canUseAssemblyAIWebhook()) {

@@ -30,10 +30,22 @@ describe("buildAnalysisUserPrompt", () => {
 });
 
 describe("buildAnalysisSystemPrompt", () => {
-  it("requires Hebrew output and grounded decisions", () => {
+  it("requires evidence-based closeout rules", () => {
     const prompt = buildAnalysisSystemPrompt(false);
-    expect(prompt).toContain("Hebrew transcript → Hebrew output");
+    expect(prompt).toContain("Hebrew transcript → Hebrew fields");
     expect(prompt).toContain("Never invent facts");
-    expect(prompt).toContain("SMART");
+    expect(prompt).toContain("DISCUSSION ≠ DECISION");
+    expect(prompt).toContain("SUGGESTION ≠ ASSIGNMENT");
+    expect(prompt).toContain("CONTRADICTIONS");
+    expect(prompt).toContain("openQuestions");
+    expect(prompt).toContain("followUps");
+    expect(prompt).toContain("אחראי לא צוין");
+    expect(prompt).toContain("מועד לא צוין");
+  });
+
+  it("includes pro-only evidence constraints", () => {
+    const prompt = buildAnalysisSystemPrompt(true);
+    expect(prompt).toContain("keyQuotes must be verbatim");
+    expect(prompt).toContain("chapters timestamps MUST come from transcript");
   });
 });

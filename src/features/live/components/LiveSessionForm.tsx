@@ -163,9 +163,6 @@ export function LiveSessionForm({ hostName, onCreated }: LiveSessionFormProps) {
                 aria-hidden
               />
               <span>
-                <span className="me-1" aria-hidden>
-                  💡
-                </span>
                 {t.liveHubBotTransparency}
               </span>
             </p>

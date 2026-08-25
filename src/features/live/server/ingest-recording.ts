@@ -60,6 +60,7 @@ export async function ingestMeetingRecording(input: {
     pathname: input.pathname,
     contentType: input.contentType || "video/mp4",
     meetingId: input.meetingId,
+    forceDiarization: meeting.bot.diarization !== false,
   });
 
   const updated: LiveSession = {
@@ -78,6 +79,44 @@ export async function ingestMeetingRecording(input: {
   waitUntil(runTranscriptionJob(job.id));
 
   return updated;
+}
+
+/**
+ * Re-run STT + closeout from an existing recording (no new upload, no duplicate meeting).
+ * Safe after failed processing — usage is only charged on successful completion.
+ */
+export async function reprocessMeetingRecording(input: {
+  meetingId: string;
+  ownerEmail: string;
+}): Promise<LiveSession> {
+  const meeting = await getMeetingById(input.meetingId);
+  if (!meeting) throw new NotFoundError("Meeting not found.");
+  if (meeting.ownerEmail !== input.ownerEmail.toLowerCase()) {
+    throw new NotFoundError("Meeting not found.");
+  }
+
+  if (!meeting.recordingBlobUrl || !meeting.recordingPathname) {
+    throw new BadRequestError(
+      "אין הקלטה לסגירה מחדש. העלו הקלטה מההאב.",
+    );
+  }
+
+  if (
+    meeting.botStatus === "transcribing" ||
+    meeting.botStatus === "analyzing" ||
+    meeting.botStatus === "uploading"
+  ) {
+    throw new BadRequestError("העיבוד כבר רץ לפגישה הזו.");
+  }
+
+  return ingestMeetingRecording({
+    meetingId: meeting.id,
+    ownerEmail: meeting.ownerEmail,
+    blobUrl: meeting.recordingBlobUrl,
+    pathname: meeting.recordingPathname,
+    fileName: `${meeting.title}.mp4`,
+    contentType: meeting.recordingContentType || "video/mp4",
+  });
 }
 
 type DigestLike = {

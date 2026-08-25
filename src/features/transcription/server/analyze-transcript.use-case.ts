@@ -22,6 +22,8 @@ interface GptAnalysisPro {
   overview?: string;
   executive: string[];
   keyTakeaways: string[];
+  openQuestions?: string[];
+  followUps?: string[];
   actionItems: Array<{
     task: string;
     owner: string;
@@ -66,26 +68,32 @@ function isHebrewCloseout(text: string): boolean {
 
 function normalizeOwner(owner: string | undefined, hebrew: boolean): string {
   const raw = (owner ?? "").trim();
-  if (!raw) return hebrew ? "לא צוין" : "Unassigned";
+  if (!raw) return hebrew ? "אחראי לא צוין" : "Unassigned";
   const lower = raw.toLowerCase();
   if (
     lower === "unassigned" ||
     lower === "unknown" ||
     lower === "n/a" ||
     raw === "לא ידוע" ||
-    raw === "לא צוין"
+    raw === "לא צוין" ||
+    raw === "אחראי לא צוין"
   ) {
-    return hebrew ? "לא צוין" : "Unassigned";
+    return hebrew ? "אחראי לא צוין" : "Unassigned";
   }
   return raw;
 }
 
 function normalizeDeadline(deadline: string | undefined, hebrew: boolean): string {
   const raw = (deadline ?? "").trim();
-  if (!raw) return hebrew ? "לא צוין" : "TBD";
+  if (!raw) return hebrew ? "מועד לא צוין" : "TBD";
   const lower = raw.toLowerCase();
-  if (lower === "tbd" || lower === "n/a" || raw === "לא צוין") {
-    return hebrew ? "לא צוין" : "TBD";
+  if (
+    lower === "tbd" ||
+    lower === "n/a" ||
+    raw === "לא צוין" ||
+    raw === "מועד לא צוין"
+  ) {
+    return hebrew ? "מועד לא צוין" : "TBD";
   }
   return raw;
 }
@@ -226,6 +234,12 @@ function mapAnalysisToResult(
     ...(analysis.topics?.length ? { topics: cleanBulletList(analysis.topics, 6) } : {}),
     ...(analysis.decisions?.length
       ? { decisions: cleanBulletList(analysis.decisions, 8) }
+      : {}),
+    ...(analysis.openQuestions?.length
+      ? { openQuestions: cleanBulletList(analysis.openQuestions, 8) }
+      : {}),
+    ...(analysis.followUps?.length
+      ? { followUps: cleanBulletList(analysis.followUps, 8) }
       : {}),
     summary: {
       overview: analysis.overview?.trim() ?? "",

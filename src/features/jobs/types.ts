@@ -22,6 +22,8 @@ export interface TranscriptionJob {
   assemblyaiTranscriptId?: string;
   /** Linked Live Hub meeting id (post-meeting pipeline) */
   meetingId?: string;
+  /** Prefer speaker diarization when plan allows */
+  forceDiarization?: boolean;
   result?: unknown;
   error?: string;
   attempts: number;
@@ -41,6 +43,8 @@ export interface EnqueueTranscriptionInput {
   pathname: string;
   contentType: string;
   meetingId?: string;
+  /** Prefer speaker diarization when plan allows */
+  forceDiarization?: boolean;
 }
 
 export interface TranscriptionJobPublic {

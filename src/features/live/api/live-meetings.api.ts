@@ -82,3 +82,13 @@ export async function attachMeetingRecording(
   });
   return parseJson(res);
 }
+
+export async function reprocessLiveMeeting(
+  id: string,
+): Promise<LiveSessionPublic> {
+  const res = await fetch(`/api/live/meetings/${id}/reprocess`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return parseJson(res);
+}

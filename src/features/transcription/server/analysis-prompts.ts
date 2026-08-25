@@ -1,20 +1,22 @@
 /**
- * GPT meeting closeout prompts — Hebrew-first, grounded, actionable.
- * Decisions/actions must be supported by the transcript; never invent.
+ * GPT meeting closeout prompts — Hebrew-first, evidence-based, anti-hallucination.
+ * Distinguishes discussion vs decisions, suggestions vs assignments, and final vs superseded choices.
  */
 
 const JSON_SCHEMA_FREE = `{
   "headline": "one outcome-focused sentence",
   "topics": ["3-5 short topic tags"],
-  "decisions": ["clear decision as stated or clearly agreed in the meeting"],
+  "decisions": ["FINAL decisions only — explicit agreements/approvals/rejections"],
   "overview": "2-3 short executive paragraphs",
   "executive": ["5-7 outcome bullets — lead with a strong verb"],
   "keyTakeaways": ["4-6 memorable takeaways"],
+  "openQuestions": ["unanswered questions that still matter commercially or operationally"],
+  "followUps": ["explicit future commitments spoken in the meeting (no invented dates)"],
   "actionItems": [
     {
       "task": "specific actionable task",
-      "owner": "person name from transcript, or לא צוין / Unassigned",
-      "deadline": "explicit deadline from transcript, or לא צוין / TBD"
+      "owner": "person name from transcript, or אחראי לא צוין / Unassigned",
+      "deadline": "explicit deadline from transcript, or מועד לא צוין / TBD"
     }
   ],
   "markdownReport": "full meeting brief in Markdown (see format below)"
@@ -23,11 +25,13 @@ const JSON_SCHEMA_FREE = `{
 const JSON_SCHEMA_PRO = `{
   "headline": "one outcome-focused sentence",
   "topics": ["3-5 short topic tags"],
-  "decisions": ["clear decision with short rationale when present"],
+  "decisions": ["FINAL decisions only — with short rationale when present"],
   "overview": "2-3 short executive paragraphs",
   "executive": ["5-7 outcome bullets"],
   "keyTakeaways": ["4-6 takeaways"],
-  "sentiment": { "overall": "positive|neutral|mixed|negative", "label": "2-3 words", "description": "one sentence" },
+  "openQuestions": ["unanswered questions that still matter"],
+  "followUps": ["explicit future commitments (no invented dates)"],
+  "sentiment": { "overall": "positive|neutral|mixed|negative", "label": "2-3 words", "description": "one sentence grounded in tone of discussion" },
   "chapters": [{ "timestamp": "MM:SS from transcript lines", "title": "section title" }],
   "keyQuotes": [{ "quote": "verbatim from transcript", "context": "speaker / topic" }],
   "risks": [{ "risk": "risk or blocker stated or clearly implied", "severity": "high|medium|low" }],
@@ -35,8 +39,8 @@ const JSON_SCHEMA_PRO = `{
   "actionItems": [
     {
       "task": "specific actionable task",
-      "owner": "person name from transcript, or לא צוין / Unassigned",
-      "deadline": "explicit deadline from transcript, or לא צוין / TBD",
+      "owner": "person name from transcript, or אחראי לא צוין / Unassigned",
+      "deadline": "explicit deadline from transcript, or מועד לא צוין / TBD",
       "priority": "high|medium|low"
     }
   ],
@@ -51,16 +55,22 @@ Write a polished Markdown document in the SAME language as the transcript:
 
 > **TL;DR** — one powerful sentence
 
-## Executive summary
+## תמצית מנהלים / Executive summary
 2-3 short paragraphs.
 
-## Key decisions
-- Decision — owner / rationale when known
+## מה הוחלט / Key decisions
+- Final decision only (not earlier superseded ideas)
 
-## Action items
+## מי עושה מה / Action items
 | Priority | Task | Owner | Due |
 |----------|------|-------|-----|
 | high | ... | ... | ... |
+
+## שאלות פתוחות / Open questions
+- Unanswered question
+
+## המשכים / Follow-ups
+- Spoken future commitment
 
 ## Risks & blockers
 - **[Severity]** risk description
@@ -85,30 +95,53 @@ export function detectTranscriptLanguageHint(text: string): "he" | "en" | "mixed
 export function buildAnalysisSystemPrompt(isPro: boolean): string {
   const schema = isPro ? JSON_SCHEMA_PRO : JSON_SCHEMA_FREE;
 
-  return `You are a principal meeting intelligence analyst specializing in post-meeting executive closeout.
-Your job is NOT to rewrite the transcript. Your job is to extract:
-1) What was decided
-2) Who must do what
-3) What happens next
-4) A short executive brief leaders can trust
+  return `You are a principal meeting intelligence analyst for STAZ.
+You produce an executive meeting CLOSEOUT — not a transcript rewrite, not a chatbot reply.
+
+Your job:
+1) What was finally decided
+2) Who must do what (only when assigned)
+3) What remains open
+4) What happens next
+5) A short executive brief leaders can trust
 
 Return a single JSON object matching this schema:
 ${schema}
 
 ${MARKDOWN_FORMAT}
 
-Hard rules:
-- Match the transcript language. Hebrew transcript → Hebrew output (headline, overview, executive, decisions, actions, markdownReport).
-- Never invent facts, names, budgets, dates, or commitments that are not in the transcript.
-- If something is unclear, omit it or mark owner/deadline as לא צוין (Hebrew) / Unassigned or TBD (English) — do not guess.
-- Decisions must be real agreements, approvals, or explicit choices — not vague discussion topics.
-- Prefer concrete decision verbs: מאשרים / סוגרים / מחליטים / מעבירים / דוחים / Decide / Approve / Ship / Block.
-- Action items must be SMART: specific task, clear owner when named, realistic deadline when spoken.
-- Separate decisions from action items. A decision is what was agreed; an action item is who executes next.
-- executive bullets: max one line each, outcome-first, no fluff, no filler adjectives.
-- Prefer 4–7 strong action items over many weak ones. Drop duplicates.
-- Do not invent speaker names. Use names/labels that appear in the transcript.
-${isPro ? "- chapters timestamps MUST come from transcript line timestamps (MM:SS), never invent times.\n- keyQuotes must be verbatim substrings from the transcript.\n- Include 3–6 risks only when blockers/concerns are actually discussed." : ""}`;
+## Decision intelligence (critical)
+- DISCUSSION ≠ DECISION.
+  - "We could launch next week" / "אפשר להשיק בשבוע הבא" → NOT a decision.
+  - "Let's launch Thursday" / "מאשרים השקה ביום חמישי" → decision.
+- SUGGESTION ≠ ASSIGNMENT.
+  - "Maybe Daniel can handle it" / "אולי דניאל יטפל" → NOT an action item.
+  - "Daniel, you own this by Thursday" / "דניאל, אתה מטפל בזה עד חמישי" → action item.
+- CONTRADICTIONS: if a later statement supersedes an earlier one, keep ONLY the final decision.
+  - Example: Sunday then "actually Wednesday" → Wednesday only.
+- "We'll decide tomorrow" / "נחליט מחר" → open question / follow-up, NOT a decision.
+- Rejected ideas: do not list as decisions unless the rejection itself is the agreement ("we will NOT do X").
+
+## Action item rules
+- Only explicit commitments or clear assignments.
+- Owner: use a name that appears in the transcript. Otherwise אחראי לא צוין / Unassigned — NEVER invent people.
+- Deadline: only if spoken. Otherwise מועד לא צוין / TBD — NEVER invent dates.
+- Prefer 3–8 strong items. Drop duplicates and soft musings.
+
+## Open questions & follow-ups
+- openQuestions: commercially/operationally important questions asked but not answered.
+- followUps: spoken future commitments ("I'll send the doc", "נבדוק מחר", "נקבע שיחה").
+- Do not invent missing dates or owners inside follow-ups.
+
+## Hard anti-hallucination rules
+- Never invent facts, names, budgets, prices, deadlines, competitors, or commitments.
+- If unclear → omit or mark אחראי לא צוין / מועד לא צוין / Unassigned / TBD.
+- Match transcript language. Hebrew transcript → Hebrew fields (headline, overview, executive, decisions, actions, openQuestions, followUps, markdownReport).
+- Prefer concrete verbs: מאשרים / סוגרים / מחליטים / מעבירים / דוחים / Decide / Approve / Ship / Block.
+- Separate decisions from action items.
+- executive bullets: one line each, outcome-first, no fluff.
+- Do not invent speaker names.
+${isPro ? "- chapters timestamps MUST come from transcript line timestamps (MM:SS).\n- keyQuotes must be verbatim substrings from the transcript.\n- Include 3–6 risks only when blockers/concerns are actually discussed.\n- sentiment must be grounded in the discussion, not theatrical." : ""}`;
 }
 
 export type AnalysisTranscriptLine = {
@@ -148,7 +181,7 @@ export function buildAnalysisUserPrompt(
 File: ${fileName ?? "meeting"}
 ${languageInstruction}
 Use the [L#] MM:SS anchors when reasoning about decisions, quotes, and chapters.
-Extract only what the meeting actually closed on.
+Extract only FINAL agreements and explicit assignments. Ignore superseded ideas.
 
 ${labeledLines?.length ? "Speaker labels are present — use them for owners and quotes when reliable." : "Speaker labels may be generic — do not invent real names."}
 

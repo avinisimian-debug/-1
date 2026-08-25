@@ -31,6 +31,7 @@ const CreateSchema = z.object({
     .max(20)
     .optional(),
   hostName: z.string().max(120).optional(),
+  attendeeEmails: z.array(z.string().email().max(320)).max(40).optional(),
   bot: z
     .object({
       enabled: z.boolean().optional(),

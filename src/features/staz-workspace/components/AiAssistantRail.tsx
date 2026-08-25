@@ -192,6 +192,36 @@ export function AiAssistantRail({
                 );
               })
             )}
+            {result.openQuestions && result.openQuestions.length > 0 ? (
+              <div className="mt-4 space-y-2 border-t border-[var(--line-subtle)] pt-3">
+                <p className="text-xs font-semibold text-[var(--ink-secondary)]">
+                  שאלות פתוחות
+                </p>
+                {result.openQuestions.map((q) => (
+                  <p
+                    key={q}
+                    className="rounded-xl border border-[var(--line-subtle)] px-3 py-2 text-sm text-[var(--ink-secondary)]"
+                  >
+                    {q}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+            {result.followUps && result.followUps.length > 0 ? (
+              <div className="mt-3 space-y-2">
+                <p className="text-xs font-semibold text-[var(--ink-secondary)]">
+                  המשכים
+                </p>
+                {result.followUps.map((f) => (
+                  <p
+                    key={f}
+                    className="rounded-xl border border-[var(--line-subtle)] px-3 py-2 text-sm text-[var(--ink-secondary)]"
+                  >
+                    {f}
+                  </p>
+                ))}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -213,8 +243,16 @@ export function AiAssistantRail({
                   {a.task}
                 </p>
                 <p className="mt-1 text-xs text-[var(--ink-tertiary)]">
-                  {a.owner === "Unassigned" ? "לא צוין" : a.owner}
-                  {a.deadline ? ` · ${a.deadline}` : ""}
+                  {a.owner === "Unassigned" || a.owner === "לא צוין"
+                    ? "אחראי לא צוין"
+                    : a.owner}
+                  {a.deadline
+                    ? ` · ${
+                        a.deadline === "TBD" || a.deadline === "לא צוין"
+                          ? "מועד לא צוין"
+                          : a.deadline
+                      }`
+                    : ""}
                 </p>
                 {a.moment && a.moment.score >= 0.35 ? (
                   <button

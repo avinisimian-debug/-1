@@ -54,7 +54,9 @@ export async function completeJobFromAssemblyAI(
     }
 
     const useSpeakerLabels =
-      job.plan === "pro" && hasFeature("pro", "speakerDiarization");
+      job.plan === "pro" &&
+      hasFeature("pro", "speakerDiarization") &&
+      job.forceDiarization !== false;
 
     let transcriptLines =
       stt.data.utterances.length > 0

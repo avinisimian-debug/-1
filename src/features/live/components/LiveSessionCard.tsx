@@ -212,6 +212,21 @@ export function LiveSessionCard({
           {session.description && (
             <p className="mt-1 text-sm text-muted-foreground">{session.description}</p>
           )}
+          {session.materials.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {session.materials.map((m) => (
+                <a
+                  key={m.id}
+                  href={m.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5 text-[11px] text-accent hover:underline"
+                >
+                  {m.title || m.url}
+                </a>
+              ))}
+            </div>
+          )}
           <p className="mt-2 text-xs text-muted-foreground">
             {when}
             {session.hostName ? ` · ${session.hostName}` : ""}
@@ -247,7 +262,7 @@ export function LiveSessionCard({
             className="btn-cinema inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
           >
             <FileVideo className="h-4 w-4" aria-hidden />
-            Open digest
+            Open closeout
           </Link>
         )}
 

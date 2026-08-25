@@ -186,6 +186,20 @@ export function buildSummaryText(result: TranscriptionResult): string {
   if (result.decisions?.length) {
     lines.push("KEY DECISIONS", result.decisions.map((d) => `• ${d}`).join("\n"), "");
   }
+  if (result.openQuestions?.length) {
+    lines.push(
+      "OPEN QUESTIONS",
+      result.openQuestions.map((q) => `• ${q}`).join("\n"),
+      "",
+    );
+  }
+  if (result.followUps?.length) {
+    lines.push(
+      "FOLLOW-UPS",
+      result.followUps.map((f) => `• ${f}`).join("\n"),
+      "",
+    );
+  }
   if (result.summary.overview) {
     lines.push(result.summary.overview, "");
   }

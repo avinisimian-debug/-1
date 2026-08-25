@@ -92,6 +92,7 @@ export async function enqueueTranscriptionJob(
     pathname: input.pathname,
     contentType: input.contentType,
     meetingId: input.meetingId,
+    forceDiarization: input.forceDiarization,
     attempts: 0,
     maxAttempts: MAX_ATTEMPTS,
     createdAt: now,

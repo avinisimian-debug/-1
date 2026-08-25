@@ -72,6 +72,10 @@ export interface TranscriptionResult {
   sentiment?: SentimentAnalysis;
   keyQuotes?: Array<{ quote: string; context: string }>;
   risks?: Array<{ risk: string; severity: "high" | "medium" | "low" }>;
+  /** Unanswered commercially/operationally important questions */
+  openQuestions?: string[];
+  /** Spoken future commitments (no invented dates) */
+  followUps?: string[];
   followUpEmail?: { subject: string; body: string };
   /** User-renamed speaker labels keyed by speakerId */
   speakerLabels?: Record<string, string>;

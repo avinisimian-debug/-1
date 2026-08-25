@@ -1187,7 +1187,7 @@ const en: Translations = {
   liveHubFieldTitle: "Session title",
   liveHubFieldUrl: "Meeting link (Zoom / Meet / Teams / RTMP)",
   liveHubBotTransparency:
-    "After you paste the link, Staz AI Assistant will join the meeting as a quiet participant. The bot records and listens only to produce a transcript, executive summary, and action items when the session ends.",
+    "After you paste the link, Staz AI Assistant joins as a quiet participant. It records and listens only — no mid-meeting interruptions. When the session ends, you get an executive closeout: decisions, owners, open questions, follow-ups, and evidence from the transcript.",
   liveHubFieldStarts: "Starts at",
   liveHubFieldDuration: "Duration (minutes)",
   liveHubFieldDesc: "Description",
@@ -1858,7 +1858,7 @@ const he: Translations = {
   liveHubFieldTitle: "כותרת המפגש",
   liveHubFieldUrl: "קישור פגישה (Zoom / Meet / Teams / RTMP)",
   liveHubBotTransparency:
-    "לאחר הדבקת הקישור, נציג סיכום אוטומטי מטעם המערכת (Staz AI Assistant) יצטרף לפגישה כמשתתף שקט. הבוט יקליט ויקשיב לשיחה בלבד כדי לייצר עבורכם תמלול, סיכום מנהלים ורשימת משימות בסיומה.",
+    "לאחר הדבקת הקישור, Staz AI Assistant מצטרף כמשתתף שקט. הוא מקליט ומקשיב בלבד — בלי להפריע בשיחה. בסיום תקבלו סגירת פגישה: החלטות, אחראים, שאלות פתוחות, המשכים וראיות מהתמלול.",
   liveHubFieldStarts: "שעת התחלה",
   liveHubFieldDuration: "משך (דקות)",
   liveHubFieldDesc: "תיאור",
