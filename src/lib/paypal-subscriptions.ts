@@ -341,11 +341,7 @@ export async function verifySubscriptionForUser(
     throw new PayPalApiError("Subscription is not bound to an account.");
   }
 
-  const allowed = new Set([
-    "APPROVAL_PENDING",
-    "APPROVED",
-    "ACTIVE",
-  ]);
+  const allowed = new Set(["APPROVED", "ACTIVE"]);
 
   if (!allowed.has(subscription.status)) {
     throw new PayPalApiError(
@@ -367,15 +363,16 @@ export function mapPayPalSubscriptionStatus(
   paypalStatus: string,
 ): "trialing" | "active" | "cancelled" | "past_due" {
   switch (paypalStatus) {
-    case "APPROVAL_PENDING":
     case "APPROVED":
-      return "trialing";
+      // Buyer approved checkout — treat as active Pro once verified (never APPROVAL_PENDING).
+      return "active";
     case "ACTIVE":
       return "active";
     case "SUSPENDED":
       return "past_due";
     case "CANCELLED":
     case "EXPIRED":
+    case "APPROVAL_PENDING":
       return "cancelled";
     default:
       return "cancelled";

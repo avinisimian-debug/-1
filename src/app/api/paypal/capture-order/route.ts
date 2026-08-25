@@ -33,7 +33,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (result.customId && result.customId !== session.user.email.toLowerCase()) {
+    if (!result.customId) {
+      return NextResponse.json(
+        { error: "Payment is not bound to an account." },
+        { status: 400 },
+      );
+    }
+
+    if (result.customId !== session.user.email.toLowerCase()) {
       return NextResponse.json(
         { error: "Payment does not belong to this account." },
         { status: 403 },

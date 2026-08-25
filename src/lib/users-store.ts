@@ -54,10 +54,11 @@ function isTrialActive(user: StoredUser, now = Date.now()): boolean {
 }
 
 function hasActiveSubscription(user: StoredUser): boolean {
-  return Boolean(
-    user.paypalSubscriptionId &&
-      user.proSubscriptionStatus &&
-      user.proSubscriptionStatus !== "cancelled",
+  if (!user.paypalSubscriptionId || !user.proSubscriptionStatus) return false;
+  return (
+    user.proSubscriptionStatus === "active" ||
+    user.proSubscriptionStatus === "trialing" ||
+    user.proSubscriptionStatus === "past_due"
   );
 }
 

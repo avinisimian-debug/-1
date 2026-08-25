@@ -50,9 +50,9 @@ export async function POST(request: NextRequest) {
     );
     const status = mapPayPalSubscriptionStatus(result.status);
 
-    if (status === "cancelled") {
+    if (status === "cancelled" || status === "past_due") {
       return NextResponse.json(
-        { error: "המנוי לא הופעל." },
+        { error: "המנוי לא הופעל. השלימו את האישור ב-PayPal ונסו שוב." },
         { status: 400 },
       );
     }

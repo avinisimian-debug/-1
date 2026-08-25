@@ -23,6 +23,7 @@ export async function verifyGoogleIdToken(
     const payload = ticket.getPayload();
 
     if (!payload?.email || !payload.sub) return null;
+    if (payload.email_verified !== true) return null;
 
     return {
       id: payload.sub,

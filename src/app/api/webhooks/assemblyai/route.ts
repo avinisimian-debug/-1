@@ -27,11 +27,14 @@ interface AssemblyAIWebhookBody {
 export async function POST(request: NextRequest) {
   try {
     const expected = getAssemblyAIWebhookSecret();
-    if (expected) {
-      const provided = request.headers.get(ASSEMBLYAI_WEBHOOK_HEADER);
-      if (provided !== expected) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    // Fail closed in production — never accept unauthenticated job completion.
+    if (!expected) {
+      console.error("[assemblyai-webhook] missing ASSEMBLYAI_WEBHOOK_SECRET/AUTH_SECRET");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const provided = request.headers.get(ASSEMBLYAI_WEBHOOK_HEADER);
+    if (provided !== expected) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const jobId = request.nextUrl.searchParams.get("jobId")?.trim();

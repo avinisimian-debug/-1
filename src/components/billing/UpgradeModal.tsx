@@ -23,7 +23,7 @@ interface UpgradeModalProps {
 }
 
 export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const router = useRouter();
   const snap = getLaunchCampaignSnapshot();
 
@@ -104,6 +104,11 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
             </p>
             <p className="text-sm leading-relaxed text-[var(--ink-tertiary)]">
               {t[meta.line2Key] as string}
+            </p>
+            <p className="text-sm leading-relaxed text-[var(--ink-secondary)]">
+              {locale === "he"
+                ? "רוצים לשמור את כל הפגישות במקום אחד, לחזור אליהן מכל מכשיר ולבנות ספרייה שאפשר לחפש בה?"
+                : "Want every meeting saved in one place, searchable across devices?"}
             </p>
           </div>
 

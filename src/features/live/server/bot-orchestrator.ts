@@ -210,13 +210,19 @@ export async function dispatchMeetingBot(
   }
 }
 
-export async function dispatchDueMeetings(now = new Date()): Promise<{
+export async function dispatchDueMeetings(
+  now = new Date(),
+  options?: { ownerEmail?: string },
+): Promise<{
   checked: number;
   dispatched: number;
   results: Array<{ id: string; status: string; error?: string }>;
 }> {
   const { listDueMeetings } = await import("./meetings-store");
-  const due = await listDueMeetings(now);
+  const ownerKey = options?.ownerEmail?.trim().toLowerCase();
+  const due = (await listDueMeetings(now)).filter((m) =>
+    ownerKey ? m.ownerEmail === ownerKey : true,
+  );
   const results: Array<{ id: string; status: string; error?: string }> = [];
 
   for (const meeting of due) {

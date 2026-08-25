@@ -19,7 +19,9 @@ export async function POST() {
     );
   }
 
-  const result = await dispatchDueMeetings(new Date());
+  const result = await dispatchDueMeetings(new Date(), {
+    ownerEmail: session.user.email,
+  });
   return NextResponse.json({
     ok: true,
     ...result,

@@ -35,8 +35,8 @@ function authorizeRecallWebhook(request: NextRequest): boolean {
     normalizeSecret(process.env.CRON_SECRET) ||
     normalizeSecret(process.env.AUTH_SECRET);
   if (!secret) {
-    // Dev/local without secrets — allow (production should set CRON_SECRET/AUTH_SECRET).
-    return process.env.VERCEL !== "1";
+    // Fail closed everywhere — never accept unsigned Recall webhooks.
+    return false;
   }
 
   const auth = request.headers.get("authorization")?.trim();
