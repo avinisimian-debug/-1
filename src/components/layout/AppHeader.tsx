@@ -43,7 +43,7 @@ export function AppHeader({
           </button>
         )}
         <div className="min-w-0 text-start">
-          <h1 className="truncate text-[0.9375rem] font-semibold leading-tight tracking-tight text-[var(--ink-primary)] sm:text-base">
+          <h1 className="truncate font-brand text-[1rem] font-semibold leading-tight tracking-tight text-[var(--ink-primary)] sm:text-[1.05rem]">
             {title}
           </h1>
           {description && (

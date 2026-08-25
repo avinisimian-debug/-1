@@ -31,7 +31,7 @@ interface DashboardWorkspaceProps {
 
 /**
  * Idle workbench: one job — drop a meeting.
- * Language / usage sit as quiet meta above the capture zone.
+ * Visual craft aligned with the landing product surface.
  */
 export function DashboardWorkspace({
   language,
@@ -64,11 +64,18 @@ export function DashboardWorkspace({
 
       <section className="staz-surface-card staz-surface-card--static overflow-hidden">
         {showHero ? (
-          <div className="border-b border-[var(--line-subtle)] px-5 py-4 sm:px-7 sm:py-5">
-            <h2 className="text-balance text-lg font-semibold leading-snug tracking-tight text-[var(--ink-primary)] sm:text-xl">
+          <div className="relative border-b border-[var(--line-subtle)] px-5 py-5 sm:px-8 sm:py-7">
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_80%_at_100%_0%,color-mix(in_srgb,var(--accent)_10%,transparent),transparent_65%)]"
+              aria-hidden
+            />
+            <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+              STAZ
+            </p>
+            <h2 className="relative mt-2 text-balance font-brand text-xl font-semibold leading-snug tracking-tight text-[var(--ink-primary)] sm:text-2xl">
               {t.dashHero}
             </h2>
-            <p className="mt-1.5 max-w-lg text-sm leading-relaxed text-[var(--ink-secondary)]">
+            <p className="relative mt-2 max-w-lg text-sm leading-relaxed text-[var(--ink-secondary)] sm:text-[0.95rem]">
               {t.dashHeroDesc}
             </p>
           </div>
@@ -76,7 +83,7 @@ export function DashboardWorkspace({
 
         <div
           id="onboarding-upload-zone"
-          className={cn("px-4 py-4 sm:px-7 sm:py-6", !showHero && "pt-6")}
+          className={cn("px-4 py-5 sm:px-8 sm:py-7", !showHero && "pt-6")}
         >
           <UploadToolbar
             language={language}

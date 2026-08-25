@@ -219,11 +219,11 @@ export function FileUploadZone({
           <Upload className="h-6 w-6 text-[var(--accent)] sm:h-7 sm:w-7" strokeWidth={1.75} />
         </div>
 
-        <h2 className="relative text-lg font-semibold tracking-tight text-[var(--ink-primary)] sm:text-xl">
+        <h2 className="relative font-brand text-lg font-semibold tracking-tight text-[var(--ink-primary)] sm:text-xl">
           גררו הקלטה לכאן
         </h2>
         <p className="relative mx-auto mt-2 max-w-md text-sm leading-relaxed text-[var(--ink-secondary)]">
-          או לחצו לבחירת קובץ — זה כל מה שצריך כדי להתחיל
+          או לחצו לבחירת קובץ — ותוך דקות תקבלו סגירה ברורה
         </p>
 
         <p className="relative mx-auto mt-5 max-w-lg text-[11px] leading-relaxed text-[var(--ink-tertiary)] sm:text-xs">

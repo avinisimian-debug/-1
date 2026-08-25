@@ -24,28 +24,28 @@
 :root {
   color-scheme: light;
 
-  /* ── Latitude design system (Wave 1) ─────────────────────────────────── */
-  --bg-canvas: #f6f5f2;
+  /* ── App shell — aligned with landing teal craft (light product surface) ─ */
+  --bg-canvas: #f1f5f4;
   --bg-elevated: #ffffff;
-  --bg-subtle: #eef0ec;
-  --bg-mute: #e4e7e2;
-  --ink-primary: #141816;
-  --ink-secondary: #5c635c;
-  --ink-tertiary: #8b928a;
-  --ink-inverse: #f6f5f2;
-  --line-subtle: rgba(20, 24, 22, 0.08);
-  --line-strong: rgba(20, 24, 22, 0.14);
-  --brand-ink: #0e1210;
-  --accent-soft: rgba(31, 107, 92, 0.1);
-  --accent-glow: rgba(31, 107, 92, 0.18);
+  --bg-subtle: #e8efed;
+  --bg-mute: #dde6e3;
+  --ink-primary: #0c1210;
+  --ink-secondary: #4a5652;
+  --ink-tertiary: #7a8782;
+  --ink-inverse: #f4f7f6;
+  --line-subtle: rgba(12, 18, 16, 0.08);
+  --line-strong: rgba(12, 18, 16, 0.14);
+  --brand-ink: #0a1210;
+  --accent-soft: rgba(15, 118, 110, 0.1);
+  --accent-glow: rgba(20, 184, 166, 0.22);
   --signal: #c4a35a;
   --stage-radial: radial-gradient(120% 80% at 50% -10%, #1a2a26 0%, #0c0e0d 55%);
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.5);
   --motion-fast: 160ms;
   --motion-base: 240ms;
   --motion-slow: 400ms;
-  --ease-premium: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* ── Semantic core tokens ─────────────────────────────────────────────── */
   --background: var(--bg-canvas);
@@ -60,15 +60,15 @@
   --text-disabled: #a1a1aa;
   --text-inverse: var(--ink-inverse);
 
-  /* Brand & actions — cedar teal (not purple) */
+  /* Brand & actions — landing teal family (readable on light) */
   --primary: var(--brand-ink);
   --primary-hover: #1c221f;
   --primary-active: #2a322e;
   --primary-foreground: var(--ink-inverse);
 
-  --accent: #1f6b5c;
-  --accent-hover: #185547;
-  --accent-active: #134539;
+  --accent: #0f766e;
+  --accent-hover: #0d9488;
+  --accent-active: #14b8a6;
   --accent-foreground: #ffffff;
   --accent-muted: var(--accent-soft);
 
@@ -98,7 +98,7 @@
   --border-muted: #ebebef;
   --border-strong: #d4d4d8;
   --input: #e4e4e7;
-  --ring: #1f6b5c;
+  --ring: #0f766e;
 
   /* Radius — rem-based */
   --radius-sm: 0.375rem;
@@ -164,25 +164,25 @@
 .dark {
   color-scheme: dark;
 
-  --bg-canvas: #0c0e0d;
-  --bg-elevated: #141816;
-  --bg-subtle: #1c211e;
-  --bg-mute: #252b27;
-  --ink-primary: #ededea;
-  --ink-secondary: #a8aea8;
-  --ink-tertiary: #6f7670;
-  --ink-inverse: #0c0e0d;
-  --line-subtle: rgba(237, 237, 234, 0.08);
-  --line-strong: rgba(237, 237, 234, 0.14);
-  --accent-soft: rgba(61, 155, 134, 0.14);
-  --accent-glow: rgba(61, 155, 134, 0.22);
+  --bg-canvas: #05080a;
+  --bg-elevated: #0a1210;
+  --bg-subtle: #111a17;
+  --bg-mute: #1a2422;
+  --ink-primary: #f4f7f6;
+  --ink-secondary: #9aaba5;
+  --ink-tertiary: #6f817a;
+  --ink-inverse: #05080a;
+  --line-subtle: rgba(244, 247, 246, 0.08);
+  --line-strong: rgba(244, 247, 246, 0.14);
+  --accent-soft: rgba(45, 212, 191, 0.12);
+  --accent-glow: rgba(45, 212, 191, 0.22);
   --signal: #d4b46a;
-  --glass: rgba(20, 24, 22, 0.72);
-  --glass-border: rgba(237, 237, 234, 0.08);
+  --glass: rgba(10, 18, 16, 0.78);
+  --glass-border: rgba(244, 247, 246, 0.08);
 
   --background: var(--bg-canvas);
   --surface: var(--bg-elevated);
-  --surface-raised: #1a1f1c;
+  --surface-raised: #0e1614;
   --surface-sunken: var(--bg-subtle);
   --foreground: var(--ink-primary);
   --text-secondary: var(--ink-secondary);
@@ -195,10 +195,10 @@
   --primary-active: #d4d4d8;
   --primary-foreground: #18181b;
 
-  --accent: #3d9b86;
-  --accent-hover: #4aaf98;
-  --accent-active: #5bc4ab;
-  --accent-foreground: #09090b;
+  --accent: #2dd4bf;
+  --accent-hover: #5eead4;
+  --accent-active: #99f6e4;
+  --accent-foreground: #04110e;
   --accent-muted: var(--accent-soft);
 
   --destructive: #ef4444;
@@ -774,9 +774,9 @@
   .app-shell-bg {
     background-color: var(--bg-canvas);
     background-image:
-      radial-gradient(ellipse 70% 50% at 100% -8%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 55%),
-      radial-gradient(ellipse 50% 40% at -8% 100%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 50%),
-      linear-gradient(180deg, var(--bg-canvas) 0%, color-mix(in srgb, var(--bg-canvas) 94%, var(--bg-subtle)) 100%);
+      radial-gradient(ellipse 65% 45% at 100% -12%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 58%),
+      radial-gradient(ellipse 45% 35% at -5% 105%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 52%),
+      linear-gradient(180deg, var(--bg-canvas) 0%, color-mix(in srgb, var(--bg-canvas) 92%, var(--bg-subtle)) 100%);
   }
 
   .nav-item {
@@ -784,15 +784,17 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border-radius: 0.75rem;
-    padding: 0.625rem 0.875rem;
+    border-radius: 0.85rem;
+    padding: 0.7rem 0.9rem;
     font-size: 0.875rem;
     font-weight: 500;
+    letter-spacing: -0.01em;
     color: var(--ink-secondary);
     transition:
       background-color 160ms var(--ease-premium),
       color 160ms var(--ease-premium),
-      transform 120ms var(--ease-premium);
+      transform 120ms var(--ease-premium),
+      box-shadow 160ms var(--ease-premium);
   }
 
   .nav-item:hover {
@@ -1780,8 +1782,10 @@
   .staz-surface-card {
     background: var(--bg-elevated);
     border: 1px solid var(--line-subtle);
-    border-radius: 1.15rem;
-    box-shadow: var(--shadow-premium);
+    border-radius: 1.25rem;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 4%, transparent),
+      var(--shadow-premium);
     transition:
       transform 200ms var(--ease-premium),
       box-shadow 200ms var(--ease-premium),
@@ -1887,15 +1891,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Capture stage — Latitude glass dropzone */
+/* Capture stage — premium dropzone aligned with landing product surfaces */
 .lat-capture-zone {
-  border-radius: 1.15rem;
-  border: 1.5px dashed var(--line-strong);
+  border-radius: 1.25rem;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 22%, var(--line-strong));
   background:
+    radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.72) 0%,
-      rgba(246, 245, 242, 0.92) 100%
+      color-mix(in srgb, var(--bg-elevated) 92%, white) 0%,
+      color-mix(in srgb, var(--bg-subtle) 35%, var(--bg-elevated)) 100%
     );
   box-shadow: var(--shadow-xs);
   backdrop-filter: blur(14px);
@@ -1907,7 +1912,7 @@
     background var(--motion-base) var(--ease-premium);
 }
 .lat-capture-zone:hover {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--line-strong));
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line-strong));
   box-shadow: var(--shadow-sm);
 }
 .lat-capture-zone:focus-visible {
@@ -1922,10 +1927,11 @@
 }
 .dark .lat-capture-zone {
   background:
+    radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
     linear-gradient(
       180deg,
-      rgba(20, 24, 22, 0.85) 0%,
-      rgba(12, 14, 13, 0.95) 100%
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.02) 100%
     );
-  border-color: var(--line-strong);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line-strong));
 }

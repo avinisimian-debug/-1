@@ -73,16 +73,16 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "relative z-10 flex h-full w-[var(--sidebar-width)] min-h-0 flex-col overflow-y-auto border-e border-[var(--line-subtle)] bg-[var(--bg-elevated)]/95 backdrop-blur-xl",
+        "relative z-10 flex h-full w-[var(--sidebar-width)] min-h-0 flex-col overflow-y-auto border-e border-[var(--line-subtle)] bg-[color-mix(in_srgb,var(--bg-elevated)_96%,transparent)] backdrop-blur-xl",
         className,
       )}
     >
       <div className="border-b border-[var(--line-subtle)] px-5 py-5">
-        <Logo size="md" showTagline />
+        <Logo size="md" showTagline variant="wordmark" />
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4" aria-label="ניווט ראשי">
-        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ink-tertiary)]">
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-tertiary)]">
           סגירה
         </p>
         {NAV_ITEMS.map((item) => {

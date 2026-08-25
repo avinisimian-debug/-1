@@ -739,10 +739,10 @@ const en: Translations = {
   navSignOut: "Sign out",
   navUsers: "Registered Users",
   dashTitle: "Meeting closeout",
-  dashDesc: "Upload a meeting — get summary, decisions, and tasks.",
+  dashDesc: "Executive brief · decisions · owners.",
   dashHero: "Upload a meeting. Get closeout.",
   dashHeroDesc:
-    "Executive brief, decisions, and tasks — ready to send in minutes.",
+    "Executive brief, what was decided, and who owns what — ready to share in minutes.",
   dashNewTranscription: "New meeting",
   dashProTip: "Pro tip",
   dashProTipDesc:
@@ -1415,10 +1415,10 @@ const he: Translations = {
   navSignOut: "התנתק",
   navUsers: "משתמשים רשומים",
   dashTitle: "סגירת פגישה",
-  dashDesc: "העלו הקלטה — קבלו תמצית, החלטות ומשימות.",
+  dashDesc: "תמצית מנהלים · מה הוחלט · מי עושה מה.",
   dashHero: "העלו פגישה. קבלו סגירה.",
   dashHeroDesc:
-    "תמצית מנהלים, החלטות ומשימות — מוכנים לשליחה תוך דקות.",
+    "תמצית מנהלים, מה הוחלט ומי עושה מה — מוכנים לשליחה תוך דקות.",
   dashNewTranscription: "פגישה חדשה",
   dashProTip: "טיפ",
   dashProTipDesc:
