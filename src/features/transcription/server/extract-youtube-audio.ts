@@ -534,7 +534,7 @@ async function extractViaYtDlp(input: {
   const bin = await resolveYtDlpBinary();
   let lastError: Error | null = null;
   let info: YtDlpInfo | null = null;
-  let usedClient = PLAYER_CLIENTS[0];
+  let usedClient: (typeof PLAYER_CLIENTS)[number] = PLAYER_CLIENTS[0];
 
   for (const client of PLAYER_CLIENTS) {
     try {
