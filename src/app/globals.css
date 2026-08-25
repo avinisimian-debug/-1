@@ -1369,7 +1369,8 @@
   }
 
   .landing-header {
-    animation: landing-fade 0.7s ease both;
+    /* No fade-in — Login must be visible on first paint */
+    opacity: 1;
   }
 
   .landing-offer-glass {

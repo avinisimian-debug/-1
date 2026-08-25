@@ -78,7 +78,7 @@ export function CapabilityStories() {
   ];
 
   return (
-    <LandingChapter tone="product">
+    <LandingChapter tone="product" id="outcomes" className="scroll-mt-24">
       <SectionHeader title={copy.headline} />
       <div className="mt-12 space-y-16 sm:space-y-20">
         {copy.items.map((item, i) => {

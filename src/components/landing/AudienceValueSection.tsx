@@ -9,7 +9,7 @@ export function AudienceValueSection() {
   const value = LANDING.value;
 
   return (
-    <LandingChapter tone="quiet">
+    <LandingChapter tone="quiet" id="audience" className="scroll-mt-24">
       <SectionHeader title={audience.headline} />
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">

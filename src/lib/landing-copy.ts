@@ -16,10 +16,17 @@ export const LANDING_CTA = {
 export const LANDING = {
   nav: {
     how: "איך זה עובד",
+    outcomes: "מה מקבלים",
+    audience: "למי זה מתאים",
     pricing: "מחיר",
     demo: "הדמו",
     login: "התחברות",
+    start: "התחילו עכשיו",
     demoCta: LANDING_CTA.secondary,
+    loginNudge: "כבר יש לכם חשבון?",
+    loginNudgeCta: "התחברו כאן",
+    menuOpen: "פתחו תפריט",
+    menuClose: "סגרו תפריט",
   },
   hero: {
     brand: "STAZ",

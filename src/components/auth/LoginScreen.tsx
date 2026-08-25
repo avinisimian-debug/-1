@@ -29,7 +29,6 @@ import {
   LaunchMonthModal,
   useLaunchMonthAutoModal,
 } from "@/components/launch/LaunchMonthModal";
-import { isLaunchCampaignActive } from "@/lib/launch-campaign";
 
 const TrustSection = dynamic(
   () =>
@@ -50,7 +49,7 @@ export function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [pastDemo, setPastDemo] = useState(false);
   const [launchModalOpen, setLaunchModalOpen] = useState(false);
-  const autoLaunch = useLaunchMonthAutoModal(isLaunchCampaignActive());
+  const autoLaunch = useLaunchMonthAutoModal(false);
   const copy = LANDING;
 
   const openLaunchOffer = useCallback(() => {
@@ -63,6 +62,14 @@ export function LoginScreen() {
 
   const scrollToHow = useCallback(() => {
     document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const scrollToOutcomes = useCallback(() => {
+    document.getElementById("outcomes")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const scrollToAudience = useCallback(() => {
+    document.getElementById("audience")?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
   const scrollToPricing = useCallback(() => {
@@ -176,7 +183,7 @@ export function LoginScreen() {
 
   return (
     <div className="landing-shell min-h-screen overflow-x-hidden pb-24 text-[var(--staz-ink)] lg:pb-0">
-      <div className="sticky top-0 z-40">
+      <div className="sticky top-0 z-50">
         <LaunchAnnouncementBar onOpenOffer={openLaunchOffer} />
         <StazNav
           locale={locale}
@@ -186,6 +193,8 @@ export function LoginScreen() {
           onLocaleChange={(l) => setLocale(l)}
           onDemo={scrollToDemo}
           onHow={scrollToHow}
+          onOutcomes={scrollToOutcomes}
+          onAudience={scrollToAudience}
           onPricing={scrollToPricing}
           onLogin={scrollToSignup}
           onSignup={scrollToSignup}
