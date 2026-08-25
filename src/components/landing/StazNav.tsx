@@ -15,6 +15,7 @@ type StazNavProps = {
   onHow: () => void;
   onPricing: () => void;
   onLogin: () => void;
+  onSignup?: () => void;
 };
 
 export function StazNav({
@@ -27,6 +28,7 @@ export function StazNav({
   onHow,
   onPricing,
   onLogin,
+  onSignup,
 }: StazNavProps) {
   const copy = LANDING.nav;
 
@@ -81,8 +83,8 @@ export function StazNav({
               </option>
             ))}
           </select>
-          <StazButton size="sm" onClick={onDemo}>
-            {copy.demoCta}
+          <StazButton size="sm" onClick={onSignup ?? onLogin}>
+            {LANDING.hero.primaryCta}
           </StazButton>
         </nav>
       </div>

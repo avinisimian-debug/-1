@@ -53,7 +53,7 @@ export function CapabilityStories() {
       className="rounded-[var(--staz-radius-sm)] border border-[var(--staz-evidence)] bg-[color-mix(in_srgb,var(--staz-evidence)_10%,white)] p-4"
     >
       <p className="text-[11px] font-medium tracking-[0.1em] text-[var(--staz-evidence)]">
-        ראיה
+        איפה זה נאמר
       </p>
       <p className="mt-2 font-mono-time text-sm text-[var(--staz-evidence)]">
         {DEMO_AHA_TIMESTAMP}

@@ -131,6 +131,9 @@ export function LandingPricing({
                     </span>
                   </p>
                 )}
+                <p className="mt-2 text-xs leading-relaxed text-white/45">
+                  {copy.underPrice}
+                </p>
               </div>
             </div>
 

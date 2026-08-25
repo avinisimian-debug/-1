@@ -83,7 +83,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
 
       <nav className="flex-1 space-y-1 px-3 py-4" aria-label="ניווט ראשי">
         <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ink-tertiary)]">
-          Workspace
+          סגירה
         </p>
         {NAV_ITEMS.map((item) => {
           const Icon = iconMap[item.icon];

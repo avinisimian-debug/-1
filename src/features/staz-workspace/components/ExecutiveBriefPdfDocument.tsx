@@ -156,7 +156,7 @@ export function ExecutiveBriefPdfDocument({
       </section>
 
       <section style={{ marginBottom: 28 }}>
-        <h2 style={sectionTitle}>החלטות מפתח</h2>
+        <h2 style={sectionTitle}>מה הוחלט</h2>
         {decisionRows.length === 0 ? (
           <p style={{ fontSize: 12, color: "#8B928A" }}>לא זוהו החלטות</p>
         ) : (
@@ -221,7 +221,7 @@ export function ExecutiveBriefPdfDocument({
       </section>
 
       <section style={{ marginBottom: 28 }}>
-        <h2 style={sectionTitle}>משימות</h2>
+        <h2 style={sectionTitle}>מי עושה מה</h2>
         {result.actionItems.length === 0 ? (
           <p style={{ fontSize: 12, color: "#8B928A" }}>אין משימות</p>
         ) : (

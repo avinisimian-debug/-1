@@ -7,7 +7,7 @@ const STAGE_LABELS_HE = [
   "מעלים",
   "מתמללים",
   "בונים תמצית מנהלים",
-  "מארגנים החלטות ומשימות",
+  "מארגנים מה הוחלט ומי עושה מה",
 ] as const;
 
 interface ProcessingTheatreProps {

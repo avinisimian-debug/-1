@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { LANDING } from "@/lib/landing-copy";
+import { LANDING, LANDING_CTA } from "@/lib/landing-copy";
 import { StazButton } from "@/components/landing/ui/StazButton";
 import { LandingChapter } from "@/components/landing/ui/LandingChapter";
 import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
@@ -38,30 +38,33 @@ export function FinalCta({ onDemo, onSignup, onLaunchOffer }: FinalCtaProps) {
         ) : null}
 
         <div className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-          {snap.active ? (
-            <StazButton
-              variant="onDark"
-              onClick={() => {
-                trackLaunchEvent("pricing_cta_click", { source: "final_cta" });
-                (onLaunchOffer ?? onSignup)();
-              }}
-              className="w-full sm:w-auto"
-            >
-              קבלו PRO ב־{snap.launchPriceLabel}
-            </StazButton>
-          ) : (
-            <StazButton variant="onDark" onClick={onDemo} className="w-full sm:w-auto">
-              {copy.cta}
-            </StazButton>
-          )}
           <StazButton
-            variant="ghost"
-            onClick={snap.active ? onDemo : onSignup}
+            variant="onDark"
+            onClick={onSignup}
             className="w-full sm:w-auto"
           >
-            {snap.active ? copy.cta : copy.secondary}
+            {copy.cta}
+          </StazButton>
+          <StazButton
+            variant="ghost"
+            onClick={onDemo}
+            className="w-full sm:w-auto"
+          >
+            {copy.secondary}
           </StazButton>
         </div>
+        {snap.active ? (
+          <button
+            type="button"
+            onClick={() => {
+              trackLaunchEvent("pricing_cta_click", { source: "final_cta" });
+              (onLaunchOffer ?? onSignup)();
+            }}
+            className="mt-4 text-sm text-white/45 underline-offset-4 transition-colors hover:text-white/70 hover:underline"
+          >
+            או Pro ב־{snap.launchPriceLabel} · {LANDING_CTA.primary}
+          </button>
+        ) : null}
       </div>
     </LandingChapter>
   );

@@ -54,7 +54,7 @@ export function AhaEvidenceSection() {
       <div className="mt-12 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="relative rounded-[var(--staz-radius)] border border-white/10 bg-white/[0.04] p-5 sm:p-6">
           <p className="text-[11px] font-medium tracking-[0.12em] text-[color-mix(in_srgb,var(--staz-sage)_85%,white)]">
-            החלטה
+            מה הוחלט
           </p>
           <p className="mt-3 text-base font-medium leading-relaxed text-[var(--staz-on-dark)]">
             {decision}

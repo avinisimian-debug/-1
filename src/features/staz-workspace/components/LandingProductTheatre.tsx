@@ -5,13 +5,25 @@ import {
   getDemoMeetingResult,
   DEMO_AHA_TIMESTAMP,
 } from "@/features/staz-workspace/data/demo-meeting";
+import { LANDING } from "@/lib/landing-copy";
 import { cn } from "@/lib/utils";
 
+const CLOSEOUT_STATS = [
+  { n: "4", label: "מה הוחלט" },
+  { n: "7", label: "מי עושה מה" },
+  { n: "3", label: "סיכונים" },
+  { n: "2", label: "המשכים" },
+] as const;
+
 /**
- * Cinematic product stage — real demo meeting data, layered depth.
+ * Cinematic product stage — meeting → closeout → decision → evidence.
  */
 export function LandingProductTheatre({ className }: { className?: string }) {
   const demo = getDemoMeetingResult();
+  const copy = LANDING.demo;
+  const [phase, setPhase] = useState<"meeting" | "closeout" | "product">(
+    "meeting",
+  );
   const [lineCount, setLineCount] = useState(0);
   const [showDecision, setShowDecision] = useState(false);
   const decisionLine = demo.transcript.find(
@@ -20,32 +32,95 @@ export function LandingProductTheatre({ className }: { className?: string }) {
   const decision = demo.decisions?.[0] ?? "החלטה מהפגישה";
 
   useEffect(() => {
+    setPhase("meeting");
     setLineCount(0);
     setShowDecision(false);
     const timers: number[] = [];
+    timers.push(window.setTimeout(() => setPhase("closeout"), 900));
+    timers.push(window.setTimeout(() => setPhase("product"), 2200));
     demo.summary.executive.forEach((_, i) => {
-      timers.push(window.setTimeout(() => setLineCount(i + 1), 500 + i * 700));
+      timers.push(
+        window.setTimeout(() => setLineCount(i + 1), 2600 + i * 650),
+      );
     });
-    timers.push(window.setTimeout(() => setShowDecision(true), 2600));
+    timers.push(window.setTimeout(() => setShowDecision(true), 4600));
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [demo.summary.executive]);
 
   return (
     <div className={cn("landing-theatre-hero relative", className)}>
       <div
-        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 hidden rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(45,212,191,0.18),transparent_70%)] sm:block"
+        className="pointer-events-none absolute -inset-x-8 -bottom-10 -top-6 hidden rounded-[2rem] bg-[radial-gradient(ellipse_at_center,rgba(45,212,191,0.14),transparent_70%)] sm:block"
         aria-hidden
       />
 
       <div className="relative mx-auto max-w-6xl">
-        {/* Back layer — muted product ghost */}
+        {/* Meeting → closeout transform banner */}
+        <div className="mb-4 flex flex-wrap items-center justify-center gap-3 sm:mb-5 sm:gap-4">
+          <div
+            className={cn(
+              "rounded-full border px-4 py-2 font-mono-time text-sm transition-all duration-500",
+              phase === "meeting"
+                ? "border-white/25 bg-white/10 text-white"
+                : "border-white/10 bg-white/[0.03] text-white/35",
+            )}
+          >
+            {copy.meetingLabel}
+          </div>
+          <span
+            className={cn(
+              "text-sm transition-colors duration-500",
+              phase !== "meeting" ? "text-[#5eead4]" : "text-white/25",
+            )}
+            aria-hidden
+          >
+            →
+          </span>
+          <div
+            className={cn(
+              "rounded-full border px-4 py-2 text-sm font-medium transition-all duration-500",
+              phase !== "meeting"
+                ? "border-teal-400/35 bg-teal-400/10 text-[#5eead4]"
+                : "border-white/10 bg-white/[0.03] text-white/35",
+            )}
+          >
+            {copy.closeoutLabel}
+          </div>
+        </div>
+
+        {phase !== "meeting" ? (
+          <div className="mb-5 grid grid-cols-2 gap-2 sm:mb-6 sm:grid-cols-4 sm:gap-3">
+            {CLOSEOUT_STATS.map((stat, i) => (
+              <div
+                key={stat.label}
+                className="landing-reveal rounded-[var(--staz-radius-sm)] border border-white/10 bg-white/[0.04] px-3 py-3 text-center backdrop-blur-sm"
+                style={{ animationDelay: `${i * 70}ms` }}
+              >
+                <p className="font-brand text-2xl text-white sm:text-3xl">
+                  {stat.n}
+                </p>
+                <p className="mt-1 text-[11px] text-white/50 sm:text-xs">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
         <div
           className="pointer-events-none absolute inset-x-6 top-8 hidden h-[88%] rounded-[var(--staz-radius)] border border-[var(--staz-border)] bg-[var(--staz-surface-muted)] opacity-50 blur-[0.5px] lg:block"
           style={{ transform: "translateY(18px) scale(0.97)" }}
           aria-hidden
         />
 
-        <div className="staz-product-surface relative overflow-hidden">
+        <div
+          className={cn(
+            "staz-product-surface relative overflow-hidden transition-all duration-700",
+            phase === "meeting" && "scale-[0.98] opacity-55",
+            phase === "closeout" && "scale-[0.99] opacity-80",
+            phase === "product" && "scale-100 opacity-100",
+          )}
+        >
           <div className="flex items-center justify-between gap-3 border-b border-[var(--staz-border)] bg-[var(--staz-bg-cool)] px-4 py-3 sm:px-5">
             <div className="flex min-w-0 items-center gap-3">
               <span className="font-brand text-sm tracking-[0.16em] text-[var(--staz-primary)]">
@@ -56,8 +131,15 @@ export function LandingProductTheatre({ className }: { className?: string }) {
                 {demo.fileName}
               </p>
             </div>
-            <span className="shrink-0 rounded-[var(--staz-radius-sm)] border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 font-mono-time text-[11px] text-[#38bdf8]">
-              {DEMO_AHA_TIMESTAMP}
+            <span
+              className={cn(
+                "shrink-0 rounded-[var(--staz-radius-sm)] border px-2.5 py-1 font-mono-time text-[11px] transition-all duration-500",
+                showDecision
+                  ? "border-[var(--staz-evidence)]/40 bg-[color-mix(in_srgb,var(--staz-evidence)_12%,white)] text-[var(--staz-evidence)]"
+                  : "border-sky-400/20 bg-sky-400/10 text-[#38bdf8]",
+              )}
+            >
+              {showDecision ? DEMO_AHA_TIMESTAMP : demo.duration}
             </span>
           </div>
 
@@ -85,13 +167,18 @@ export function LandingProductTheatre({ className }: { className?: string }) {
               <div className="mt-7 grid gap-5 sm:grid-cols-2">
                 <div>
                   <p className="text-[11px] font-medium tracking-[0.12em] staz-decision-chip">
-                    החלטות
+                    מה הוחלט
                   </p>
                   <ul className="mt-2.5 space-y-2">
-                    {(demo.decisions ?? []).slice(0, 3).map((d) => (
+                    {(demo.decisions ?? []).slice(0, 3).map((d, i) => (
                       <li
                         key={d}
-                        className="flex items-start gap-2 text-sm leading-snug text-[var(--staz-ink)]"
+                        className={cn(
+                          "flex items-start gap-2 text-sm leading-snug text-[var(--staz-ink)] transition-all duration-500",
+                          showDecision && i === 0
+                            ? "rounded-lg border border-[var(--staz-decision)]/30 bg-[color-mix(in_srgb,var(--staz-decision)_8%,white)] px-2 py-1.5"
+                            : "",
+                        )}
                       >
                         <span
                           className="mt-0.5 text-[var(--staz-decision)]"
@@ -106,7 +193,7 @@ export function LandingProductTheatre({ className }: { className?: string }) {
                 </div>
                 <div>
                   <p className="text-[11px] font-medium tracking-[0.12em] staz-action-chip">
-                    משימות
+                    מי עושה מה
                   </p>
                   <ul className="mt-2.5 space-y-2">
                     {demo.actionItems.slice(0, 3).map((a) => (
@@ -130,7 +217,7 @@ export function LandingProductTheatre({ className }: { className?: string }) {
 
             <div className="flex flex-col gap-4 bg-[color-mix(in_srgb,var(--staz-primary-soft)_70%,white)] p-5 sm:p-6">
               <p className="text-[11px] font-medium tracking-[0.12em] staz-evidence-chip">
-                תמלול · רגע מדויק
+                איפה זה נאמר
               </p>
               <div
                 className={cn(
@@ -174,7 +261,7 @@ export function LandingProductTheatre({ className }: { className?: string }) {
                   showDecision ? "opacity-100" : "pointer-events-none opacity-0",
                 )}
               >
-                חוו את הדמו החי
+                {LANDING.hero.secondaryCta}
               </a>
             </div>
           </div>

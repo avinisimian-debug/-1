@@ -8,8 +8,10 @@ import { SignupCard } from "@/components/auth/SignupCard";
 import { AhaEvidenceSection } from "@/components/landing/AhaEvidenceSection";
 import { AudienceValueSection } from "@/components/landing/AudienceValueSection";
 import { CapabilityStories } from "@/components/landing/CapabilityStories";
+import { DayInLifeSection } from "@/components/landing/DayInLifeSection";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { LandingFaq } from "@/components/landing/LandingFaq";
+import { RoiSection } from "@/components/landing/RoiSection";
 import { StazFooter } from "@/components/landing/StazFooter";
 import { StazHero } from "@/components/landing/StazHero";
 import { StazNav } from "@/components/landing/StazNav";
@@ -21,13 +23,13 @@ import { LandingChapter } from "@/components/landing/ui/LandingChapter";
 import { StazButton } from "@/components/landing/ui/StazButton";
 import { PublicDemoWorkspace } from "@/features/staz-workspace";
 import { useLocale } from "@/context/LocaleContext";
-import { LANDING } from "@/lib/landing-copy";
+import { LANDING, LANDING_CTA } from "@/lib/landing-copy";
 import { LaunchAnnouncementBar } from "@/components/launch/LaunchAnnouncementBar";
 import {
   LaunchMonthModal,
   useLaunchMonthAutoModal,
 } from "@/components/launch/LaunchMonthModal";
-import { isLaunchCampaignActive, getLaunchCampaignSnapshot } from "@/lib/launch-campaign";
+import { isLaunchCampaignActive } from "@/lib/launch-campaign";
 
 const TrustSection = dynamic(
   () =>
@@ -171,7 +173,6 @@ export function LoginScreen() {
     setLaunchModalOpen(false);
     autoLaunch.close();
   };
-  const launchSnap = getLaunchCampaignSnapshot();
 
   return (
     <div className="landing-shell min-h-screen overflow-x-hidden pb-24 text-[var(--staz-ink)] lg:pb-0">
@@ -187,6 +188,7 @@ export function LoginScreen() {
           onHow={scrollToHow}
           onPricing={scrollToPricing}
           onLogin={scrollToSignup}
+          onSignup={scrollToSignup}
         />
       </div>
 
@@ -205,8 +207,10 @@ export function LoginScreen() {
 
       <AhaEvidenceSection />
       <WalkthroughSection />
+      <DayInLifeSection />
       <CapabilityStories />
       <WhyNotJustChat />
+      <RoiSection />
       <TrustSection variant="landing" />
       <AudienceValueSection />
 
@@ -265,20 +269,10 @@ export function LoginScreen() {
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#05080a]/90 p-3 backdrop-blur-xl lg:hidden">
         <StazButton
-          onClick={
-            pastDemo
-              ? launchSnap.active
-                ? openLaunchOffer
-                : scrollToSignup
-              : scrollToDemo
-          }
+          onClick={pastDemo ? scrollToSignup : scrollToDemo}
           className="w-full"
         >
-          {pastDemo
-            ? launchSnap.active
-              ? `קבלו PRO ב־${launchSnap.launchPriceLabel}`
-              : copy.hero.secondaryCta
-            : copy.hero.primaryCta}
+          {pastDemo ? LANDING_CTA.primary : LANDING_CTA.secondary}
         </StazButton>
       </div>
     </div>

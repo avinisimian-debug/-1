@@ -111,9 +111,9 @@ export function AiAssistantRail({
       <div className="flex gap-1 border-b border-[var(--line-subtle)] px-2 py-1.5">
         {(
           [
-            ["brief", "תמצית"],
-            ["decisions", "החלטות"],
-            ["actions", "משימות"],
+            ["brief", "תמצית מנהלים"],
+            ["decisions", "מה הוחלט"],
+            ["actions", "מי עושה מה"],
             ["chat", "שאלו"],
           ] as const
         ).map(([id, label]) => (
@@ -161,7 +161,7 @@ export function AiAssistantRail({
           <div className="lat-fade-rise space-y-2">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
               <Scale className="size-4 text-[var(--accent)]" />
-              החלטות
+              מה הוחלט
             </div>
             {decisionList.length === 0 ? (
               <p className="text-xs text-[var(--ink-tertiary)]">אין החלטות</p>
@@ -199,7 +199,7 @@ export function AiAssistantRail({
           <div className="lat-fade-rise space-y-2">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
               <ListChecks className="size-4 text-[var(--accent)]" />
-              משימות
+              מי עושה מה
             </div>
             {actionMoments.length === 0 ? (
               <p className="text-xs text-[var(--ink-tertiary)]">אין משימות שזוהו</p>

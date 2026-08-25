@@ -226,8 +226,8 @@ export function PremiumWorkspace({
       <div className="sticky top-[3.25rem] z-[9] flex border-b border-[var(--line-subtle)] bg-[color-mix(in_srgb,var(--bg-elevated)_94%,transparent)] backdrop-blur-md lg:hidden">
         {(
           [
-            ["summary", "סיכום"],
-            ["transcript", "תמלול"],
+            ["summary", "תמצית"],
+            ["transcript", "מה נאמר"],
             ["ask", "שאלו"],
           ] as const
         ).map(([id, label]) => (

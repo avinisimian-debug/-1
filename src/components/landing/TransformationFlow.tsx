@@ -9,13 +9,10 @@ export function TransformationFlow() {
 
   return (
     <LandingChapter tone="sand">
-      <SectionHeader
-        title={copy.headline}
-        subtitle="אותה פגישה. שני מסלולים. רק אחד מסתיים בבהירות."
-      />
+      <SectionHeader title={copy.headline} subtitle={copy.subtitle} />
 
       <div className="mt-12 grid overflow-hidden rounded-[var(--staz-radius)] border border-[var(--staz-border)] shadow-[var(--staz-shadow-soft)] lg:grid-cols-2">
-        <div className="bg-[color-mix(in_srgb,var(--staz-bg-cool)_80%,#d5ddd8)] p-6 sm:p-8">
+        <div className="bg-[color-mix(in_srgb,var(--staz-bg-cool)_80%,#0a1210)] p-6 sm:p-8">
           <p className="text-xs font-semibold tracking-[0.14em] text-[var(--staz-muted)]">
             {copy.beforeTitle}
           </p>
@@ -23,7 +20,7 @@ export function TransformationFlow() {
             {copy.before.map((step, i) => (
               <li key={step} className="flex flex-col items-start">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/70 text-[11px] font-medium text-[var(--staz-muted)]">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/5 text-[11px] font-medium text-[var(--staz-muted)]">
                     {i + 1}
                   </span>
                   <p className="text-base text-[var(--staz-muted)]">{step}</p>
@@ -39,15 +36,15 @@ export function TransformationFlow() {
           </ol>
         </div>
 
-        <div className="border-t border-[var(--staz-border)] bg-[var(--staz-primary-soft)] p-6 sm:p-8 lg:border-t-0 lg:border-s">
-          <p className="text-xs font-semibold tracking-[0.14em] text-[var(--staz-primary)]">
+        <div className="border-t border-[var(--staz-border)] bg-[color-mix(in_srgb,var(--staz-primary)_12%,#08110f)] p-6 sm:p-8 lg:border-t-0 lg:border-s">
+          <p className="text-xs font-semibold tracking-[0.14em] text-[#5eead4]">
             {copy.afterTitle}
           </p>
           <ol className="mt-6 space-y-0">
             {copy.after.map((step, i) => (
               <li key={step} className="flex flex-col items-start">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--staz-primary)] text-[11px] font-medium text-white">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--staz-primary)] text-[11px] font-medium text-[#04110e]">
                     {i + 1}
                   </span>
                   <p className="text-base font-medium text-[var(--staz-ink)]">
