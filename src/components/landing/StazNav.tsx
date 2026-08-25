@@ -62,12 +62,9 @@ export function StazNav({
     } catch {
       /* ignore */
     }
-    const show = window.setTimeout(() => setNudgeVisible(true), 700);
-    const hide = window.setTimeout(() => setNudgeVisible(false), 10000);
-    return () => {
-      window.clearTimeout(show);
-      window.clearTimeout(hide);
-    };
+    setNudgeVisible(true);
+    const hide = window.setTimeout(() => setNudgeVisible(false), 12000);
+    return () => window.clearTimeout(hide);
   }, []);
 
   useEffect(() => {
