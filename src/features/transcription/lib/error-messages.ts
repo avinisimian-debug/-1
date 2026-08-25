@@ -154,6 +154,9 @@ function classifyTranscriptionError(message: string): ErrorKind {
   if (
     lower.includes("transcoding failed") ||
     lower.includes("youtube") ||
+    lower.includes("youtu.be") ||
+    lower.includes("yt-dlp") ||
+    lower.includes("piped") ||
     (lower.includes("try a direct") && lower.includes("mp3"))
   ) {
     return "youtube_unavailable";
@@ -166,6 +169,10 @@ function classifyTranscriptionError(message: string): ErrorKind {
     lower.includes("process this recording") ||
     lower.includes("could not process")
   ) {
+    // ffmpeg mention on YouTube ingest paths should not become a video/Pro hint
+    if (lower.includes("youtube") || lower.includes("yt_")) {
+      return "youtube_temp";
+    }
     return "video";
   }
 
@@ -204,8 +211,23 @@ export function resolveTranscriptionErrorMessage(
   message: string,
   t: Translations,
   isPro = false,
+  sourceHint?: string,
 ): { text: string; kind: ErrorKind; title?: string; subtitle?: string } {
-  const kind = classifyTranscriptionError(message);
+  const hint = (sourceHint || "").toLowerCase();
+  const looksLikeYoutube =
+    hint.includes("youtube.com") ||
+    hint.includes("youtu.be") ||
+    hint.startsWith("youtube-");
+
+  let kind = classifyTranscriptionError(message);
+  // Never show the old "video / upgrade to Pro" path for YouTube sources.
+  if (
+    looksLikeYoutube &&
+    (kind === "video" || kind === "generic" || kind === "timeout")
+  ) {
+    kind = message.trim().startsWith("YT_TEMP") ? "youtube_temp" : "youtube_unavailable";
+  }
+
   const stripped = stripErrorCodePrefix(message);
 
   const byKind: Record<ErrorKind, string> = {

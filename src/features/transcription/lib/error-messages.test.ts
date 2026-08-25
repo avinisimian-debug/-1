@@ -32,4 +32,16 @@ describe("resolveTranscriptionErrorMessage youtube", () => {
     );
     expect(r.kind).toBe("analysis_failed");
   });
+
+  it("forces youtube kind when source is a YouTube URL even for video-ish messages", () => {
+    const r = resolveTranscriptionErrorMessage(
+      "לא הצלחנו לקרוא את ערוץ השמע בסרטון. נסו MP3/WAV, או שדרגו ל-Pro לעיבוד וידאו מתקדם.",
+      t,
+      true,
+      "https://www.youtube.com/watch?v=pGxBrJ5KK20",
+    );
+    expect(r.kind).toBe("youtube_unavailable");
+    expect(r.text).not.toMatch(/Pro/i);
+    expect(r.text).not.toMatch(/שדרגו/);
+  });
 });

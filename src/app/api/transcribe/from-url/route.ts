@@ -26,9 +26,11 @@ import {
 } from "@/shared/api";
 import { isFailure } from "@/shared/lib/result";
 import { randomUUID } from "node:crypto";
-import { enqueueTranscriptionJob } from "@/features/jobs/server/transcription-queue";
+import {
+  enqueueTranscriptionJob,
+  jobQueue,
+} from "@/features/jobs/server/transcription-queue";
 import { runTranscriptionJob } from "@/features/jobs/server/process-transcription-job";
-import { toPublicJob } from "@/features/jobs/types";
 import { waitUntil } from "@/lib/wait-until";
 
 export const runtime = "nodejs";
@@ -140,17 +142,49 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       forceDiarization: true,
     });
 
-    waitUntil(runTranscriptionJob(job.id));
-
     console.log(
-      `[transcribe-from-url] requestId=${requestId} youtube_job=${job.id} queued`,
+      `[transcribe-from-url] requestId=${requestId} youtube_job=${job.id} processing`,
     );
 
-    // Return 202-style payload via handler (withApiHandler wraps data).
+    // Keep the serverless invocation alive for extract + STT + analysis.
+    // waitUntil is a safety net if the platform supports background continuation.
+    const processing = runTranscriptionJob(job.id);
+    waitUntil(processing);
+
+    try {
+      await processing;
+    } catch (error) {
+      console.error(
+        `[transcribe-from-url] requestId=${requestId} youtube_job=${job.id} crashed`,
+        error,
+      );
+    }
+
+    const done = await jobQueue.get(job.id);
+    if (done?.status === "completed" && done.result) {
+      console.log(
+        `[transcribe-from-url] requestId=${requestId} youtube_job=${job.id} completed`,
+      );
+      return done.result;
+    }
+
+    if (done?.status === "failed") {
+      const failMessage =
+        done.error ||
+        "YT_TEMP_FAILURE: לא הצלחנו לעבד את הסרטון כרגע. נסו שוב בעוד רגע.";
+      console.warn(
+        `[transcribe-from-url] requestId=${requestId} youtube_job=${job.id} failed=${failMessage.slice(0, 200)}`,
+      );
+      throw new BadRequestError(failMessage);
+    }
+
+    // Still running / interrupted — let the client poll (reclaim on GET).
+    console.log(
+      `[transcribe-from-url] requestId=${requestId} youtube_job=${job.id} async_poll status=${done?.status ?? "missing"}`,
+    );
     return {
       async: true as const,
       jobId: job.id,
-      job: toPublicJob(job),
       sourceUrl: parsedYt.canonicalUrl,
     };
   }

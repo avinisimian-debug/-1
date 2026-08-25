@@ -17,18 +17,38 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 async function maybeReclaimQueuedJob(jobId: string): Promise<void> {
   const job = await jobQueue.get(jobId);
-  if (!job || job.status !== "queued") return;
+  if (!job) return;
   if (job.attempts >= job.maxAttempts) return;
 
   const updatedAt = Date.parse(job.updatedAt);
   if (!Number.isFinite(updatedAt)) return;
 
-  const delay = job.attempts <= 0 ? 30_000 : getRetryDelayMs(job.attempts);
-  if (Date.now() - updatedAt < delay) return;
+  const isYoutube = job.sourceKind === "youtube" && Boolean(job.sourceUrl);
+  const stuckProcessing =
+    isYoutube &&
+    (job.status === "processing" || job.status === "transcribing") &&
+    !job.assemblyaiTranscriptId &&
+    Date.now() - updatedAt > 90_000;
+
+  if (job.status === "queued") {
+    const delay = job.attempts <= 0 ? 30_000 : getRetryDelayMs(job.attempts);
+    if (Date.now() - updatedAt < delay) return;
+  } else if (!stuckProcessing) {
+    return;
+  }
 
   console.log(
-    `[jobs] reclaiming queued job=${jobId} attempt=${job.attempts}/${job.maxAttempts}`,
+    `[jobs] reclaiming ${job.status} job=${jobId} attempt=${job.attempts}/${job.maxAttempts} youtube=${isYoutube}`,
   );
+
+  if (stuckProcessing) {
+    await jobQueue.update({
+      ...job,
+      status: "queued",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
   waitUntil(runTranscriptionJob(jobId));
 }
 

@@ -1,6 +1,10 @@
 /**
- * Extract playable audio from a public YouTube video via yt-dlp.
+ * Extract playable audio from a public YouTube video.
  * AssemblyAI cannot ingest YouTube page URLs — we must resolve a media source first.
+ *
+ * Strategy order:
+ * 1) yt-dlp with rotating player clients (android / tv / web_embedded)
+ * 2) Piped API instances (no binary; works better from some datacenter IPs)
  */
 
 import { spawn } from "node:child_process";
@@ -13,6 +17,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -61,6 +66,23 @@ type YtDlpInfo = {
 
 const require = createRequire(import.meta.url);
 
+const PLAYER_CLIENTS = [
+  "android",
+  "tv",
+  "web_embedded",
+  "ios",
+] as const;
+
+const PIPED_API_BASES = [
+  "https://pipedapi.kavin.rocks",
+  "https://pipedapi.adminforge.de",
+  "https://pipedapi.darkness.services",
+  "https://api.piped.private.coffee",
+];
+
+/** Refresh cached yt-dlp if older than this (YouTube breaks extractors often). */
+const YT_DLP_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
 let cachedBinaryPath: string | null = null;
 
 function candidateBinaryPaths(): string[] {
@@ -86,10 +108,18 @@ export function isYouTubeExtractorPresentSync(): boolean {
   return candidateBinaryPaths().some((p) => existsSync(p));
 }
 
+function isBinaryFresh(path: string): boolean {
+  try {
+    const age = Date.now() - statSync(path).mtimeMs;
+    return age < YT_DLP_MAX_AGE_MS;
+  } catch {
+    return false;
+  }
+}
+
 async function downloadYtDlpBinary(): Promise<string> {
   const isWin = process.platform === "win32";
   const target = join(tmpdir(), isWin ? "staz-yt-dlp.exe" : "staz-yt-dlp");
-  if (existsSync(target)) return target;
 
   const url = isWin
     ? "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
@@ -123,24 +153,42 @@ async function downloadYtDlpBinary(): Promise<string> {
 }
 
 async function resolveYtDlpBinary(): Promise<string> {
-  if (cachedBinaryPath && existsSync(cachedBinaryPath)) {
+  if (cachedBinaryPath && existsSync(cachedBinaryPath) && isBinaryFresh(cachedBinaryPath)) {
     return cachedBinaryPath;
   }
-  for (const candidate of candidateBinaryPaths()) {
-    if (existsSync(candidate)) {
-      cachedBinaryPath = candidate;
-      return candidate;
-    }
+
+  // Prefer a fresh download into /tmp on serverless (install scripts often skip binary).
+  const tmpTarget = join(
+    tmpdir(),
+    process.platform === "win32" ? "staz-yt-dlp.exe" : "staz-yt-dlp",
+  );
+  if (existsSync(tmpTarget) && isBinaryFresh(tmpTarget)) {
+    cachedBinaryPath = tmpTarget;
+    return tmpTarget;
   }
-  // Vercel may skip package install scripts — fetch binary at runtime once.
-  cachedBinaryPath = await downloadYtDlpBinary();
-  return cachedBinaryPath;
+
+  try {
+    cachedBinaryPath = await downloadYtDlpBinary();
+    return cachedBinaryPath;
+  } catch (downloadError) {
+    for (const candidate of candidateBinaryPaths()) {
+      if (existsSync(candidate)) {
+        console.warn(
+          "[youtube] using bundled yt-dlp after download failed:",
+          downloadError instanceof Error ? downloadError.message : downloadError,
+        );
+        cachedBinaryPath = candidate;
+        return candidate;
+      }
+    }
+    throw downloadError;
+  }
 }
 
 function runBinary(
   bin: string,
   args: string[],
-  timeoutMs = 180_000,
+  timeoutMs = 90_000,
 ): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     const child = spawn(bin, args, {
@@ -192,6 +240,15 @@ function classifyYtDlpFailure(stderr: string): BadRequestError {
     );
   }
   if (
+    lower.includes("sign in to confirm") ||
+    lower.includes("not a bot") ||
+    lower.includes("confirm you're not a bot")
+  ) {
+    return new BadRequestError(
+      "YT_TEMP_FAILURE: לא הצלחנו לעבד את הסרטון כרגע. נסו שוב בעוד רגע.",
+    );
+  }
+  if (
     lower.includes("video unavailable") ||
     lower.includes("has been removed") ||
     lower.includes("not available") ||
@@ -211,21 +268,35 @@ function classifyYtDlpFailure(stderr: string): BadRequestError {
   );
 }
 
-async function fetchYtDlpInfo(
-  bin: string,
-  canonicalUrl: string,
-): Promise<YtDlpInfo> {
-  const result = await runBinary(bin, [
-    "--dump-single-json",
-    "--skip-download",
+function commonYtArgs(client: string): string[] {
+  return [
+    "--force-ipv4",
     "--no-warnings",
     "--no-check-certificates",
+    "--extractor-args",
+    `youtube:player_client=${client}`,
     "--add-header",
     "referer:youtube.com",
     "--add-header",
-    "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    canonicalUrl,
-  ]);
+    "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  ];
+}
+
+async function fetchYtDlpInfo(
+  bin: string,
+  canonicalUrl: string,
+  client: string,
+): Promise<YtDlpInfo> {
+  const result = await runBinary(
+    bin,
+    [
+      "--dump-single-json",
+      "--skip-download",
+      ...commonYtArgs(client),
+      canonicalUrl,
+    ],
+    60_000,
+  );
   if (result.code !== 0) {
     throw classifyYtDlpFailure(result.stderr || result.stdout);
   }
@@ -272,34 +343,11 @@ function assertPlayable(info: YtDlpInfo, maxDurationSeconds: number): void {
   }
 }
 
-async function resolveStreamUrl(
-  bin: string,
-  canonicalUrl: string,
-): Promise<string | undefined> {
-  const result = await runBinary(bin, [
-    "-f",
-    "bestaudio[ext=m4a]/bestaudio/best",
-    "-g",
-    "--no-warnings",
-    "--no-check-certificates",
-    "--add-header",
-    "referer:youtube.com",
-    "--add-header",
-    "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    canonicalUrl,
-  ]);
-  if (result.code !== 0) return undefined;
-  const line = result.stdout
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .find((l) => l.startsWith("http"));
-  return line;
-}
-
 async function downloadAudioFile(
   bin: string,
   canonicalUrl: string,
   videoId: string,
+  client: string,
 ): Promise<{ buffer: Buffer; fileName: string; contentType: string }> {
   const work = join(tmpdir(), `staz-yt-${randomUUID()}`);
   mkdirSync(work, { recursive: true });
@@ -315,29 +363,34 @@ async function downloadAudioFile(
     const outTpl = join(work, `${videoId}.%(ext)s`);
     const args = [
       "-f",
-      "bestaudio[ext=m4a]/bestaudio/best",
+      "bestaudio/best",
+      "-x",
+      "--audio-format",
+      "m4a",
+      "--audio-quality",
+      "5",
       "-o",
       outTpl,
-      "--no-warnings",
-      "--no-check-certificates",
-      "--add-header",
-      "referer:youtube.com",
-      "--add-header",
-      "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      ...commonYtArgs(client),
       "--ffmpeg-location",
       work,
+      "--no-playlist",
       canonicalUrl,
     ];
 
-    const result = await runBinary(bin, args, 240_000);
+    const result = await runBinary(bin, args, 180_000);
     if (result.code !== 0) {
       throw classifyYtDlpFailure(result.stderr || result.stdout);
     }
 
-    const files = readdirSync(work).filter(
-      (f) => !f.startsWith("ffmpeg") && /\.(m4a|mp3|webm|opus|ogg)$/i.test(f),
+    const allFiles = readdirSync(work).filter((f) => !f.startsWith("ffmpeg"));
+    const files = allFiles.filter((f) =>
+      /\.(m4a|mp3|webm|opus|ogg|mp4|m4b|aac|wav)$/i.test(f),
     );
     if (files.length === 0) {
+      console.warn(
+        `[youtube] no audio files after download; saw=${allFiles.join(",") || "(empty)"} stderr=${(result.stderr || "").slice(0, 240)}`,
+      );
       throw new BadRequestError(
         "YT_NO_AUDIO: לא מצאנו ערוץ שמע זמין בסרטון. נסו סרטון אחר או העלו MP3/WAV.",
       );
@@ -359,12 +412,198 @@ async function downloadAudioFile(
           ? "audio/webm"
           : ext === "ogg" || ext === "opus"
             ? "audio/ogg"
-            : "audio/mp4";
+            : ext === "wav"
+              ? "audio/wav"
+              : ext === "aac"
+                ? "audio/aac"
+                : "audio/mp4";
 
     return { buffer, fileName: `${videoId}.${ext}`, contentType };
   } finally {
     rmSync(work, { recursive: true, force: true });
   }
+}
+
+type PipedStream = {
+  url?: string;
+  bitrate?: number;
+  mimeType?: string;
+  contentLength?: number;
+};
+
+type PipedResponse = {
+  title?: string;
+  duration?: number;
+  audioStreams?: PipedStream[];
+  livestream?: boolean;
+};
+
+async function extractViaPiped(input: {
+  videoId: string;
+  maxDurationSeconds: number;
+  requestId: string;
+}): Promise<YoutubeAudioSource | null> {
+  for (const base of PIPED_API_BASES) {
+    try {
+      console.log(
+        `[youtube] stage=piped requestId=${input.requestId} base=${base}`,
+      );
+      const res = await fetch(`${base}/streams/${input.videoId}`, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "StazAI/1.0",
+        },
+        signal: AbortSignal.timeout(25_000),
+      });
+      if (!res.ok) continue;
+      const data = (await res.json()) as PipedResponse;
+      if (data.livestream) {
+        throw new BadRequestError(
+          "YT_LIVE: שידורים חיים לא נתמכים כרגע. המתינו לסיום השידור או העלו הקלטה.",
+        );
+      }
+      const duration = Number(data.duration ?? 0);
+      if (duration > input.maxDurationSeconds) {
+        throw new BadRequestError(
+          `YT_TOO_LONG: הסרטון ארוך מדי לתוכנית שלכם (עד ${Math.floor(input.maxDurationSeconds / 60)} דקות).`,
+        );
+      }
+      const streams = (data.audioStreams ?? [])
+        .filter((s) => typeof s.url === "string" && s.url.startsWith("http"))
+        .sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
+      if (streams.length === 0) continue;
+
+      const best = streams[0];
+      const audioRes = await fetch(best.url!, {
+        headers: { "User-Agent": "StazAI/1.0", Referer: "https://www.youtube.com/" },
+        signal: AbortSignal.timeout(120_000),
+        redirect: "follow",
+      });
+      if (!audioRes.ok) continue;
+      const buffer = Buffer.from(await audioRes.arrayBuffer());
+      if (buffer.length < 1024) continue;
+
+      const mime = (best.mimeType || audioRes.headers.get("content-type") || "")
+        .toLowerCase();
+      const ext = mime.includes("webm")
+        ? "webm"
+        : mime.includes("mp4") || mime.includes("m4a")
+          ? "m4a"
+          : mime.includes("mpeg") || mime.includes("mp3")
+            ? "mp3"
+            : "m4a";
+      const contentType =
+        ext === "mp3"
+          ? "audio/mpeg"
+          : ext === "webm"
+            ? "audio/webm"
+            : "audio/mp4";
+
+      console.log(
+        `[youtube] stage=piped requestId=${input.requestId} ok=1 bytes=${buffer.length}`,
+      );
+
+      return {
+        videoId: input.videoId,
+        title: (data.title || `youtube-${input.videoId}`).slice(0, 180),
+        durationSeconds: duration,
+        canonicalUrl: `https://www.youtube.com/watch?v=${input.videoId}`,
+        file: {
+          buffer,
+          fileName: `${input.videoId}.${ext}`,
+          contentType,
+        },
+      };
+    } catch (error) {
+      if (error instanceof BadRequestError) throw error;
+      console.warn(
+        `[youtube] piped failed base=${base}:`,
+        error instanceof Error ? error.message.slice(0, 160) : error,
+      );
+    }
+  }
+  return null;
+}
+
+async function extractViaYtDlp(input: {
+  parsed: ParsedYouTubeUrl;
+  maxDurationSeconds: number;
+  preferDownload: boolean;
+  requestId: string;
+}): Promise<YoutubeAudioSource> {
+  const bin = await resolveYtDlpBinary();
+  let lastError: Error | null = null;
+  let info: YtDlpInfo | null = null;
+  let usedClient = PLAYER_CLIENTS[0];
+
+  for (const client of PLAYER_CLIENTS) {
+    try {
+      console.log(
+        `[youtube] stage=fetching_source requestId=${input.requestId} videoId=${input.parsed.videoId} client=${client}`,
+      );
+      info = await fetchYtDlpInfo(bin, input.parsed.canonicalUrl, client);
+      usedClient = client;
+      break;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.warn(
+        `[youtube] info failed client=${client}:`,
+        lastError.message.slice(0, 160),
+      );
+    }
+  }
+
+  if (!info) {
+    throw lastError instanceof BadRequestError
+      ? lastError
+      : new BadRequestError(
+          lastError?.message?.startsWith("YT_")
+            ? lastError.message
+            : "YT_TEMP_FAILURE: לא הצלחנו לעבד את הסרטון כרגע. נסו שוב בעוד רגע.",
+        );
+  }
+
+  assertPlayable(info, input.maxDurationSeconds);
+
+  const title = (info.title || `youtube-${input.parsed.videoId}`).slice(0, 180);
+  const durationSeconds = Number(info.duration ?? 0);
+
+  lastError = null;
+  for (const client of [usedClient, ...PLAYER_CLIENTS.filter((c) => c !== usedClient)]) {
+    try {
+      console.log(
+        `[youtube] stage=extracting_audio requestId=${input.requestId} videoId=${input.parsed.videoId} client=${client}`,
+      );
+      const file = await downloadAudioFile(
+        bin,
+        input.parsed.canonicalUrl,
+        input.parsed.videoId,
+        client,
+      );
+      console.log(
+        `[youtube] stage=extracting_audio requestId=${input.requestId} videoId=${input.parsed.videoId} bytes=${file.buffer.length}`,
+      );
+      return {
+        videoId: input.parsed.videoId,
+        title,
+        durationSeconds,
+        canonicalUrl: input.parsed.canonicalUrl,
+        file,
+      };
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.warn(
+        `[youtube] download failed client=${client}:`,
+        lastError.message.slice(0, 160),
+      );
+    }
+  }
+
+  throw lastError instanceof BadRequestError
+    ? lastError
+    : new BadRequestError(
+        "YT_TEMP_FAILURE: לא הצלחנו לעבד את הסרטון כרגע. נסו שוב בעוד רגע.",
+      );
 }
 
 export async function extractYoutubeAudioSource(input: {
@@ -375,58 +614,44 @@ export async function extractYoutubeAudioSource(input: {
   requestId?: string;
 }): Promise<{ parsed: ParsedYouTubeUrl; source: YoutubeAudioSource }> {
   const parsed = parseYouTubeUrl(input.url);
-  const bin = await resolveYtDlpBinary();
   const requestId = input.requestId ?? randomUUID().slice(0, 8);
+  const preferDownload = input.preferDownload !== false;
 
-  console.log(
-    `[youtube] stage=fetching_source requestId=${requestId} videoId=${parsed.videoId}`,
-  );
-
-  const info = await fetchYtDlpInfo(bin, parsed.canonicalUrl);
-  assertPlayable(info, input.maxDurationSeconds);
-
-  const title = (info.title || `youtube-${parsed.videoId}`).slice(0, 180);
-  const durationSeconds = Number(info.duration ?? 0);
-
-  let streamUrl: string | undefined;
-  if (!input.preferDownload) {
-    streamUrl = await resolveStreamUrl(bin, parsed.canonicalUrl);
-  }
-
-  if (streamUrl && !input.preferDownload) {
-    console.log(
-      `[youtube] stage=stream_url requestId=${requestId} videoId=${parsed.videoId} ok=1`,
-    );
-    return {
+  // yt-dlp with android client is currently the most reliable path.
+  // Piped instances are a fallback when yt-dlp is blocked (common on some datacenter IPs).
+  try {
+    const source = await extractViaYtDlp({
       parsed,
-      source: {
-        videoId: parsed.videoId,
-        title,
-        durationSeconds,
-        canonicalUrl: parsed.canonicalUrl,
-        streamUrl,
-      },
-    };
-  }
+      maxDurationSeconds: input.maxDurationSeconds,
+      preferDownload,
+      requestId,
+    });
+    return { parsed, source };
+  } catch (ytError) {
+    if (ytError instanceof BadRequestError) {
+      const code = ytError.message.split(":")[0];
+      if (
+        code === "YT_PRIVATE" ||
+        code === "YT_AGE_RESTRICTED" ||
+        code === "YT_LIVE" ||
+        code === "YT_TOO_LONG" ||
+        code === "YT_INVALID_URL"
+      ) {
+        throw ytError;
+      }
+    }
 
-  console.log(
-    `[youtube] stage=extracting_audio requestId=${requestId} videoId=${parsed.videoId}`,
-  );
-  const file = await downloadAudioFile(bin, parsed.canonicalUrl, parsed.videoId);
-  console.log(
-    `[youtube] stage=extracting_audio requestId=${requestId} videoId=${parsed.videoId} bytes=${file.buffer.length}`,
-  );
-
-  return {
-    parsed,
-    source: {
+    const piped = await extractViaPiped({
       videoId: parsed.videoId,
-      title,
-      durationSeconds,
-      canonicalUrl: parsed.canonicalUrl,
-      file,
-    },
-  };
+      maxDurationSeconds: input.maxDurationSeconds,
+      requestId,
+    });
+    if (piped) {
+      return { parsed, source: piped };
+    }
+
+    throw ytError;
+  }
 }
 
 export function youtubeErrorCodeFromMessage(message: string): YoutubeErrorCode | null {

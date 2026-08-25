@@ -114,14 +114,17 @@ export async function markJobFailed(
   error: string,
   options?: { incrementAttempts?: boolean },
 ): Promise<TranscriptionJob> {
-  const increment = options?.incrementAttempts !== false;
-  const attempts = increment ? job.attempts + 1 : job.attempts;
+  // incrementAttempts:false means "this failure is terminal" (already counted /
+  // permanent). Previously those stayed "queued" forever and poll reclaim looped.
+  const forceTerminal = options?.incrementAttempts === false;
+  const attempts = forceTerminal ? job.attempts : job.attempts + 1;
   const next: TranscriptionJob = {
     ...job,
     attempts,
     error,
     updatedAt: new Date().toISOString(),
-    status: attempts >= job.maxAttempts ? "failed" : "queued",
+    status:
+      forceTerminal || attempts >= job.maxAttempts ? "failed" : "queued",
   };
   await jobQueue.update(next);
   return next;

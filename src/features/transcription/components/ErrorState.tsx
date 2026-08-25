@@ -33,7 +33,12 @@ export function ErrorState({
 }: ErrorStateProps) {
   const { t } = useLocale();
   const { isPro } = usePlan();
-  const { text, kind } = resolveTranscriptionErrorMessage(message, t, isPro);
+  const { text, kind } = resolveTranscriptionErrorMessage(
+    message,
+    t,
+    isPro,
+    fileName,
+  );
   const showPro = shouldShowProUpsell(kind, isPro);
   const isYoutube = kind.startsWith("youtube_");
 
