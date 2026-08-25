@@ -6,6 +6,7 @@ import {
   isBlobStorageConfigured,
   isOpenAiKeyConfigured,
 } from "@/lib/transcription-ready";
+import { isYouTubeExtractorPresentSync } from "@/features/transcription/server/extract-youtube-audio";
 
 export const runtime = "nodejs";
 
@@ -18,16 +19,19 @@ export async function GET(): Promise<NextResponse> {
   const providers = getPipelineProviderStatus();
   const issues = getTranscriptionReadinessIssues();
   const openaiDiag = getOpenAiKeyDiagnostics();
+  const youtubeExtractor = isYouTubeExtractorPresentSync();
 
   return NextResponse.json({
     ok: issues.length === 0,
     blob,
     openai,
     assemblyai: providers.assemblyai,
+    youtubeExtractor,
+    // Runtime can download yt-dlp on first use if install scripts were skipped.
+    youtubeReady: Boolean(providers.assemblyai),
     sttPrimary: providers.sttPrimary,
     largeUploads: blob,
     issues,
-    /** Safe shape check — never includes the secret value. */
     openaiDiag: {
       present: openaiDiag.present,
       length: openaiDiag.length,

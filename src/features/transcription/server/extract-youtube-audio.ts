@@ -6,12 +6,14 @@
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import {
+  chmodSync,
   copyFileSync,
   existsSync,
   mkdirSync,
   readFileSync,
   readdirSync,
   rmSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -59,33 +61,80 @@ type YtDlpInfo = {
 
 const require = createRequire(import.meta.url);
 
-function resolveYtDlpBinary(): string {
+let cachedBinaryPath: string | null = null;
+
+function candidateBinaryPaths(): string[] {
+  const paths: string[] = [];
   try {
-    // youtube-dl-exec ships a platform binary under bin/
     const constants = require("youtube-dl-exec/src/constants") as {
       YOUTUBE_DL_PATH: string;
     };
-    if (constants.YOUTUBE_DL_PATH && existsSync(constants.YOUTUBE_DL_PATH)) {
-      return constants.YOUTUBE_DL_PATH;
-    }
+    if (constants.YOUTUBE_DL_PATH) paths.push(constants.YOUTUBE_DL_PATH);
   } catch {
-    // fall through
+    // ignore
   }
-
-  // Fallbacks for traced serverless deployments
-  const candidates = [
+  paths.push(
     join(process.cwd(), "node_modules", "youtube-dl-exec", "bin", "yt-dlp"),
     join(process.cwd(), "node_modules", "youtube-dl-exec", "bin", "yt-dlp.exe"),
-    join(__dirname, "..", "..", "..", "..", "node_modules", "youtube-dl-exec", "bin", "yt-dlp"),
-    join(__dirname, "..", "..", "..", "..", "node_modules", "youtube-dl-exec", "bin", "yt-dlp.exe"),
-  ];
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) return candidate;
-  }
-
-  throw new BadRequestError(
-    "YT_EXTRACTOR_MISSING: ייבוא YouTube לא מוגדר בשרת. העלו קובץ MP3/MP4 או נסו שוב מאוחר יותר.",
+    join(tmpdir(), "staz-yt-dlp"),
+    join(tmpdir(), "staz-yt-dlp.exe"),
   );
+  return paths;
+}
+
+export function isYouTubeExtractorPresentSync(): boolean {
+  return candidateBinaryPaths().some((p) => existsSync(p));
+}
+
+async function downloadYtDlpBinary(): Promise<string> {
+  const isWin = process.platform === "win32";
+  const target = join(tmpdir(), isWin ? "staz-yt-dlp.exe" : "staz-yt-dlp");
+  if (existsSync(target)) return target;
+
+  const url = isWin
+    ? "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+    : "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux";
+
+  console.log("[youtube] downloading yt-dlp binary for serverless runtime");
+  const res = await fetch(url, {
+    redirect: "follow",
+    headers: { "User-Agent": "StazAI/1.0" },
+  });
+  if (!res.ok) {
+    throw new BadRequestError(
+      "YT_EXTRACTOR_MISSING: ייבוא YouTube לא מוגדר בשרת. העלו קובץ MP3/MP4 או נסו שוב מאוחר יותר.",
+    );
+  }
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length < 1_000_000) {
+    throw new BadRequestError(
+      "YT_EXTRACTOR_MISSING: ייבוא YouTube לא מוגדר בשרת. העלו קובץ MP3/MP4 או נסו שוב מאוחר יותר.",
+    );
+  }
+  writeFileSync(target, buf);
+  if (!isWin) {
+    try {
+      chmodSync(target, 0o755);
+    } catch {
+      // ignore
+    }
+  }
+  return target;
+}
+
+async function resolveYtDlpBinary(): Promise<string> {
+  if (cachedBinaryPath && existsSync(cachedBinaryPath)) {
+    return cachedBinaryPath;
+  }
+  for (const candidate of candidateBinaryPaths()) {
+    if (existsSync(candidate)) {
+      cachedBinaryPath = candidate;
+      return candidate;
+    }
+  }
+  // Vercel may skip package install scripts — fetch binary at runtime once.
+  cachedBinaryPath = await downloadYtDlpBinary();
+  return cachedBinaryPath;
 }
 
 function runBinary(
@@ -326,7 +375,7 @@ export async function extractYoutubeAudioSource(input: {
   requestId?: string;
 }): Promise<{ parsed: ParsedYouTubeUrl; source: YoutubeAudioSource }> {
   const parsed = parseYouTubeUrl(input.url);
-  const bin = resolveYtDlpBinary();
+  const bin = await resolveYtDlpBinary();
   const requestId = input.requestId ?? randomUUID().slice(0, 8);
 
   console.log(
