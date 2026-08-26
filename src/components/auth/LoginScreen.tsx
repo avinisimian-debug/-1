@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { LandingPricing } from "@/components/auth/LandingPricing";
-import { SignupCard } from "@/components/auth/SignupCard";
+import { SignIn1 } from "@/components/ui/modern-stunning-sign-in";
 import { AhaEvidenceSection } from "@/components/landing/AhaEvidenceSection";
 import { AudienceValueSection } from "@/components/landing/AudienceValueSection";
 import { CapabilityStories } from "@/components/landing/CapabilityStories";
@@ -249,9 +249,8 @@ export function LoginScreen() {
               {copy.signup.subhead}
             </p>
           </div>
-          <SignupCard
+          <SignIn1
             ref={signupRef}
-            variant="landing"
             name={name}
             email={email}
             otp={otp}
