@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { DashboardWorkspace } from "@/components/dashboard/DashboardWorkspace";
 import { LaunchDashboardCard } from "@/components/launch/LaunchDashboardCard";
+import { StazGlassWorkCard } from "@/components/ui/glassmorphism-trust-hero";
 import {
   ErrorState,
   ProcessingState,
@@ -19,7 +20,7 @@ export function DashboardContent() {
   const dash = useDashboardController();
   const router = useRouter();
   const { isPro } = usePlan();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   useEffect(() => {
     try {
@@ -33,6 +34,7 @@ export function DashboardContent() {
   }, [router]);
 
   const idle = dash.phase === "idle";
+  const he = locale === "he";
 
   return (
     <DashboardShell
@@ -40,8 +42,20 @@ export function DashboardContent() {
       description={idle ? t.dashDesc : t.resExecutive}
     >
       {idle && (
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-2xl space-y-4">
           <LaunchDashboardCard isPro={isPro} />
+          <StazGlassWorkCard
+            title={
+              he
+                ? "כל פגישה נסגרת עם מקור"
+                : "Every meeting closes with evidence"
+            }
+            body={
+              he
+                ? "העלו הקלטה — תקבלו תמצית, החלטות ומשימות עם קישור למשפט בתמלול."
+                : "Upload a recording — get a brief, decisions, and tasks linked to transcript lines."
+            }
+          />
           <DashboardWorkspace
             language={dash.language}
             onLanguageChange={dash.setLanguage}

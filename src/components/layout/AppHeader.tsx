@@ -13,6 +13,7 @@ interface AppHeaderProps {
   onMenuOpen?: () => void;
   showMenuButton?: boolean;
   userInitials?: string;
+  onAccountOpen?: () => void;
 }
 
 function openCommandPalette() {
@@ -25,6 +26,7 @@ export function AppHeader({
   onMenuOpen,
   showMenuButton = true,
   userInitials = "SA",
+  onAccountOpen,
 }: AppHeaderProps) {
   const { isPro } = usePlan();
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
@@ -100,14 +102,17 @@ export function AppHeader({
           <Search className="h-5 w-5" />
         </button>
 
-        <div
+        <button
+          type="button"
+          onClick={onAccountOpen}
+          aria-label={t.settingsTitle}
           className={cn(
             "avatar-gradient flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold shadow-sm",
+            "transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]",
           )}
-          aria-hidden
         >
           {userInitials}
-        </div>
+        </button>
       </div>
     </header>
   );

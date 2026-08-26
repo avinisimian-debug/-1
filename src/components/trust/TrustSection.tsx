@@ -1,16 +1,22 @@
 "use client";
 
 import { LANDING } from "@/lib/landing-copy";
-import { SectionHeader } from "@/components/landing/ui/SectionHeader";
-import { DEMO_AHA_TIMESTAMP } from "@/features/staz-workspace/data/demo-meeting";
+import { StazGlassTrustHero } from "@/components/ui/glassmorphism-trust-hero";
 import { cn } from "@/lib/utils";
 
 interface TrustSectionProps {
   variant?: "landing" | "sidebar";
   className?: string;
+  onSignup?: () => void;
+  onDemo?: () => void;
 }
 
-export function TrustSection({ variant = "landing", className }: TrustSectionProps) {
+export function TrustSection({
+  variant = "landing",
+  className,
+  onSignup,
+  onDemo,
+}: TrustSectionProps) {
   const copy = LANDING.trust;
 
   if (variant === "sidebar") {
@@ -39,53 +45,13 @@ export function TrustSection({ variant = "landing", className }: TrustSectionPro
         className,
       )}
       aria-labelledby="trust-heading"
+      id="trust"
     >
       <div className="landing-chapter-inner">
-        <SectionHeader
-          id="trust-heading"
-          tone="dark"
-          title={
-            <>
-              <span className="block">{copy.headline}</span>
-              <span className="mt-1 block text-[color-mix(in_srgb,var(--staz-sage)_90%,white)]">
-                {copy.headlineAccent}
-              </span>
-            </>
-          }
-          subtitle={copy.subhead}
-        />
-
-        <div className="mx-auto mt-12 flex max-w-lg flex-col items-center gap-3 text-center text-sm">
-          <span className="rounded-[var(--staz-radius-sm)] border border-white/10 bg-white/[0.06] px-4 py-2 font-medium text-[var(--staz-on-dark)]">
-            החלטה
-          </span>
-          <span className="text-[color-mix(in_srgb,var(--staz-sage)_85%,white)]" aria-hidden>
-            ↓
-          </span>
-          <span className="font-mono-time text-base text-[var(--staz-warn)]">
-            {DEMO_AHA_TIMESTAMP}
-          </span>
-          <span className="text-[color-mix(in_srgb,var(--staz-sage)_85%,white)]" aria-hidden>
-            ↓
-          </span>
-          <span className="rounded-[var(--staz-radius-sm)] border border-white/10 bg-white/[0.06] px-4 py-2 text-[var(--staz-on-dark-muted)]">
-            ראיה בתמלול
-          </span>
-        </div>
-
-        <ul className="mt-12 grid gap-3 sm:grid-cols-2">
-          {copy.items.map((item) => (
-            <li
-              key={item.title}
-              className="rounded-[var(--staz-radius)] border border-white/10 bg-white/[0.04] p-5"
-            >
-              <p className="font-semibold text-[var(--staz-on-dark)]">{item.title}</p>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--staz-on-dark-muted)]">
-                {item.body}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <h2 id="trust-heading" className="sr-only">
+          {copy.headline} {copy.headlineAccent}
+        </h2>
+        <StazGlassTrustHero onPrimary={onSignup} onSecondary={onDemo} />
       </div>
     </section>
   );

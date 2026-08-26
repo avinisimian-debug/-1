@@ -11,6 +11,7 @@ import {
   LaunchMonthModal,
   useLaunchMonthAutoModal,
 } from "@/components/launch/LaunchMonthModal";
+import { StazAccountDrawer } from "@/components/ui/animated-drawer";
 import { usePlan } from "@/context/PlanContext";
 import { isLaunchCampaignActive } from "@/lib/launch-campaign";
 
@@ -29,6 +30,7 @@ export function AppShell({
 }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [launchOpen, setLaunchOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const { data: session } = useSession();
   const { isPro } = usePlan();
   const autoLaunch = useLaunchMonthAutoModal(
@@ -66,6 +68,7 @@ export function AppShell({
           description={description}
           onMenuOpen={() => setMobileOpen(true)}
           userInitials={initials}
+          onAccountOpen={() => setAccountOpen(true)}
         />
 
         <main
@@ -79,6 +82,11 @@ export function AppShell({
       </div>
 
       <CommandPalette />
+      <StazAccountDrawer
+        open={accountOpen}
+        onOpenChange={setAccountOpen}
+        userName={session?.user?.name}
+      />
       <LaunchMonthModal
         open={showLaunchModal}
         onClose={closeLaunch}

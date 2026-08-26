@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Clock, FolderOpen, Trash2, Upload } from "lucide-react";
 import { HISTORY_VIEW_KEY } from "@/features/transcription";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { StazGlassWorkCard } from "@/components/ui/glassmorphism-trust-hero";
 import { useLocale } from "@/context/LocaleContext";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,10 @@ export default function HistoryPage() {
       description={t.historyDesc}
     >
       <div className="mx-auto w-full max-w-4xl space-y-5 page-enter">
+        <StazGlassWorkCard
+          title="ספריית הפגישות"
+          body="כל סגירה נשמרת כאן — אפשר לחזור להחלטות, משימות וההקלטה בכל עת."
+        />
         {loading ? (
           <div className="space-y-3" aria-busy="true" aria-label="טוען ספרייה">
             {[0, 1, 2, 3].map((i) => (

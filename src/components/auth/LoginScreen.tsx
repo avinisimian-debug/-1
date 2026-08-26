@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { LandingPricing } from "@/components/auth/LandingPricing";
 import { SignIn1 } from "@/components/ui/modern-stunning-sign-in";
+import { VintageKeyboard } from "@/components/ui/vintage-keyboard";
 import { AhaEvidenceSection } from "@/components/landing/AhaEvidenceSection";
 import { AudienceValueSection } from "@/components/landing/AudienceValueSection";
 import { CapabilityStories } from "@/components/landing/CapabilityStories";
@@ -223,7 +224,11 @@ export function LoginScreen() {
       <CapabilityStories />
       <WhyNotJustChat />
       <RoiSection />
-      <TrustSection variant="landing" />
+      <TrustSection
+        variant="landing"
+        onSignup={scrollToSignup}
+        onDemo={scrollToDemo}
+      />
       <AudienceValueSection />
 
       <LandingChapter tone="sand" className="!py-10 sm:!py-14">
@@ -235,6 +240,20 @@ export function LoginScreen() {
       </LandingChapter>
 
       <LandingFaq />
+
+      <LandingChapter tone="cool" className="!py-12 sm:!py-16">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="font-brand text-2xl tracking-tight text-[var(--staz-ink)] sm:text-3xl">
+            מקלדת רטרו
+          </h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm text-[var(--staz-muted)]">
+            רגע קטן לשחק — לחצו על המקשים או הקלידו במקלדת האמיתית.
+          </p>
+          <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-[#120e0b]/80 px-2 py-8 sm:px-4">
+            <VintageKeyboard />
+          </div>
+        </div>
+      </LandingChapter>
 
       <LandingChapter tone="quiet" id="signup">
         <div className="mx-auto max-w-xl" aria-labelledby="signup-heading">

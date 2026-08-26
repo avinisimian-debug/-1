@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Bell, CheckCircle2, Crown, Shield, Wallet } from "lucide-react";
+import { Bell, CheckCircle2, Crown, Keyboard, Shield, Wallet } from "lucide-react";
 import { PayPalSubscribeButton } from "@/components/billing/PayPalSubscribeButton";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
-import { PricingTable } from "@/components/billing/PricingTable";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
+import { Pricing, type PricingPlan } from "@/components/blocks/pricing";
+import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { VintageKeyboard } from "@/components/ui/vintage-keyboard";
+import { LANDING } from "@/lib/landing-copy";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { getProPlanPriceLabel } from "@/lib/constants";
@@ -146,6 +149,59 @@ export default function SettingsPage() {
   const proLifetime = Boolean(planDetails?.proLifetime);
   const showCheckout = !isPro || needsPayPalSetup;
   const showProActive = isPro && !needsPayPalSetup;
+  const snap = getLaunchCampaignSnapshot();
+  const pricingCopy = LANDING.pricing;
+  const proPrice = getProPlanPriceLabel();
+
+  const settingsPlans: PricingPlan[] = [
+    {
+      name: pricingCopy.freeTitle,
+      price: "0",
+      yearlyPrice: "0",
+      period: "",
+      description: pricingCopy.freeTag,
+      features: [...pricingCopy.freeBullets],
+      buttonText:
+        plan === "free" ? t.pricingCurrentPlan : pricingCopy.freeCta,
+      note: pricingCopy.freeNote,
+      disabled: plan === "free",
+      isPopular: false,
+      priceNode: (
+        <p className="text-4xl font-bold tracking-tight text-foreground">$0</p>
+      ),
+    },
+    {
+      name: "Pro",
+      price: snap.active ? snap.launchPrice : snap.originalPrice,
+      yearlyPrice: snap.originalPrice,
+      period: pricingCopy.perMonth,
+      description: pricingCopy.proValue,
+      features: [...pricingCopy.proBullets],
+      buttonText:
+        plan === "pro"
+          ? t.pricingCurrentPlan
+          : snap.active
+            ? `Pro · ${snap.launchPriceLabel}`
+            : pricingCopy.proCta,
+      note: snap.active ? snap.billingNoteHe : pricingCopy.proNote(proPrice),
+      badge: snap.active ? `${snap.discountPercent}% הנחה` : "הכי משתלם",
+      onClick: plan === "pro" ? undefined : scrollToCheckout,
+      disabled: plan === "pro",
+      isPopular: true,
+      priceNode: snap.active ? (
+        <LaunchPriceStack size="md" />
+      ) : (
+        <p className="flex flex-wrap items-baseline gap-x-2">
+          <span className="text-4xl font-bold tracking-tight text-foreground">
+            {proPrice}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {pricingCopy.perMonth}
+          </span>
+        </p>
+      ),
+    },
+  ];
 
   return (
     <DashboardShell title={t.settingsTitle} description={t.settingsDesc}>
@@ -160,10 +216,12 @@ export default function SettingsPage() {
             </h2>
           </div>
 
-          <PricingTable
-            currentPlan={plan}
-            onSelectPro={scrollToCheckout}
-            landing={false}
+          <Pricing
+            plans={settingsPlans}
+            title={t.pricingTitle}
+            description={t.pricingSubtitle}
+            showToggle={false}
+            tone="default"
           />
 
           <div className="mt-8">
@@ -291,6 +349,23 @@ export default function SettingsPage() {
               <h2 className="text-base font-semibold text-foreground">
                 {t.settingsSecurity}
               </h2>
+            </div>
+          </section>
+
+          <section className="lat-panel overflow-hidden rounded-xl p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <Keyboard className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <h2 className="text-base font-semibold text-foreground">
+                  מקלדת רטרו
+                </h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  נסו להקליד — אנימציית לחיצה כמו בקומפוננטת 21st Vintage Keyboard.
+                </p>
+              </div>
+            </div>
+            <div className="rounded-2xl bg-[#120e0b] px-2 py-6 sm:px-4">
+              <VintageKeyboard />
             </div>
           </section>
         </div>
