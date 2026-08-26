@@ -1284,7 +1284,7 @@ const en: Translations = {
   liveHubEmptyHint:
     "Schedule a meeting with a link — the bot handles recording and closeout.",
   liveHubHowItWorks:
-    "The bot joins ~2 minutes before start. Keep this page open as backup; cron also dispatches every minute.",
+    "The bot joins ~2 minutes before start. Keep this page open around start time so dispatch can run (Hobby cron is once/day).",
   liveHubHowItWorksManual:
     "Auto-join needs RECALL_AI_API_KEY. Until then: after the call, upload the recording here for automatic closeout.",
   liveHubLoadError: "Could not load meetings.",
@@ -2017,7 +2017,7 @@ const he: Translations = {
   liveHubEmptyHint:
     "תזמנו פגישה עם קישור — הבוט מטפל בהקלטה ובסגירה.",
   liveHubHowItWorks:
-    "הבוט מצטרף כ־2 דקות לפני ההתחלה. העמוד פתוח משמש גיבוי; גם cron רץ כל דקה.",
+    "הבוט מצטרף כ־2 דקות לפני ההתחלה. השאירו את העמוד פתוח סביב שעת ההתחלה (ב־Hobby ה־cron רץ פעם ביום).",
   liveHubHowItWorksManual:
     "להצטרפות אוטומטית צריך RECALL_AI_API_KEY. בינתיים: אחרי השיחה העלו כאן הקלטה — הסגירה רצה אוטומטית.",
   liveHubLoadError: "לא ניתן לטעון פגישות.",

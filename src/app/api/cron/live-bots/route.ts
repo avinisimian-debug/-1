@@ -6,8 +6,7 @@ export const maxDuration = 60;
 
 /**
  * Vercel Cron: dispatch meeting bots that are due to join.
- * Schedule: every minute (Pro). On Hobby, Vercel may only fire once/day —
- * Live Hub also heartbeats POST /api/live/dispatch every 30s as backup.
+ * Hobby: once/day. Live Hub heartbeats POST /api/live/dispatch every 30s as backup.
  * Secure with Authorization: Bearer $CRON_SECRET
  */
 export async function GET(request: NextRequest) {
