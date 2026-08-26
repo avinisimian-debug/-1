@@ -116,7 +116,7 @@ export function PricingTable({
             >
               {tier.id === "pro" && snap.active ? (
                 <span className="absolute end-4 top-4 rounded-full bg-accent-muted px-2 py-0.5 text-[10px] font-bold tracking-wide text-accent">
-                  LAUNCH · {snap.discountPercent}% OFF
+                  חודש השקה · {snap.discountPercent}% הנחה
                 </span>
               ) : null}
               <div className="mb-5">
@@ -138,7 +138,7 @@ export function PricingTable({
                   {tier.id === "pro" ? (
                     <span className="text-sm font-normal text-muted-foreground">
                       {" "}
-                      / mo
+                      /חודש
                     </span>
                   ) : null}
                 </p>
@@ -168,7 +168,7 @@ export function PricingTable({
                 {isCurrent
                   ? t.pricingCurrentPlan
                   : tier.id === "pro" && snap.active
-                    ? `התחילו PRO · ${proLabel}`
+                    ? `התחילו עם Pro · ${proLabel}`
                     : (t[tier.ctaKey] as string)}
                 {!isCurrent && <ArrowRight className="h-4 w-4" />}
               </button>

@@ -56,13 +56,13 @@ export function LaunchPriceStack({
         </del>
         <span
           className={cn(
-            "rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-[0.14em]",
+            "rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide",
             dark
               ? "border border-teal-400/30 bg-teal-400/10 text-[#5eead4]"
               : "bg-[var(--staz-primary-soft)] text-[var(--staz-primary)]",
           )}
         >
-          {snap.discountPercent}% OFF
+          {snap.discountPercent}% הנחה
         </span>
       </div>
       <p

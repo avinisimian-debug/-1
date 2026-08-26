@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none" role="img" aria-label="STAZ">
+  <defs>
+    <linearGradient id="staz-ring" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5EEAD4"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+    <linearGradient id="staz-check" x1="14" y1="16" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#CCFBF1"/>
+      <stop offset="0.4" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#0D9488"/>
+    </linearGradient>
+  </defs>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="15" fill="#05080A" stroke="url(#staz-ring)" stroke-width="1.75"/>
+  <path
+    d="M17.5 33.5 L28.2 44.2 L48 20.5"
+    stroke="url(#staz-check)"
+    stroke-width="6.5"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+  />
+  <text
+    x="78"
+    y="42"
+    fill="#F4F7F6"
+    font-family="Rubik, Arial, sans-serif"
+    font-size="28"
+    font-weight="600"
+    letter-spacing="0.28em"
+  >STAZ</text>
+</svg>

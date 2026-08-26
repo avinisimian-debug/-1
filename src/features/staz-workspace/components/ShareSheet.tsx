@@ -1,5 +1,6 @@
 "use client";
 
+import { StazMark } from "@/components/brand/Logo";
 import { useCallback, useRef, useState } from "react";
 import { Copy, Download, Loader2, X } from "lucide-react";
 import type { TranscriptionResult } from "@/features/transcription/types";
@@ -80,9 +81,10 @@ export function ShareSheet({ result, onClose }: ShareSheetProps) {
         </div>
 
         <div className="overflow-hidden rounded-xl border border-[var(--line-subtle)]">
-          <div className="bg-[var(--accent-soft)] px-4 py-2">
+          <div className="flex items-center gap-2 bg-[var(--accent-soft)] px-4 py-2">
+            <StazMark size={20} />
             <span className="font-brand text-sm text-[var(--accent)]">STAZ</span>
-            <span className="ms-2 text-[11px] text-[var(--ink-secondary)]">
+            <span className="ms-1 text-[11px] text-[var(--ink-secondary)]">
               תמצית מנהלים
             </span>
           </div>

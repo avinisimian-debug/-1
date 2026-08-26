@@ -18,6 +18,7 @@ import {
   wordsForEntry,
 } from "../lib/word-timing";
 import { EditableSegmentText } from "./EditableSegmentText";
+import { scrollIntoContainer } from "@/lib/scroll-into-container";
 
 interface WordTimedTranscriptProps {
   entries: TranscriptEntry[];
@@ -92,14 +93,16 @@ export function WordTimedTranscript({
 
   useEffect(() => {
     if (!isPlaying) return;
+    const root = containerRef.current;
+    if (!root) return;
     if (editable) {
       const node = entryRefs.current.get(activeEntryIndex);
-      node?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (node) scrollIntoContainer(node, root, { behavior: "smooth", block: "nearest" });
       return;
     }
     if (activeWordIndex < 0) return;
     const node = wordRefs.current.get(activeWordIndex);
-    node?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (node) scrollIntoContainer(node, root, { behavior: "smooth", block: "nearest" });
   }, [activeEntryIndex, activeWordIndex, editable, isPlaying]);
 
   return (

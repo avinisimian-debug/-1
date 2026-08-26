@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 import { LANDING } from "@/lib/landing-copy";
 import { StazButton } from "@/components/landing/ui/StazButton";
 import type { Locale } from "@/lib/i18n/translations";
@@ -50,7 +50,10 @@ export function StazNav({
   const [nudgeVisible, setNudgeVisible] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => {
+      const next = window.scrollY > 12;
+      setScrolled((prev) => (prev === next ? prev : next));
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -115,12 +118,7 @@ export function StazNav({
     >
       <div className="relative mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-4 sm:px-6">
         {/* RIGHT (RTL start): brand */}
-        <Link
-          href="/"
-          className="shrink-0 font-brand text-xl tracking-[0.28em] text-white transition-opacity hover:opacity-90 sm:text-2xl"
-        >
-          STAZ
-        </Link>
+        <Logo size="md" tone="dark" href="/" />
 
         {/* CENTER: nav links (desktop only) */}
         <nav

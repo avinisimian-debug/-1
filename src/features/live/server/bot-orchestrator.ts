@@ -5,6 +5,7 @@ import {
   computeJoinAt,
   detectPlatform,
   getBotProvider,
+  isDueForBotDispatch,
   isValidMeetingUrl,
 } from "./platform-resolver";
 import {
@@ -58,15 +59,15 @@ export async function createScheduledMeeting(
   input: LiveSessionInput,
 ): Promise<LiveSessionPublic> {
   if (!input.title?.trim()) {
-    throw new BadRequestError("Meeting title is required.");
+    throw new BadRequestError("נא להזין שם לפגישה.");
   }
   if (!isValidMeetingUrl(input.meetingUrl)) {
     throw new BadRequestError(
-      "Invalid meeting link. Use Zoom, Google Meet, Teams, RTMP, or WebRTC URL.",
+      "קישור פגישה לא תקין. השתמשו ב-Zoom, Google Meet, Teams, RTMP או WebRTC.",
     );
   }
   if (!input.startsAt || Number.isNaN(Date.parse(input.startsAt))) {
-    throw new BadRequestError("Valid start date/time is required.");
+    throw new BadRequestError("נא לבחור תאריך ושעת התחלה תקינים.");
   }
 
   const now = new Date().toISOString();
@@ -107,6 +108,13 @@ export async function createScheduledMeeting(
   };
 
   await upsertMeeting(session);
+
+  // If already inside the join window, dispatch immediately (no waiting for cron).
+  if (botEnabled && isDueForBotDispatch(session)) {
+    const dispatched = await dispatchMeetingBot(session);
+    return toPublicMeeting(dispatched);
+  }
+
   return toPublicMeeting(session);
 }
 

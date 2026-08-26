@@ -1,5 +1,6 @@
 "use client";
 
+import { StazMark } from "@/components/brand/Logo";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TranscriptionResult } from "@/features/transcription/types";
 import {
@@ -151,7 +152,10 @@ export function PremiumWorkspace({
   return (
     <div
       className={cn(
-        "relative flex h-[min(100dvh,920px)] min-h-[640px] flex-col overflow-hidden rounded-2xl border border-[var(--line-subtle)] bg-[var(--bg-canvas)] shadow-[var(--shadow-premium)]",
+        // Use svh (stable) — never dvh. Dynamic viewport height changes when
+        // mobile Safari shows/hides the toolbar and resizes the whole page,
+        // which jumps scroll position for anyone mid-page.
+        "relative flex h-[min(100svh,920px)] min-h-[640px] flex-col overflow-hidden rounded-2xl border border-[var(--line-subtle)] bg-[var(--bg-canvas)] shadow-[var(--shadow-premium)]",
         className,
       )}
       data-demo={demo ? DEMO_MEETING_ID : undefined}
@@ -167,13 +171,16 @@ export function PremiumWorkspace({
 
       {/* Header — clear export actions, sticky tools */}
       <header className="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b border-[var(--line-subtle)] bg-[color-mix(in_srgb,var(--bg-elevated)_92%,transparent)] px-3 py-2.5 backdrop-blur-md sm:gap-2.5 sm:px-4">
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
-            STAZ
-          </p>
-          <h1 className="mt-0.5 truncate text-sm font-semibold leading-snug text-[var(--ink-primary)] sm:text-[0.9375rem]">
-            {result.fileName}
-          </h1>
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+          <StazMark size={28} title="STAZ" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
+              STAZ
+            </p>
+            <h1 className="mt-0.5 truncate text-sm font-semibold leading-snug text-[var(--ink-primary)] sm:text-[0.9375rem]">
+              {result.fileName}
+            </h1>
+          </div>
         </div>
         <span className="hidden rounded-full bg-[var(--ok-soft,rgba(47,111,78,0.1))] px-2.5 py-1 text-[11px] font-semibold text-[var(--ok,#2F6F4E)] sm:inline-flex">
           מוכן
@@ -284,9 +291,9 @@ export function PremiumWorkspace({
               )
             ) : (
               <div className="px-4 text-center">
-                <p className="font-brand text-2xl text-[var(--ink-tertiary)]">
-                  STAZ
-                </p>
+                <div className="flex justify-center">
+                  <StazMark size={40} title="STAZ" />
+                </div>
                 <p className="mt-2 text-xs text-[var(--ink-tertiary)]">
                   {demo ? "דמו ללא מדיה — לחצו ↗ לניווט בתמלול" : "אין מדיה מצורפת"}
                 </p>

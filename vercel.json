@@ -10,7 +10,7 @@
   "crons": [
     {
       "path": "/api/cron/live-bots",
-      "schedule": "0 6 * * *"
+      "schedule": "* * * * *"
     }
   ],
   "build": {

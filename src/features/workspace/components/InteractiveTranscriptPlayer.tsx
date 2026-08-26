@@ -12,6 +12,7 @@ import {
   getSpeakerStyle,
 } from "../lib/speaker-style";
 import { findActiveLineIndex, timestampToSeconds } from "../lib/timestamp";
+import { scrollIntoContainer } from "@/lib/scroll-into-container";
 
 interface InteractiveTranscriptPlayerProps {
   entries: TranscriptEntry[];
@@ -68,13 +69,17 @@ export function InteractiveTranscriptPlayer({
   useEffect(() => {
     if (scrollToIndex == null || scrollToIndex < 0) return;
     const node = lineRefs.current.get(scrollToIndex);
-    node?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const root = containerRef.current;
+    if (!node || !root) return;
+    scrollIntoContainer(node, root, { behavior: "smooth", block: "center" });
   }, [scrollToIndex]);
 
   useEffect(() => {
     if (activeIndex < 0 || scrollToIndex != null) return;
     const node = lineRefs.current.get(activeIndex);
-    node?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const root = containerRef.current;
+    if (!node || !root) return;
+    scrollIntoContainer(node, root, { behavior: "smooth", block: "nearest" });
   }, [activeIndex, scrollToIndex]);
 
   return (

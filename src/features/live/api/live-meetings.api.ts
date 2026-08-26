@@ -14,6 +14,25 @@ async function parseJson<T>(res: Response): Promise<T> {
   return body.data;
 }
 
+export async function fetchLivePipelineStatus(): Promise<{
+  autoJoin: boolean;
+  provider: "recall" | "manual" | "simulate";
+  closeoutReady: boolean;
+}> {
+  const res = await fetch("/api/live/status", {
+    credentials: "include",
+    cache: "no-store",
+  });
+  return parseJson(res);
+}
+
+export async function kickLiveDispatch(): Promise<void> {
+  await fetch("/api/live/dispatch", {
+    method: "POST",
+    credentials: "include",
+  }).catch(() => {});
+}
+
 export async function fetchLiveMeetings(): Promise<LiveSessionPublic[]> {
   const res = await fetch("/api/live/meetings", {
     credentials: "include",

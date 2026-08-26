@@ -78,7 +78,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       )}
     >
       <div className="border-b border-[var(--line-subtle)] px-5 py-5">
-        <Logo size="md" showTagline variant="wordmark" />
+        <Logo size="md" showTagline tone="light" />
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4" aria-label="ניווט ראשי">

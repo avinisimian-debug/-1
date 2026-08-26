@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { LandingPricing } from "@/components/auth/LandingPricing";
@@ -21,6 +20,7 @@ import { WhyNotJustChat } from "@/components/landing/WhyNotJustChat";
 import { WhyStazSection } from "@/components/landing/WhyStazSection";
 import { LandingChapter } from "@/components/landing/ui/LandingChapter";
 import { StazButton } from "@/components/landing/ui/StazButton";
+import { TrustSection } from "@/components/trust/TrustSection";
 import { PublicDemoWorkspace } from "@/features/staz-workspace";
 import { useLocale } from "@/context/LocaleContext";
 import { LANDING, LANDING_CTA } from "@/lib/landing-copy";
@@ -30,17 +30,10 @@ import {
   useLaunchMonthAutoModal,
 } from "@/components/launch/LaunchMonthModal";
 
-const TrustSection = dynamic(
-  () =>
-    import("@/components/trust/TrustSection").then((m) => ({
-      default: m.TrustSection,
-    })),
-  { loading: () => <div className="h-16" /> },
-);
-
 export function LoginScreen() {
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
   const signupRef = useRef<HTMLDivElement>(null);
+  const pastDemoRef = useRef(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -92,14 +85,24 @@ export function LoginScreen() {
   useEffect(() => {
     const demoEl = document.getElementById("demo");
     if (!demoEl) return;
+
+    // visualViewport height is read for CTA label only — never drives layout.
     const onScroll = () => {
+      const viewportH = window.visualViewport?.height ?? window.innerHeight;
       const rect = demoEl.getBoundingClientRect();
-      // Switch sticky CTA after the demo stage has been scrolled through.
-      setPastDemo(rect.bottom < window.innerHeight * 0.45);
+      const next = rect.bottom < viewportH * 0.45;
+      if (next === pastDemoRef.current) return;
+      pastDemoRef.current = next;
+      setPastDemo(next);
     };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.visualViewport?.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.visualViewport?.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   const requestOtp = async () => {
@@ -182,7 +185,7 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="landing-shell min-h-screen overflow-x-hidden pb-24 text-[var(--staz-ink)] lg:pb-0">
+    <div className="landing-shell min-h-screen overflow-x-hidden pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] text-[var(--staz-ink)] lg:pb-0">
       <div className="sticky top-0 z-50">
         <LaunchAnnouncementBar onOpenOffer={openLaunchOffer} />
         <StazNav
@@ -276,7 +279,13 @@ export function LoginScreen() {
         source={launchModalOpen ? "manual" : "auto"}
       />
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#05080a]/90 p-3 backdrop-blur-xl lg:hidden">
+      {/* Fixed CTA — does not alter document height; safe-area via padding only */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#05080a]/90 px-3 pt-3 backdrop-blur-xl lg:hidden"
+        style={{
+          paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))",
+        }}
+      >
         <StazButton
           onClick={pastDemo ? scrollToSignup : scrollToDemo}
           className="w-full"

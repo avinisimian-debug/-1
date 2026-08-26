@@ -37,6 +37,9 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#05080a" },
     { media: "(prefers-color-scheme: dark)", color: "#05080a" },
   ],
+  // Stable mobile viewport — avoid interactive/resizing viewport units
+  // fighting Safari chrome. safe-area env() works with cover.
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({
@@ -59,17 +62,10 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: I18N_BOOTSTRAP_SCRIPT }}
         />
         {showMarketingChrome ? (
-          <>
-            <meta
-              name="google-adsense-account"
-              content="ca-pub-1517251000751283"
-            />
-            <script
-              async
-              src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1517251000751283"
-              crossOrigin="anonymous"
-            />
-          </>
+          <meta
+            name="google-adsense-account"
+            content="ca-pub-1517251000751283"
+          />
         ) : null}
       </head>
       <body className="min-h-full bg-background text-foreground">

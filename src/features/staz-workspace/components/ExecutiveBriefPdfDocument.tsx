@@ -83,15 +83,25 @@ export function ExecutiveBriefPdfDocument({
         }}
       >
         <div>
-          <div
-            style={{
-              fontFamily: "Georgia, Times New Roman, serif",
-              fontSize: 28,
-              letterSpacing: "-0.02em",
-              color: "#0E1210",
-            }}
-          >
-            STAZ
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/staz-mark.png"
+              alt="STAZ"
+              width={36}
+              height={36}
+              style={{ borderRadius: 8, display: "block" }}
+            />
+            <div
+              style={{
+                fontFamily: "Georgia, Times New Roman, serif",
+                fontSize: 28,
+                letterSpacing: "-0.02em",
+                color: "#0E1210",
+              }}
+            >
+              STAZ
+            </div>
           </div>
           <div
             style={{

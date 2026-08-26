@@ -79,7 +79,7 @@ export function PayPalSubscribeButton() {
         {status === "processing"
           ? "פותחים את PayPal…"
           : snap.active
-            ? `קבלו PRO · ${price}`
+            ? `התחילו עם Pro · ${price}`
             : `המשיכו לתשלום · ${price}/חודש`}
       </button>
       {error ? (

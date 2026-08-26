@@ -71,7 +71,7 @@ export function UpgradeModal({ feature, open, onClose }: UpgradeModalProps) {
               <LogoMark size={28} />
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-tertiary)]">
-                  {snap.active ? "Launch Month · Staz Pro" : "Staz AI Pro"}
+                  {snap.active ? "חודש השקה · Staz Pro" : "Staz AI Pro"}
                 </p>
                 <p className="text-sm font-semibold text-[var(--ink-primary)]">
                   {t.gateEyebrow}

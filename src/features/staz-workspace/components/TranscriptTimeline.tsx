@@ -7,6 +7,7 @@ import {
   findActiveLineIndex,
   timestampToSeconds,
 } from "@/features/workspace/lib/timestamp";
+import { scrollIntoContainer } from "@/lib/scroll-into-container";
 import { cn } from "@/lib/utils";
 
 interface TranscriptTimelineProps {
@@ -60,7 +61,10 @@ export function TranscriptTimeline({
   }, [entries, query]);
 
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    const node = activeRef.current;
+    const root = listRef.current;
+    if (!node || !root) return;
+    scrollIntoContainer(node, root, { block: "nearest", behavior: "smooth" });
   }, [activeIndex]);
 
   return (

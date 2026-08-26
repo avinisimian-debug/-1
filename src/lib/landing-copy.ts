@@ -317,7 +317,7 @@ export const LANDING = {
     subhead: "כדי לעבד את הפגישה שלכם — לא רק את הדמו — צרו חשבון חינמי.",
     submitSend: "שלחו קוד והמשיכו",
     submitVerify: "אימות כניסה",
-    emailPlaceholder: "name@company.com",
+    emailPlaceholder: "name@company.co.il",
   },
   final: {
     headline: "סיימתם את הפגישה. עכשיו תדעו בדיוק מה הלאה.",

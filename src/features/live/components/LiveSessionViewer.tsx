@@ -2,31 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Download,
-  HelpCircle,
-  ListChecks,
-  Loader2,
-  Scale,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { StazMark } from "@/components/brand/Logo";
 import { useLocale } from "@/context/LocaleContext";
-import { MeetingWorkspace } from "@/features/workspace/components/MeetingWorkspace";
+import { PremiumWorkspace } from "@/features/staz-workspace";
 import type { TranscriptionResult } from "@/features/transcription/types";
-import { mapDecisionsToTimestamps } from "@/features/staz-workspace/lib/map-decision-timestamp";
 import { cn } from "@/lib/utils";
 import { fetchLiveMeeting, reprocessLiveMeeting } from "../api/live-meetings.api";
 import type { BotStatus, LiveSessionPublic } from "../types";
 import { deriveMeetingOutcome } from "../lib/meeting-outcome";
-
-type TabId =
-  | "brief"
-  | "decisions"
-  | "actions"
-  | "open"
-  | "transcript"
-  | "media";
 
 interface LiveSessionViewerProps {
   meetingId: string;
@@ -38,66 +22,63 @@ function isTranscriptionResult(value: unknown): value is TranscriptionResult {
   return Array.isArray(v.transcript) && typeof v.fileName === "string";
 }
 
-const STATUS_HE: Record<BotStatus, string> = {
-  scheduled: "מתוזמן",
-  dispatching: "שולח בוט…",
-  joining: "מצטרף לפגישה…",
-  recording: "מקליט",
-  uploading: "מעלה הקלטה…",
-  transcribing: "מתמלל…",
-  analyzing: "בונה תמצית מנהלים…",
-  ready: "סגירה מוכנה",
-  failed: "עיבוד נכשל",
-  cancelled: "בוטל",
-  awaiting_recording: "ממתין להקלטה",
-};
-
-const STATUS_EN: Record<BotStatus, string> = {
-  scheduled: "Scheduled",
-  dispatching: "Dispatching bot…",
-  joining: "Bot joining…",
-  recording: "Recording",
-  uploading: "Uploading",
-  transcribing: "Transcribing…",
-  analyzing: "Building closeout…",
-  ready: "Closeout ready",
-  failed: "Failed",
-  cancelled: "Cancelled",
-  awaiting_recording: "Awaiting recording",
-};
+const STAGE_ORDER: BotStatus[] = [
+  "scheduled",
+  "dispatching",
+  "joining",
+  "recording",
+  "uploading",
+  "transcribing",
+  "analyzing",
+  "ready",
+];
 
 function waitingCopy(status: BotStatus, error: string | undefined, he: boolean) {
   if (status === "failed") {
     return {
       title: he
-        ? "משהו השתבש בעיבוד הפגישה."
-        : "Something went wrong processing this meeting.",
-      body: error?.trim() || (he ? "נסו שוב מההאב — ההקלטה נשמרת." : "Retry from Live Hub — the recording is kept."),
+        ? "משהו השתבש בעיבוד הפגישה"
+        : "Something went wrong processing this meeting",
+      body:
+        error?.trim() ||
+        (he
+          ? "ההקלטה נשמרת — אפשר לנסות שוב או להעלות קובץ מההאב."
+          : "The recording is kept — retry or upload from the hub."),
     };
   }
   if (status === "awaiting_recording") {
     return {
-      title: he
-        ? "מעלים הקלטה מההאב כדי להתחיל סגירה."
-        : "Upload a recording from Live Hub to start closeout.",
+      title: he ? "ממתינים להקלטה" : "Waiting for recording",
       body: he
-        ? "הבוט מקליט בשקט בזמן הפגישה. אחרי ההקלטה — תמלול ותמצית מנהלים."
-        : "The bot records quietly during the meeting. Afterward — transcript and executive closeout.",
+        ? "העלו הקלטה מההאב כדי להתחיל סגירה אוטומטית."
+        : "Upload a recording from the hub to start closeout.",
     };
   }
-  if (status === "transcribing" || status === "analyzing" || status === "uploading") {
+  if (
+    status === "transcribing" ||
+    status === "analyzing" ||
+    status === "uploading"
+  ) {
     return {
-      title: he ? "Staz מעבד את הפגישה…" : "Staz is processing the meeting…",
+      title: he ? "Staz סוגר את הפגישה…" : "Staz is closing the meeting…",
       body: he
-        ? "בונים תמלול, החלטות, משימות וראיות. זה יכול לקחת כמה דקות."
-        : "Building transcript, decisions, actions, and evidence. This can take a few minutes.",
+        ? "בונים תמלול, החלטות ומשימות. זה יכול לקחת כמה דקות."
+        : "Building transcript, decisions, and actions. This can take a few minutes.",
+    };
+  }
+  if (status === "joining" || status === "recording" || status === "dispatching") {
+    return {
+      title: he ? "הבוט בפגישה" : "Bot is in the meeting",
+      body: he
+        ? "מקשיב ומקליט בשקט — בלי להפריע לשיחה."
+        : "Listening and recording quietly — no interruptions.",
     };
   }
   return {
-    title: he ? "ממתין להקלטה ולסגירה…" : "Waiting for recording & closeout…",
+    title: he ? "ממתין להתחלת הפגישה" : "Waiting for the meeting to start",
     body: he
-      ? "הבוט מקשיב ומקליט בלבד — בלי להפריע בשיחה."
-      : "The bot listens and records only — no mid-meeting interruptions.",
+      ? "כשיגיע הזמן הבוט יצטרף אוטומטית (אם מחובר), או שתוכלו להעלות הקלטה אחרי."
+      : "When the time comes the bot joins automatically (if connected), or upload a recording after.",
   };
 }
 
@@ -106,7 +87,6 @@ export function LiveSessionViewer({ meetingId }: LiveSessionViewerProps) {
   const he = locale === "he";
   const [meeting, setMeeting] = useState<LiveSessionPublic | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<TabId>("brief");
   const [loading, setLoading] = useState(true);
   const [retrying, setRetrying] = useState(false);
 
@@ -166,20 +146,6 @@ export function LiveSessionViewer({ meetingId }: LiveSessionViewerProps) {
     [digest, he],
   );
 
-  const decisionList = useMemo(() => {
-    if (!digest) return [];
-    if (digest.decisions && digest.decisions.length > 0) return digest.decisions;
-    return digest.summary.keyTakeaways ?? [];
-  }, [digest]);
-
-  const decisionMoments = useMemo(
-    () =>
-      digest
-        ? mapDecisionsToTimestamps(decisionList, digest.transcript)
-        : [],
-    [decisionList, digest],
-  );
-
   const mediaKind = useMemo(() => {
     const ct = meeting?.recordingContentType ?? "";
     if (ct.startsWith("audio/")) return "audio" as const;
@@ -190,115 +156,149 @@ export function LiveSessionViewer({ meetingId }: LiveSessionViewerProps) {
     ? `/api/live/meetings/${meeting.id}/media`
     : undefined;
 
+  const statusLabels: Record<BotStatus, string> = {
+    scheduled: t.liveStatusScheduled,
+    dispatching: t.liveStatusDispatching,
+    joining: t.liveStatusJoining,
+    recording: t.liveStatusRecording,
+    uploading: t.liveStatusUploading,
+    transcribing: t.liveStatusTranscribing,
+    analyzing: t.liveStatusAnalyzing,
+    ready: t.liveStatusReady,
+    failed: t.liveStatusFailed,
+    cancelled: t.liveStatusCancelled,
+    awaiting_recording: t.liveStatusAwaitingRecording,
+  };
+
   if (loading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-        {he ? "טוען מפגש…" : "Loading session…"}
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-[var(--ink-tertiary)]">
+        <Loader2 className="h-5 w-5 animate-spin text-[var(--accent)]" aria-hidden />
+        {he ? "טוען פגישה…" : "Loading session…"}
       </div>
     );
   }
 
   if (error || !meeting) {
     return (
-      <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+      <div className="mx-auto max-w-lg rounded-[1.15rem] border border-destructive/30 bg-destructive/5 p-8 text-center">
         <p className="text-sm text-destructive">
           {error || (he ? "הפגישה לא נמצאה" : "Meeting not found")}
         </p>
         <Link
           href="/live"
-          className="mt-4 inline-block text-sm text-accent hover:underline"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)] hover:underline"
         >
-          {he ? "חזרה להאב" : "Back to Live Hub"}
+          {he ? "חזרה לבוט פגישות" : "Back to meeting bot"}
+          <ArrowRight className="h-3.5 w-3.5 rotate-180" aria-hidden />
         </Link>
       </div>
     );
   }
 
-  const statusLabel = (he ? STATUS_HE : STATUS_EN)[meeting.botStatus];
   const wait = waitingCopy(meeting.botStatus, meeting.error, he);
-
-  const tabs: Array<{ id: TabId; label: string }> = he
-    ? [
-        { id: "brief", label: "תמצית מנהלים" },
-        { id: "decisions", label: "מה הוחלט" },
-        { id: "actions", label: "מי עושה מה" },
-        { id: "open", label: "פתוח" },
-        { id: "transcript", label: "תמלול" },
-        { id: "media", label: "מדיה" },
-      ]
-    : [
-        { id: "brief", label: "Executive brief" },
-        { id: "decisions", label: "Decisions" },
-        { id: "actions", label: "Action items" },
-        { id: "open", label: "Open" },
-        { id: "transcript", label: "Transcript" },
-        { id: "media", label: "Media" },
-      ];
+  const stageIdx = Math.max(0, STAGE_ORDER.indexOf(meeting.botStatus));
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6" dir={he ? "rtl" : "ltr"}>
+    <div
+      className="mx-auto w-full max-w-6xl space-y-5 page-enter"
+      dir={he ? "rtl" : "ltr"}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/live"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--ink-tertiary)] transition hover:text-[var(--ink-primary)]"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
+          <ArrowRight className="h-4 w-4 rotate-180" aria-hidden />
           {t.liveHubTitle}
         </Link>
-        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-          {statusLabel}
+        <span className="rounded-full bg-[var(--bg-subtle)] px-3 py-1 text-xs font-medium text-[var(--ink-secondary)]">
+          {statusLabels[meeting.botStatus]}
         </span>
       </div>
 
-      <header className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {meeting.title}
-        </h1>
-        {meeting.description ? (
-          <p className="mt-2 text-sm text-muted-foreground">{meeting.description}</p>
-        ) : null}
-        {meeting.materials?.length ? (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {meeting.materials.map((m) => (
-              <a
-                key={m.id}
-                href={m.url}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium text-accent hover:underline"
-              >
-                {m.title || m.url}
-              </a>
-            ))}
+      <header className="staz-surface-card staz-surface-card--static px-5 py-5 sm:px-7 sm:py-6">
+        <div className="flex flex-wrap items-start gap-3">
+          <StazMark size={36} />
+          <div className="min-w-0 flex-1">
+            <h1 className="font-brand text-xl font-semibold tracking-tight text-[var(--ink-primary)] sm:text-2xl">
+              {meeting.title}
+            </h1>
+            {meeting.description ? (
+              <p className="mt-2 text-sm text-[var(--ink-secondary)]">
+                {meeting.description}
+              </p>
+            ) : null}
+            {meeting.materials?.length ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {meeting.materials.map((m) => (
+                  <a
+                    key={m.id}
+                    href={m.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg border border-[var(--line-subtle)] bg-[var(--bg-subtle)] px-3 py-1.5 text-xs font-medium text-[var(--accent)] hover:underline"
+                  >
+                    {m.title || m.url}
+                  </a>
+                ))}
+              </div>
+            ) : null}
+            {outcome ? (
+              <div className="mt-4 rounded-xl border border-[var(--line-subtle)] bg-[var(--bg-subtle)]/50 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--ink-tertiary)]">
+                  {he ? "מצב סגירה" : "Closeout status"}
+                </p>
+                <p className="mt-1 text-sm font-medium text-[var(--ink-primary)]">
+                  {outcome.label}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-[var(--ink-tertiary)]">
+                  {outcome.reason}
+                </p>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-        {outcome ? (
-          <div className="mt-4 rounded-xl border border-border/60 bg-muted/20 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {he ? "מצב סגירה" : "Closeout status"}
-            </p>
-            <p className="mt-1 text-sm font-medium text-foreground">{outcome.label}</p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              {outcome.reason}
-            </p>
-          </div>
-        ) : null}
+        </div>
       </header>
 
       {!digest ? (
-        <div className="rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-16 text-center">
+        <div className="lat-stage flex flex-col items-center rounded-[1.15rem] px-6 py-14 text-center">
+          <StazMark size={48} />
           {meeting.botStatus !== "failed" ? (
-            <Loader2 className="mx-auto mb-3 h-6 w-6 animate-spin text-accent" aria-hidden />
+            <Loader2
+              className="mt-5 h-5 w-5 animate-spin text-[#5eead4]"
+              aria-hidden
+            />
           ) : null}
-          <p className="text-sm font-medium text-foreground">{wait.title}</p>
-          <p className="mt-2 text-xs text-muted-foreground">{wait.body}</p>
+          <p className="mt-4 text-base font-semibold text-[#ededea]">{wait.title}</p>
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-[#a8aea8]">
+            {wait.body}
+          </p>
+
+          {meeting.botStatus !== "failed" && meeting.botStatus !== "cancelled" ? (
+            <ol className="mt-8 flex w-full max-w-md flex-wrap justify-center gap-2">
+              {STAGE_ORDER.filter((s) => s !== "ready").map((s, i) => (
+                <li
+                  key={s}
+                  className={cn(
+                    "rounded-full px-2.5 py-1 text-[10px] font-medium",
+                    i <= stageIdx
+                      ? "bg-teal-400/15 text-[#5eead4]"
+                      : "bg-white/5 text-white/35",
+                  )}
+                >
+                  {statusLabels[s]}
+                </li>
+              ))}
+            </ol>
+          ) : null}
+
           {meeting.botStatus === "failed" ? (
             <button
               type="button"
               disabled={retrying || !meeting.recordingBlobUrl}
               onClick={() => void retryCloseout()}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground disabled:opacity-50"
+              className="lat-btn-primary mt-6 !rounded-full disabled:opacity-50"
             >
               {retrying ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -306,232 +306,21 @@ export function LiveSessionViewer({ meetingId }: LiveSessionViewerProps) {
               {he ? "נסו שוב" : "Try again"}
             </button>
           ) : null}
+
+          <Link
+            href="/live"
+            className="mt-6 text-sm text-[#5eead4]/80 hover:text-[#5eead4] hover:underline"
+          >
+            {he ? "חזרה להאב — העלאת הקלטה" : "Back to hub — upload recording"}
+          </Link>
         </div>
       ) : (
-        <>
-          <div
-            className="flex flex-wrap gap-1 rounded-xl border border-border/60 bg-muted/30 p-1"
-            role="tablist"
-          >
-            {tabs.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={tab === item.id}
-                onClick={() => setTab(item.id)}
-                className={cn(
-                  "rounded-lg px-3 py-2 text-sm font-medium transition",
-                  tab === item.id
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          {tab === "brief" && (
-            <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Sparkles className="h-4 w-4 text-accent" aria-hidden />
-                {he ? "תמצית מנהלים" : "Executive brief"}
-              </div>
-              {digest.headline ? (
-                <h2 className="text-xl font-semibold text-foreground">
-                  {digest.headline}
-                </h2>
-              ) : null}
-              {digest.summary.overview ? (
-                <p className="text-sm leading-relaxed text-foreground/90">
-                  {digest.summary.overview}
-                </p>
-              ) : null}
-              {digest.summary.executive.length > 0 ? (
-                <ul className="list-disc space-y-1.5 ps-5 text-sm text-foreground/85">
-                  {digest.summary.executive.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              ) : null}
-              {digest.followUps && digest.followUps.length > 0 ? (
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-foreground">
-                    {he ? "המשכים" : "Follow-ups"}
-                  </h3>
-                  <ul className="list-disc space-y-1 ps-5 text-sm text-foreground/85">
-                    {digest.followUps.map((f) => (
-                      <li key={f}>{f}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {digest.topics && digest.topics.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {digest.topics.map((topic) => (
-                    <span
-                      key={topic}
-                      className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent"
-                    >
-                      {topic}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </section>
-          )}
-
-          {tab === "decisions" && (
-            <section className="space-y-3 rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-              <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
-                <Scale className="h-4 w-4 text-accent" aria-hidden />
-                {he ? "מה הוחלט" : "Decisions"}
-              </div>
-              {decisionList.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {he ? "לא זוהו החלטות סופיות." : "No final decisions identified."}
-                </p>
-              ) : (
-                decisionList.map((decision) => {
-                  const m = decisionMoments.find((x) => x.decision === decision);
-                  return (
-                    <div
-                      key={decision}
-                      className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3"
-                    >
-                      <p className="text-sm font-medium text-foreground">{decision}</p>
-                      {m ? (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {he ? "ראיה" : "Evidence"} · {m.timestamp}
-                          {m.quote ? ` — “${m.quote.slice(0, 80)}${m.quote.length > 80 ? "…" : ""}”` : ""}
-                        </p>
-                      ) : (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {he
-                            ? "לא נמצא רגע מדויק בתמלול"
-                            : "No exact transcript moment found"}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </section>
-          )}
-
-          {tab === "actions" && (
-            <section className="space-y-3 rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-              <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
-                <ListChecks className="h-4 w-4 text-accent" aria-hidden />
-                {he ? "מי עושה מה" : "Who does what"}
-              </div>
-              {digest.actionItems.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {he ? "לא זוהו משימות מפורשות." : "No explicit action items."}
-                </p>
-              ) : (
-                digest.actionItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3"
-                  >
-                    <p className="text-sm font-medium text-foreground">{item.task}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {item.owner} · {item.deadline}
-                      {item.priority ? ` · ${item.priority}` : ""}
-                    </p>
-                  </div>
-                ))
-              )}
-            </section>
-          )}
-
-          {tab === "open" && (
-            <section className="space-y-5 rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-              <div>
-                <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-                  <HelpCircle className="h-4 w-4 text-accent" aria-hidden />
-                  {he ? "שאלות פתוחות" : "Open questions"}
-                </div>
-                {!digest.openQuestions?.length ? (
-                  <p className="text-sm text-muted-foreground">
-                    {he ? "אין שאלות פתוחות שזוהו." : "No open questions identified."}
-                  </p>
-                ) : (
-                  <ul className="list-disc space-y-1.5 ps-5 text-sm text-foreground/85">
-                    {digest.openQuestions.map((q) => (
-                      <li key={q}>{q}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              {digest.risks && digest.risks.length > 0 ? (
-                <div>
-                  <h3 className="mb-2 text-sm font-semibold text-foreground">
-                    {he ? "סיכונים / חסמים" : "Risks / blockers"}
-                  </h3>
-                  <ul className="space-y-2">
-                    {digest.risks.map((r) => (
-                      <li
-                        key={r.risk}
-                        className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-sm"
-                      >
-                        <span className="text-xs font-semibold uppercase text-muted-foreground">
-                          {r.severity}
-                        </span>
-                        <p className="mt-1 text-foreground">{r.risk}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </section>
-          )}
-
-          {tab === "transcript" && (
-            <MeetingWorkspace
-              result={digest}
-              mediaSrc={mediaSrc}
-              mediaKind={mediaKind}
-            />
-          )}
-
-          {tab === "media" && (
-            <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-              {mediaSrc ? (
-                <>
-                  {mediaKind === "video" ? (
-                    <video
-                      src={mediaSrc}
-                      controls
-                      className="aspect-video w-full rounded-xl bg-black"
-                    />
-                  ) : (
-                    <audio src={mediaSrc} controls className="w-full" />
-                  )}
-                  <a
-                    href={mediaSrc}
-                    download={`${meeting.title.replace(/\s+/g, "-")}.mp4`}
-                    className="btn-cinema inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
-                  >
-                    <Download className="h-4 w-4" aria-hidden />
-                    {he ? "הורדת הקלטה" : "Download recording"}
-                  </a>
-                  <p className="text-xs text-muted-foreground">
-                    {he
-                      ? "סטרימינג מאובטח לחשבון שלכם בלבד."
-                      : "Secure authenticated stream for your account."}
-                  </p>
-                </>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  {he ? "עדיין אין קובץ הקלטה." : "No recording file attached yet."}
-                </p>
-              )}
-            </section>
-          )}
-        </>
+        <PremiumWorkspace
+          result={digest}
+          mediaSrc={mediaSrc}
+          mediaKind={mediaKind}
+          className="h-[min(100svh,920px)] min-h-[560px] border-[var(--line-subtle)] shadow-[var(--shadow-premium)]"
+        />
       )}
     </div>
   );

@@ -37,9 +37,13 @@ yarn-error.log*
 # user data (privacy)
 /data/users.json
 /data/auth-config.json
+/data/otp/
 
 # vercel
 .vercel
+
+# local scratch / unrelated
+/מעיינות/
 
 # typescript
 *.tsbuildinfo

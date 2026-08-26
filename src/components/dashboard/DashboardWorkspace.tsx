@@ -1,6 +1,7 @@
 "use client";
 
 import { UploadToolbar } from "@/components/dashboard/UploadToolbar";
+import { StazMark } from "@/components/brand/Logo";
 import { FileUploadZone } from "@/features/transcription";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { useLocale } from "@/context/LocaleContext";
@@ -69,9 +70,12 @@ export function DashboardWorkspace({
               className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_80%_at_100%_0%,color-mix(in_srgb,var(--accent)_10%,transparent),transparent_65%)]"
               aria-hidden
             />
-            <p className="relative text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-              STAZ
-            </p>
+            <div className="relative flex items-center gap-2">
+              <StazMark size={22} />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                STAZ
+              </p>
+            </div>
             <h2 className="relative mt-2 text-balance font-brand text-xl font-semibold leading-snug tracking-tight text-[var(--ink-primary)] sm:text-2xl">
               {t.dashHero}
             </h2>

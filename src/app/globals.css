@@ -348,15 +348,16 @@
     font-size: 100%;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    scroll-behavior: smooth;
+    /* Intentionally NOT scroll-behavior:smooth on html.
+       Global smooth scroll amplifies layout shifts and Safari chrome
+       adjustments into visible page jumps. Intentional nav uses
+       element.scrollIntoView({ behavior: "smooth" }) / scrollTo instead. */
+    scroll-behavior: auto;
+    overflow-anchor: auto;
     @apply font-sans;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-
     *,
     *::before,
     *::after {

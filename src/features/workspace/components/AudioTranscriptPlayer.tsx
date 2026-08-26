@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TranscriptEntry } from "@/features/transcription/types";
@@ -11,6 +11,7 @@ import {
   getSpeakerStyle,
 } from "../lib/speaker-style";
 import { findActiveLineIndex, secondsToTimestamp, timestampToSeconds } from "../lib/timestamp";
+import { scrollIntoContainer } from "@/lib/scroll-into-container";
 
 export interface AudioTranscriptPlayerProps {
   entries: TranscriptEntry[];
@@ -32,6 +33,7 @@ export function AudioTranscriptPlayer({
   followPlayback = true,
 }: AudioTranscriptPlayerProps) {
   const playback = useAudioPlayback(audioSrc);
+  const listRef = useRef<HTMLDivElement>(null);
   const timestamps = useMemo(() => entries.map((e) => e.timestamp), [entries]);
   const activeIndex = useMemo(
     () => findActiveLineIndex(timestamps, playback.currentTime),
@@ -46,7 +48,10 @@ export function AudioTranscriptPlayer({
     (index: number, node: HTMLButtonElement | null) => {
       if (!followPlayback || !node) return;
       if (index === activeIndex && playback.isPlaying) {
-        node.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        const root = listRef.current;
+        if (root) {
+          scrollIntoContainer(node, root, { behavior: "smooth", block: "nearest" });
+        }
       }
     },
     [activeIndex, followPlayback, playback.isPlaying],
@@ -119,7 +124,10 @@ export function AudioTranscriptPlayer({
       </div>
 
       {/* Transcript */}
-      <div className="max-h-[28rem] space-y-2 overflow-y-auto px-4 py-5 sm:px-6">
+      <div
+        ref={listRef}
+        className="max-h-[28rem] space-y-2 overflow-y-auto px-4 py-5 sm:px-6"
+      >
         {entries.map((entry, index) => {
           const speakerIdx = speakerIndexMap.get(entry.speaker) ?? 0;
           const isRight = speakerIdx % 2 === 1;

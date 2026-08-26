@@ -41,7 +41,10 @@ export function PublicDemoWorkspace({ onSignup }: PublicDemoWorkspaceProps) {
         <PremiumWorkspace
           result={demo}
           isDemo
-          className="max-lg:min-h-[480px] sm:max-lg:min-h-[600px] lg:h-[min(88dvh,820px)]"
+          // Fixed heights on mobile so Safari chrome show/hide cannot resize
+          // the demo block. Must override base `h-*`/`min-h-*` (not max-lg:*),
+          // otherwise twMerge leaves `h-[min(100svh,…)]` active on small screens.
+          className="h-[560px] min-h-[560px] sm:h-[620px] sm:min-h-[620px] lg:h-[min(88svh,820px)] lg:min-h-[640px]"
         />
       </div>
 

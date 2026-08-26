@@ -1,6 +1,7 @@
 "use client";
 
 import type { ProcessingStage } from "@/features/transcription/types";
+import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 
 const STAGE_LABELS_HE = [
@@ -50,7 +51,7 @@ export function ProcessingTheatre({
         className,
       )}
     >
-      <p className="font-brand text-3xl tracking-tight text-[#ededea]">STAZ</p>
+      <Logo size="lg" tone="dark" href={null} />
       <h2 className="mt-4 text-xl font-semibold text-[#ededea]">Staz מקשיב</h2>
       {fileName ? (
         <p className="mt-2 max-w-sm truncate text-sm text-[#a8aea8]">{fileName}</p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { LANDING, LANDING_CTA } from "@/lib/landing-copy";
+import { LANDING } from "@/lib/landing-copy";
 import { StazButton } from "@/components/landing/ui/StazButton";
 import { LandingChapter } from "@/components/landing/ui/LandingChapter";
 import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
@@ -62,7 +62,7 @@ export function FinalCta({ onDemo, onSignup, onLaunchOffer }: FinalCtaProps) {
             }}
             className="mt-4 text-sm text-white/45 underline-offset-4 transition-colors hover:text-white/70 hover:underline"
           >
-            או Pro ב־{snap.launchPriceLabel} · {LANDING_CTA.primary}
+            או חודש השקה · Pro ב־{snap.launchPriceLabel}
           </button>
         ) : null}
       </div>

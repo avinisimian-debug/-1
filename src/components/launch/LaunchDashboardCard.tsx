@@ -36,8 +36,8 @@ export function LaunchDashboardCard({ isPro }: { isPro: boolean }) {
 
   return (
     <aside className="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-[var(--line-subtle)] bg-[var(--bg-elevated)] px-3.5 py-2.5 shadow-xs sm:px-4">
-      <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-bold tracking-[0.12em] text-[var(--accent)]">
-        LAUNCH
+      <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] font-bold tracking-wide text-[var(--accent)]">
+        חודש השקה
       </span>
       <p className="min-w-0 flex-1 text-sm text-[var(--ink-secondary)]">
         Pro ב־
@@ -47,6 +47,7 @@ export function LaunchDashboardCard({ isPro }: { isPro: boolean }) {
         <span className="mx-1.5 text-[var(--ink-tertiary)] line-through">
           {snap.originalPriceLabel}
         </span>
+        <span className="text-[var(--ink-tertiary)]"> לחודש הראשון</span>
       </p>
       <button
         type="button"

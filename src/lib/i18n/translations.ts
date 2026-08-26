@@ -534,6 +534,50 @@ export interface Translations {
   liveHubReminderNow: string;
   liveHubConfigTitle: string;
   liveHubConfigBody: string;
+  liveHubShellDesc: string;
+  liveHubChipBot: string;
+  liveHubChipDigest: string;
+  liveHubModeAuto: string;
+  liveHubModeManual: string;
+  liveHubModeCloseoutOk: string;
+  liveHubModeCloseoutMissing: string;
+  liveHubEmptyHint: string;
+  liveHubHowItWorks: string;
+  liveHubHowItWorksManual: string;
+  liveHubLoadError: string;
+  liveHubRetry: string;
+  liveHubCreatedToast: string;
+  liveHubDeletedToast: string;
+  liveHubDeleteConfirm: string;
+  liveHubTitlePlaceholder: string;
+  liveHubDetectedPlatform: string;
+  liveHubBotAutoJoin: string;
+  liveHubBotDiarization: string;
+  liveHubBotLanguage: string;
+  liveHubMoreOptions: string;
+  liveHubScheduling: string;
+  liveHubScheduleFail: string;
+  liveHubSaveHint: string;
+  liveHubOpenCloseout: string;
+  liveHubViewStatus: string;
+  liveHubUploadRecording: string;
+  liveHubMore: string;
+  liveHubYou: string;
+  liveHubQaFail: string;
+  liveHubUploadAuthFail: string;
+  liveHubUploadStarted: string;
+  liveHubUploadFail: string;
+  liveStatusScheduled: string;
+  liveStatusDispatching: string;
+  liveStatusJoining: string;
+  liveStatusRecording: string;
+  liveStatusUploading: string;
+  liveStatusTranscribing: string;
+  liveStatusAnalyzing: string;
+  liveStatusReady: string;
+  liveStatusFailed: string;
+  liveStatusCancelled: string;
+  liveStatusAwaitingRecording: string;
   aiInsightsLoading: string;
   aiInsightsLoadingHint: string;
   aiInsightsError: string;
@@ -1180,23 +1224,23 @@ const en: Translations = {
   workspaceAudioMode: "Audio recording — use the controls below to play",
   workspaceSeek: "Seek",
   liveHubBadge: "Meeting bot",
-  liveHubTitle: "Live meetings",
+  liveHubTitle: "Meeting bot",
   liveHubDesc:
-    "Schedule Zoom, Meet, or Teams — a bot can join, then Staz closes the meeting with summary, decisions, and tasks.",
-  liveHubUpcoming: "Upcoming sessions",
-  liveHubSessions: "sessions",
-  liveHubEmpty: "No live sessions yet. Schedule your first meeting above.",
+    "Paste a Zoom, Meet, or Teams link. The bot joins quietly, then Staz closes the meeting with a brief, decisions, and owners.",
+  liveHubUpcoming: "Your meetings",
+  liveHubSessions: "meetings",
+  liveHubEmpty: "No meetings yet",
   liveHubScheduleTitle: "Schedule a meeting",
   liveHubScheduleDesc:
-    "Paste a Zoom, Google Meet, Teams, RTMP, or WebRTC link. Enable the bot for autonomous join & transcription.",
-  liveHubNewSession: "New session",
-  liveHubCancel: "Cancel",
-  liveHubSave: "Save session",
+    "Three fields are enough to start. Optional details are under “More options”.",
+  liveHubNewSession: "New meeting",
+  liveHubCancel: "Close",
+  liveHubSave: "Schedule meeting",
   liveHubJoin: "Join meeting",
-  liveHubAddCalendar: "Add to Google Calendar",
-  liveHubSetReminder: "Set reminder",
+  liveHubAddCalendar: "Google Calendar",
+  liveHubSetReminder: "Reminder",
   liveHubExtras: "Agenda & Q&A",
-  liveHubDelete: "Delete session",
+  liveHubDelete: "Delete",
   liveHubLiveNow: "Live now",
   liveHubEnded: "Ended",
   liveHubMinutes: "min",
@@ -1208,10 +1252,10 @@ const en: Translations = {
   liveHubQaEmpty: "Ask the first question to start the thread.",
   liveHubQaPlaceholder: "Type a question…",
   liveHubQaSend: "Send",
-  liveHubFieldTitle: "Session title",
-  liveHubFieldUrl: "Meeting link (Zoom / Meet / Teams / RTMP)",
+  liveHubFieldTitle: "Meeting title",
+  liveHubFieldUrl: "Meeting link",
   liveHubBotTransparency:
-    "After you paste the link, Staz AI Assistant joins as a quiet participant. It records and listens only — no mid-meeting interruptions. When the session ends, you get an executive closeout: decisions, owners, open questions, follow-ups, and evidence from the transcript.",
+    "Staz joins as a quiet participant — records and listens only. When the meeting ends you get a closeout: decisions, owners, and evidence from the transcript.",
   liveHubFieldStarts: "Starts at",
   liveHubFieldDuration: "Duration (minutes)",
   liveHubFieldDesc: "Description",
@@ -1219,7 +1263,7 @@ const en: Translations = {
   liveHubAgendaPlaceholder: "Welcome\nDeep dive\nQ&A",
   liveHubFieldMaterialTitle: "Material title",
   liveHubFieldMaterialUrl: "Material URL",
-  liveHubErrorTitle: "Please enter a session title.",
+  liveHubErrorTitle: "Please enter a meeting title.",
   liveHubErrorUrl:
     "Enter a valid Zoom, Google Meet, Teams, RTMP, or WebRTC link.",
   liveHubErrorTime: "Choose a start date and time.",
@@ -1229,7 +1273,54 @@ const en: Translations = {
   liveHubReminderNow: "Starting soon — join: {url}",
   liveHubConfigTitle: "Bot & pipeline",
   liveHubConfigBody:
-    "Meetings sync to the cloud. Cron dispatches the bot before start. With RECALL_AI_API_KEY the bot joins automatically; otherwise upload the recording after the call. Post-meeting STT uses AssemblyAI + GPT-4o. Large files need BLOB_READ_WRITE_TOKEN.",
+    "Keep this page open near start time so the bot can dispatch. If auto-join is not configured, upload the recording after the call.",
+  liveHubShellDesc: "Schedule · bot joins · closeout ready",
+  liveHubChipBot: "Quiet auto-join",
+  liveHubChipDigest: "Executive closeout after",
+  liveHubModeAuto: "Auto-join on",
+  liveHubModeManual: "Upload mode — add Recall key for auto-join",
+  liveHubModeCloseoutOk: "Closeout pipeline ready",
+  liveHubModeCloseoutMissing: "Closeout keys incomplete",
+  liveHubEmptyHint:
+    "Schedule a meeting with a link — the bot handles recording and closeout.",
+  liveHubHowItWorks:
+    "The bot joins ~2 minutes before start. Keep this page open as backup; cron also dispatches every minute.",
+  liveHubHowItWorksManual:
+    "Auto-join needs RECALL_AI_API_KEY. Until then: after the call, upload the recording here for automatic closeout.",
+  liveHubLoadError: "Could not load meetings.",
+  liveHubRetry: "Retry",
+  liveHubCreatedToast: "Meeting scheduled",
+  liveHubDeletedToast: "Meeting deleted",
+  liveHubDeleteConfirm: "Delete this meeting?",
+  liveHubTitlePlaceholder: "e.g. Weekly product sync",
+  liveHubDetectedPlatform: "Detected: {platform}",
+  liveHubBotAutoJoin: "Auto-join bot",
+  liveHubBotDiarization: "Speaker labels",
+  liveHubBotLanguage: "Language",
+  liveHubMoreOptions: "More options",
+  liveHubScheduling: "Scheduling…",
+  liveHubScheduleFail: "Could not schedule the meeting.",
+  liveHubSaveHint: "The bot joins ~2 minutes before start when connected.",
+  liveHubOpenCloseout: "Open closeout",
+  liveHubViewStatus: "View status",
+  liveHubUploadRecording: "Upload recording",
+  liveHubMore: "More",
+  liveHubYou: "You",
+  liveHubQaFail: "Could not post question.",
+  liveHubUploadAuthFail: "Upload authorization failed.",
+  liveHubUploadStarted: "Recording uploaded — closeout started",
+  liveHubUploadFail: "Upload failed",
+  liveStatusScheduled: "Scheduled",
+  liveStatusDispatching: "Sending bot…",
+  liveStatusJoining: "Joining…",
+  liveStatusRecording: "Recording",
+  liveStatusUploading: "Uploading…",
+  liveStatusTranscribing: "Transcribing…",
+  liveStatusAnalyzing: "Building closeout…",
+  liveStatusReady: "Closeout ready",
+  liveStatusFailed: "Failed",
+  liveStatusCancelled: "Cancelled",
+  liveStatusAwaitingRecording: "Awaiting recording",
   aiInsightsLoading: "Generating AI insights…",
   aiInsightsLoadingHint: "GPT-4o mini is analyzing your transcript",
   aiInsightsError: "Could not generate insights",
@@ -1867,46 +1958,46 @@ const he: Translations = {
   workspaceAudioMode: "הקלטת אודיו — השתמשו בפקדים למטה לניגון",
   workspaceSeek: "גלילה",
   liveHubBadge: "בוט פגישות",
-  liveHubTitle: "פגישות חיות",
+  liveHubTitle: "בוט פגישות",
   liveHubDesc:
-    "תזמון Zoom, Meet או Teams — בוט יכול להצטרף, ואז Staz סוגר את הפגישה עם תמצית, החלטות ומשימות.",
-  liveHubUpcoming: "מפגשים קרובים",
-  liveHubSessions: "מפגשים",
-  liveHubEmpty: "אין עדיין מפגשים. תזמנו פגישה ראשונה למעלה.",
+    "הדביקו קישור Zoom, Meet או Teams. הבוט מצטרף בשקט — ואז Staz סוגר את הפגישה עם תמצית, החלטות ואחראים.",
+  liveHubUpcoming: "הפגישות שלכם",
+  liveHubSessions: "פגישות",
+  liveHubEmpty: "אין עדיין פגישות",
   liveHubScheduleTitle: "תזמון פגישה",
   liveHubScheduleDesc:
-    "הדביקו קישור Zoom, Meet, Teams, RTMP או WebRTC. הפעילו בוט להצטרפות ותמלול אוטומטיים.",
-  liveHubNewSession: "מפגש חדש",
-  liveHubCancel: "ביטול",
-  liveHubSave: "שמירת מפגש",
+    "שלושה שדות מספיקים להתחלה. פרטים נוספים נמצאים תחת «אפשרויות נוספות».",
+  liveHubNewSession: "פגישה חדשה",
+  liveHubCancel: "סגירה",
+  liveHubSave: "תזמון פגישה",
   liveHubJoin: "הצטרפות לפגישה",
-  liveHubAddCalendar: "הוספה ליומן Google",
+  liveHubAddCalendar: "יומן Google",
   liveHubSetReminder: "תזכורת",
-  liveHubExtras: "אג'נדה ושאלות",
-  liveHubDelete: "מחיקת מפגש",
+  liveHubExtras: "אג׳נדה ושאלות",
+  liveHubDelete: "מחיקה",
   liveHubLiveNow: "בשידור חי",
   liveHubEnded: "הסתיים",
   liveHubMinutes: "דק׳",
-  liveHubAgenda: "אג'נדה",
-  liveHubAgendaEmpty: "אין פריטי אג'נדה עדיין.",
+  liveHubAgenda: "אג׳נדה",
+  liveHubAgendaEmpty: "אין פריטי אג׳נדה עדיין.",
   liveHubMaterials: "חומרים",
   liveHubMaterialsEmpty: "לא צורפו חומרים להורדה.",
   liveHubQa: "שאלות ותשובות",
   liveHubQaEmpty: "שאלו את השאלה הראשונה כדי להתחיל.",
   liveHubQaPlaceholder: "כתבו שאלה…",
   liveHubQaSend: "שליחה",
-  liveHubFieldTitle: "כותרת המפגש",
-  liveHubFieldUrl: "קישור פגישה (Zoom / Meet / Teams / RTMP)",
+  liveHubFieldTitle: "שם הפגישה",
+  liveHubFieldUrl: "קישור לפגישה",
   liveHubBotTransparency:
-    "לאחר הדבקת הקישור, Staz AI Assistant מצטרף כמשתתף שקט. הוא מקליט ומקשיב בלבד — בלי להפריע בשיחה. בסיום תקבלו סגירת פגישה: החלטות, אחראים, שאלות פתוחות, המשכים וראיות מהתמלול.",
+    "Staz מצטרף כמשתתף שקט — מקליט ומקשיב בלבד. בסיום תקבלו סגירה: החלטות, אחראים וראיות מהתמלול.",
   liveHubFieldStarts: "שעת התחלה",
   liveHubFieldDuration: "משך (דקות)",
   liveHubFieldDesc: "תיאור",
-  liveHubFieldAgenda: "אג'נדה (שורה לכל פריט)",
+  liveHubFieldAgenda: "אג׳נדה (שורה לכל פריט)",
   liveHubAgendaPlaceholder: "פתיחה\nהעמקה\nשאלות",
   liveHubFieldMaterialTitle: "שם חומר",
   liveHubFieldMaterialUrl: "קישור לחומר",
-  liveHubErrorTitle: "נא להזין כותרת למפגש.",
+  liveHubErrorTitle: "נא להזין שם לפגישה.",
   liveHubErrorUrl: "הזינו קישור תקין של Zoom, Meet, Teams, RTMP או WebRTC.",
   liveHubErrorTime: "בחרו תאריך ושעת התחלה.",
   liveHubReminderSet: "התזכורת נקבעה (5 דקות לפני ההתחלה).",
@@ -1915,7 +2006,54 @@ const he: Translations = {
   liveHubReminderNow: "מתחיל בקרוב — הצטרפו: {url}",
   liveHubConfigTitle: "בוט וצינור עיבוד",
   liveHubConfigBody:
-    "המפגשים מסונכרנים לענן. Cron מפעיל את הבוט לפני ההתחלה. עם RECALL_AI_API_KEY הבוט מצטרף אוטומטית; אחרת העלו הקלטה אחרי השיחה. תמלול עם AssemblyAI + GPT-4o. קבצים גדולים דורשים BLOB_READ_WRITE_TOKEN.",
+    "השאירו את העמוד פתוח סביב שעת ההתחלה כדי שהבוט יוכל להצטרף. אם אין הצטרפות אוטומטית — העלו הקלטה אחרי השיחה.",
+  liveHubShellDesc: "תזמון · הבוט מצטרף · סגירה מוכנה",
+  liveHubChipBot: "הצטרפות שקטה",
+  liveHubChipDigest: "סגירת מנהלים אחרי",
+  liveHubModeAuto: "הצטרפות אוטומטית פעילה",
+  liveHubModeManual: "מצב העלאה — חסר מפתח Recall להצטרפות אוטומטית",
+  liveHubModeCloseoutOk: "צינור סגירה מוכן",
+  liveHubModeCloseoutMissing: "חסרים מפתחות לסגירה",
+  liveHubEmptyHint:
+    "תזמנו פגישה עם קישור — הבוט מטפל בהקלטה ובסגירה.",
+  liveHubHowItWorks:
+    "הבוט מצטרף כ־2 דקות לפני ההתחלה. העמוד פתוח משמש גיבוי; גם cron רץ כל דקה.",
+  liveHubHowItWorksManual:
+    "להצטרפות אוטומטית צריך RECALL_AI_API_KEY. בינתיים: אחרי השיחה העלו כאן הקלטה — הסגירה רצה אוטומטית.",
+  liveHubLoadError: "לא ניתן לטעון פגישות.",
+  liveHubRetry: "נסו שוב",
+  liveHubCreatedToast: "הפגישה תוזמנה",
+  liveHubDeletedToast: "הפגישה נמחקה",
+  liveHubDeleteConfirm: "למחוק את הפגישה?",
+  liveHubTitlePlaceholder: "למשל: סנכרון מוצר שבועי",
+  liveHubDetectedPlatform: "זוהה: {platform}",
+  liveHubBotAutoJoin: "הצטרפות אוטומטית של הבוט",
+  liveHubBotDiarization: "זיהוי דוברים",
+  liveHubBotLanguage: "שפה",
+  liveHubMoreOptions: "אפשרויות נוספות",
+  liveHubScheduling: "מתזמן…",
+  liveHubScheduleFail: "לא ניתן לתזמן את הפגישה.",
+  liveHubSaveHint: "הבוט מצטרף כ־2 דקות לפני ההתחלה (כשהוא מחובר).",
+  liveHubOpenCloseout: "פתיחת סגירה",
+  liveHubViewStatus: "סטטוס",
+  liveHubUploadRecording: "העלאת הקלטה",
+  liveHubMore: "עוד",
+  liveHubYou: "אתם",
+  liveHubQaFail: "לא ניתן לשלוח שאלה.",
+  liveHubUploadAuthFail: "אישור ההעלאה נכשל.",
+  liveHubUploadStarted: "ההקלטה הועלתה — הסגירה התחילה",
+  liveHubUploadFail: "ההעלאה נכשלה",
+  liveStatusScheduled: "מתוזמן",
+  liveStatusDispatching: "שולח בוט…",
+  liveStatusJoining: "מצטרף…",
+  liveStatusRecording: "מקליט",
+  liveStatusUploading: "מעלה…",
+  liveStatusTranscribing: "מתמלל…",
+  liveStatusAnalyzing: "בונה סגירה…",
+  liveStatusReady: "סגירה מוכנה",
+  liveStatusFailed: "נכשל",
+  liveStatusCancelled: "בוטל",
+  liveStatusAwaitingRecording: "ממתין להקלטה",
   aiInsightsLoading: "מייצר תובנות AI…",
   aiInsightsLoadingHint: "GPT-4o mini מנתח את התמלול",
   aiInsightsError: "לא ניתן לייצר תובנות",

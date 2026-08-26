@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   DEMO_AHA_TIMESTAMP,
   getDemoMeetingResult,
@@ -9,6 +9,7 @@ import { LANDING } from "@/lib/landing-copy";
 import { LandingChapter } from "@/components/landing/ui/LandingChapter";
 import { SectionHeader } from "@/components/landing/ui/SectionHeader";
 import { StazButton } from "@/components/landing/ui/StazButton";
+import { scrollIntoContainer } from "@/lib/scroll-into-container";
 import { cn } from "@/lib/utils";
 
 /** Signature interaction: decision → timestamp → transcript highlight. */
@@ -23,6 +24,7 @@ export function AhaEvidenceSection() {
   }, [demo.transcript]);
   const [activeTs, setActiveTs] = useState<string | null>(null);
   const [scrub, setScrub] = useState(8);
+  const listRef = useRef<HTMLUListElement>(null);
   const copy = LANDING.aha;
   const revealed = activeTs === DEMO_AHA_TIMESTAMP;
 
@@ -30,9 +32,11 @@ export function AhaEvidenceSection() {
     setScrub(52);
     setActiveTs(DEMO_AHA_TIMESTAMP);
     window.setTimeout(() => {
-      document
-        .getElementById(`aha-line-${DEMO_AHA_TIMESTAMP}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const line = document.getElementById(`aha-line-${DEMO_AHA_TIMESTAMP}`);
+      const list = listRef.current;
+      if (line && list) {
+        scrollIntoContainer(line, list, { behavior: "smooth", block: "center" });
+      }
     }, 120);
   };
 
@@ -100,7 +104,10 @@ export function AhaEvidenceSection() {
           <p className="mb-3 text-[11px] font-medium tracking-[0.12em] text-[var(--staz-on-dark-muted)]">
             תמלול
           </p>
-          <ul className="max-h-[280px] space-y-2 overflow-y-auto pe-1 sm:max-h-[300px]">
+          <ul
+            ref={listRef}
+            className="max-h-[280px] space-y-2 overflow-y-auto pe-1 sm:max-h-[300px]"
+          >
             {lines.map((line) => {
               const active = activeTs === line.timestamp;
               return (

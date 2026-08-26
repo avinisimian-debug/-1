@@ -70,11 +70,11 @@ export function LaunchAnnouncementBar({
       >
         <span className="hidden h-1.5 w-1.5 animate-pulse rounded-full bg-[#2dd4bf] sm:inline-block" aria-hidden />
         <span>
-          <span className="font-semibold tracking-[0.12em] text-[#5eead4]">
-            LAUNCH MONTH
+          <span className="font-semibold tracking-wide text-[#5eead4]">
+            חודש השקה
           </span>
           <span className="mx-2 text-white/35">·</span>
-          PRO ב־
+          Pro ב־
           <span className="mx-1 font-semibold text-white">{snap.launchPriceLabel}</span>
           <span className="mx-1 text-white/40 line-through">
             {snap.originalPriceLabel}
@@ -84,9 +84,9 @@ export function LaunchAnnouncementBar({
           className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 font-mono text-[10px] text-white/70 sm:inline-flex"
           aria-label={`נותרו ${cd.d} ימים ${cd.h} שעות ${cd.m} דקות`}
         >
-          <span className="text-white/40">Ends</span>
+          <span className="text-white/40">נותרו</span>
           <span className="tabular-nums text-[#5eead4]">
-            {cd.d}d {cd.h}:{cd.m}
+            {cd.d}י׳ {cd.h}:{cd.m}
           </span>
         </span>
       </button>

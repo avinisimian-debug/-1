@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo } from "react";
+import { Logo } from "@/components/brand/Logo";
 import { LANDING } from "@/lib/landing-copy";
 import { StazButton } from "@/components/landing/ui/StazButton";
 import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
@@ -39,9 +40,9 @@ export function StazHero({ onDemo, onSignup, onLaunchOffer }: StazHeroProps) {
 
         <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-6xl flex-col justify-center px-4 pb-20 pt-24 sm:px-6 sm:pb-24 sm:pt-28">
           <div className="landing-hero-copy mx-auto max-w-3xl text-center">
-            <p className="font-brand text-4xl tracking-[0.3em] text-white sm:text-5xl md:text-[3.5rem]">
-              {copy.brand}
-            </p>
+            <div className="flex justify-center">
+              <Logo size="xl" tone="dark" href={null} />
+            </div>
             <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#5eead4] sm:text-[12px]">
               {copy.positioning}
             </p>
@@ -62,8 +63,8 @@ export function StazHero({ onDemo, onSignup, onLaunchOffer }: StazHeroProps) {
 
             {snap.active ? (
               <div className="landing-offer-glass landing-reveal mx-auto mt-7 max-w-sm rounded-2xl px-5 py-4 text-center">
-                <p className="text-[11px] font-semibold tracking-[0.2em] text-[#5eead4]">
-                  LAUNCH MONTH
+                <p className="text-[11px] font-semibold tracking-wide text-[#5eead4]">
+                  חודש השקה
                 </p>
                 <div className="mt-2.5 flex justify-center">
                   <LaunchPriceStack size="md" tone="dark" className="text-center" />
@@ -95,7 +96,7 @@ export function StazHero({ onDemo, onSignup, onLaunchOffer }: StazHeroProps) {
                 }}
                 className="mt-4 text-sm text-white/45 underline-offset-4 transition-colors hover:text-white/70 hover:underline"
               >
-                או Pro ב־{snap.launchPriceLabel}
+                או חודש השקה · Pro ב־{snap.launchPriceLabel}
               </button>
             ) : null}
             <p className="mt-4 text-xs leading-relaxed text-white/40 sm:text-sm">

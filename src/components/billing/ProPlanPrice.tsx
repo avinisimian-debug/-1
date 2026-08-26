@@ -30,7 +30,7 @@ export function ProPlanPrice({
   return (
     <p className={cn(priceClass, "text-zinc-900", className)}>
       {snap.originalPriceLabel}
-      <span className="text-sm font-normal text-zinc-500"> / month</span>
+      <span className="text-sm font-normal text-zinc-500"> /חודש</span>
     </p>
   );
 }

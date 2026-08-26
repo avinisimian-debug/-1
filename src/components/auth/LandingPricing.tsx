@@ -100,17 +100,17 @@ export function LandingPricing({
 
           <div className="landing-reveal landing-section-forest relative flex flex-col overflow-hidden rounded-[var(--staz-radius)] border border-teal-400/25 p-7 text-start shadow-[0_0_60px_-24px_rgba(45,212,191,0.45)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_80px_-20px_rgba(45,212,191,0.55)] sm:p-8" style={{ animationDelay: "80ms" }}>
             {snap.active ? (
-              <span className="absolute end-4 top-4 rounded-full border border-teal-400/30 bg-teal-400/10 px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-[#5eead4]">
-                {snap.discountPercent}% OFF
+              <span className="absolute end-4 top-4 rounded-full border border-teal-400/30 bg-teal-400/10 px-2.5 py-1 text-[10px] font-bold tracking-wide text-[#5eead4]">
+                {snap.discountPercent}% הנחה
               </span>
             ) : (
-              <span className="absolute end-4 top-4 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-white/60">
-                BEST VALUE
+              <span className="absolute end-4 top-4 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold tracking-wide text-white/60">
+                הכי משתלם
               </span>
             )}
             <div className="relative mb-6">
-              <p className="text-xs font-semibold tracking-[0.18em] text-[#5eead4]">
-                PRO
+              <p className="text-xs font-semibold tracking-wide text-[#5eead4]">
+                Pro
               </p>
               <h3 className="mt-2 text-lg font-semibold text-white">
                 {copy.proTitle}
@@ -153,7 +153,7 @@ export function LandingPricing({
 
             <StazButton variant="onDark" onClick={handlePro} className="w-full">
               {snap.active
-                ? `התחילו PRO · ${snap.launchPriceLabel}`
+                ? `התחילו עם Pro · ${snap.launchPriceLabel}`
                 : copy.proCta}
             </StazButton>
             <p className="mt-3 text-center text-xs text-white/45">

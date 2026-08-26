@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 import {
   getLaunchCampaignSnapshot,
   trackLaunchEvent,
@@ -17,6 +18,13 @@ type LaunchMonthModalProps = {
   onClose: () => void;
   source?: string;
 };
+
+const BENEFITS = [
+  "תמצית מנהלים והחלטות ברורות",
+  "משימות עם אחראים — מי עושה מה",
+  "ספריית פגישות בענן",
+  "דוח PDF מקצועי וגישה מכל מכשיר",
+] as const;
 
 export function LaunchMonthModal({
   open,
@@ -72,21 +80,25 @@ export function LaunchMonthModal({
             aria-hidden
           />
           <div className="relative flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold tracking-[0.2em] text-[#5eead4]">
-                LAUNCH MONTH
+            <div className="min-w-0 flex-1">
+              <Logo size="sm" tone="dark" href={null} className="mb-3" />
+              <p className="text-[11px] font-semibold tracking-wide text-[#5eead4]">
+                חודש השקה
               </p>
               <h2
                 id={titleId}
                 className="mt-2 font-brand text-2xl tracking-tight text-white"
               >
-                PRO ב־{snap.launchPriceLabel}
+                Staz Pro במחיר השקה
               </h2>
-              <p className="mt-2 text-sm text-white/55">
-                <span className="line-through opacity-60">{snap.originalPriceLabel}</span>
-                {" → "}
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
+                במקום{" "}
+                <span className="line-through opacity-70">
+                  {snap.originalPriceLabel}
+                </span>
+                {" — "}
                 <span className="font-semibold text-white">
-                  {snap.launchPriceLabel}/חודש
+                  {snap.launchPriceLabel} לחודש הראשון
                 </span>
               </p>
             </div>
@@ -103,12 +115,7 @@ export function LaunchMonthModal({
 
         <div className="border-t border-white/8 px-6 py-5 text-start">
           <ul className="space-y-2.5 text-sm text-white/65">
-            {[
-              "תמצית מנהלים והחלטות",
-              "משימות עם בעלים",
-              "ספריית פגישות בענן",
-              "PDF מקצועי וגישה מכל מכשיר",
-            ].map((line) => (
+            {BENEFITS.map((line) => (
               <li key={line} className="flex gap-2.5">
                 <span className="text-[#5eead4]" aria-hidden>
                   ✓
@@ -118,17 +125,19 @@ export function LaunchMonthModal({
             ))}
           </ul>
 
-          <p className="mt-4 text-xs text-white/40">{snap.billingNoteHe}</p>
+          <p className="mt-4 text-xs leading-relaxed text-white/40">
+            {snap.billingNoteHe}
+          </p>
 
           <button
             type="button"
             onClick={upgrade}
             className="staz-btn-primary mt-5 w-full"
           >
-            קבלו PRO ב־{snap.launchPriceLabel}
+            התחילו עם Pro ב־{snap.launchPriceLabel}
           </button>
-          <p className="mt-3 text-center text-[11px] text-white/35">
-            מחיר השקה במהלך חודש ההשקה · ביטול דרך PayPal בכל עת
+          <p className="mt-3 text-center text-[11px] leading-relaxed text-white/35">
+            המחיר תקף לחודש ההשקה · אפשר לבטל דרך PayPal בכל עת
           </p>
         </div>
       </div>

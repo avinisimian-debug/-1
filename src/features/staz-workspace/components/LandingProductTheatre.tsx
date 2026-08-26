@@ -5,6 +5,7 @@ import {
   getDemoMeetingResult,
   DEMO_AHA_TIMESTAMP,
 } from "@/features/staz-workspace/data/demo-meeting";
+import { StazMark } from "@/components/brand/Logo";
 import { LANDING } from "@/lib/landing-copy";
 import { cn } from "@/lib/utils";
 
@@ -88,24 +89,35 @@ export function LandingProductTheatre({ className }: { className?: string }) {
           </div>
         </div>
 
-        {phase !== "meeting" ? (
-          <div className="mb-5 grid grid-cols-2 gap-2 sm:mb-6 sm:grid-cols-4 sm:gap-3">
-            {CLOSEOUT_STATS.map((stat, i) => (
-              <div
-                key={stat.label}
-                className="landing-reveal rounded-[var(--staz-radius-sm)] border border-white/10 bg-white/[0.04] px-3 py-3 text-center backdrop-blur-sm"
-                style={{ animationDelay: `${i * 70}ms` }}
-              >
-                <p className="font-brand text-2xl text-white sm:text-3xl">
-                  {stat.n}
-                </p>
-                <p className="mt-1 text-[11px] text-white/50 sm:text-xs">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : null}
+        {/* Always mounted — conditional mount here caused CLS / scroll jumps
+            when stats appeared ~900ms after load and pushed the page down. */}
+        <div
+          className={cn(
+            "mb-5 grid grid-cols-2 gap-2 sm:mb-6 sm:grid-cols-4 sm:gap-3",
+            phase === "meeting" && "invisible",
+          )}
+          aria-hidden={phase === "meeting"}
+        >
+          {CLOSEOUT_STATS.map((stat, i) => (
+            <div
+              key={stat.label}
+              className={cn(
+                "rounded-[var(--staz-radius-sm)] border border-white/10 bg-white/[0.04] px-3 py-3 text-center backdrop-blur-sm",
+                phase !== "meeting" && "landing-reveal",
+              )}
+              style={
+                phase !== "meeting" ? { animationDelay: `${i * 70}ms` } : undefined
+              }
+            >
+              <p className="font-brand text-2xl text-white sm:text-3xl">
+                {stat.n}
+              </p>
+              <p className="mt-1 text-[11px] text-white/50 sm:text-xs">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
 
         <div
           className="pointer-events-none absolute inset-x-6 top-8 hidden h-[88%] rounded-[var(--staz-radius)] border border-[var(--staz-border)] bg-[var(--staz-surface-muted)] opacity-50 blur-[0.5px] lg:block"
@@ -123,6 +135,7 @@ export function LandingProductTheatre({ className }: { className?: string }) {
         >
           <div className="flex items-center justify-between gap-3 border-b border-[var(--staz-border)] bg-[var(--staz-bg-cool)] px-4 py-3 sm:px-5">
             <div className="flex min-w-0 items-center gap-3">
+              <StazMark size={22} />
               <span className="font-brand text-sm tracking-[0.16em] text-[var(--staz-primary)]">
                 STAZ
               </span>

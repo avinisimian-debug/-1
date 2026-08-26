@@ -62,7 +62,7 @@ export function getLaunchCampaignSnapshot(now = Date.now()): LaunchCampaignSnaps
     launchPriceLabel: PRO_PLAN_INTRO_PRICE_LABEL,
     currency: "USD",
     discountPercent: discountPercent(),
-    billingNoteHe: `חודש ראשון ${PRO_PLAN_INTRO_PRICE_LABEL}, אחר כך ${PRO_PLAN_REGULAR_PRICE_LABEL} לחודש`,
+    billingNoteHe: `חודש ראשון ב־${PRO_PLAN_INTRO_PRICE_LABEL}, אחר כך ${PRO_PLAN_REGULAR_PRICE_LABEL} לחודש`,
     billingNoteEn: `First month ${PRO_PLAN_INTRO_PRICE_LABEL}, then ${PRO_PLAN_REGULAR_PRICE_LABEL}/month`,
     endsInMs,
   };

@@ -56,16 +56,14 @@ export function PdfReportTemplate({
           <div style={{ flex: 1, minWidth: 0 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
+              src="/brand/staz-mark.png"
               alt={labels.brand}
               style={{
-                height: "40px",
-                width: "auto",
+                height: "44px",
+                width: "44px",
                 marginBottom: "16px",
                 display: "block",
-                background: "#ffffff",
-                borderRadius: "8px",
-                padding: "4px 10px",
+                borderRadius: "10px",
               }}
             />
             <h1

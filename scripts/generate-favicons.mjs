@@ -3,43 +3,33 @@ import { existsSync } from "fs";
 import { join } from "path";
 
 const ROOT = process.cwd();
-const SOURCE = join(ROOT, "public", "logo.png");
+const SOURCE =
+  [
+    join(ROOT, "public", "brand", "staz-mark-source.png"),
+    join(ROOT, "public", "brand", "staz-mark.png"),
+    join(ROOT, "public", "logo.png"),
+  ].find((p) => existsSync(p)) ?? join(ROOT, "public", "logo.png");
 
-async function cropMark(size, output) {
-  const meta = await sharp(SOURCE).metadata();
-  const height = meta.height ?? size;
-  const cropWidth = Math.min(height, meta.width ?? height);
-
+async function writeSquare(size, output) {
   await sharp(SOURCE)
-    .extract({ left: 0, top: 0, width: cropWidth, height })
-    .resize(size, size, { fit: "cover", position: "left" })
+    .resize(size, size, { fit: "cover" })
     .png()
     .toFile(output);
-
   console.log(`✓ ${output} (${size}x${size})`);
 }
 
 async function main() {
   if (!existsSync(SOURCE)) {
-    console.error("Missing public/logo.png");
+    console.error("Missing brand mark source. Run: node scripts/generate-brand-assets.mjs");
     process.exit(1);
   }
 
-  await cropMark(32, join(ROOT, "src", "app", "icon.png"));
-  await cropMark(180, join(ROOT, "src", "app", "apple-icon.png"));
-  await cropMark(192, join(ROOT, "public", "icon-192.png"));
-  await cropMark(512, join(ROOT, "public", "icon-512.png"));
-
-  await sharp(join(ROOT, "src", "app", "icon.png"))
-    .resize(16, 16)
-    .toFile(join(ROOT, "public", "favicon-16x16.png"));
-
-  await sharp(join(ROOT, "src", "app", "icon.png"))
-    .resize(32, 32)
-    .toFile(join(ROOT, "public", "favicon-32x32.png"));
-
-  console.log("✓ public/favicon-16x16.png");
-  console.log("✓ public/favicon-32x32.png");
+  await writeSquare(32, join(ROOT, "src", "app", "icon.png"));
+  await writeSquare(180, join(ROOT, "src", "app", "apple-icon.png"));
+  await writeSquare(192, join(ROOT, "public", "icon-192.png"));
+  await writeSquare(512, join(ROOT, "public", "icon-512.png"));
+  await writeSquare(16, join(ROOT, "public", "favicon-16x16.png"));
+  await writeSquare(32, join(ROOT, "public", "favicon-32x32.png"));
 }
 
 main().catch((err) => {
