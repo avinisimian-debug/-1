@@ -1,0 +1,29 @@
+---
+description: Keep 21st/Spectrum design-command components visually unchanged
+alwaysApply: true
+---
+
+# Design commands — do not alter visuals
+
+The following UI came from explicit design install commands. **Do not change their visual design, layout, motion, or structure** unless the user explicitly asks to redesign them.
+
+## Locked component sources
+
+- `src/components/ui/glassmorphism-trust-hero.tsx` (easemize glassmorphism-trust-hero) — especially the default `HeroSection` export
+- `src/components/ui/modern-stunning-sign-in.tsx` / `modern-stunning-sign-in-demo.tsx`
+- `src/components/ui/vintage-keyboard.tsx`
+- `src/components/blocks/pricing.tsx` (Codehagen pricing block API + look)
+- `src/components/spectrumui/animateddrawer.tsx` (Spectrum / 21st animated-drawer)
+- `src/shared/demo.tsx` (drawer demo icons)
+
+## Allowed
+
+- Wire components into pages via **wrappers** (`TrustSection`, `LandingPricing`, `AppShell`, settings, demos)
+- Pass product props (Staz plans, OTP handlers, open/close state)
+- Fix build/type errors without changing the intended look
+
+## Not allowed without explicit user request
+
+- Restyling colors, spacing, typography, or animations inside locked files
+- Replacing the command UI with a simplified/custom redesign
+- “Adapting” the design away from the command’s original composition

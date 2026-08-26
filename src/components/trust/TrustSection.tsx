@@ -1,7 +1,7 @@
 "use client";
 
 import { LANDING } from "@/lib/landing-copy";
-import { StazGlassTrustHero } from "@/components/ui/glassmorphism-trust-hero";
+import HeroSection from "@/components/ui/glassmorphism-trust-hero";
 import { cn } from "@/lib/utils";
 
 interface TrustSectionProps {
@@ -11,11 +11,13 @@ interface TrustSectionProps {
   onDemo?: () => void;
 }
 
+/**
+ * Wires the glassmorphism-trust-hero design command into the landing.
+ * Visuals stay in the locked HeroSection — do not restyle here.
+ */
 export function TrustSection({
   variant = "landing",
   className,
-  onSignup,
-  onDemo,
 }: TrustSectionProps) {
   const copy = LANDING.trust;
 
@@ -40,19 +42,14 @@ export function TrustSection({
 
   return (
     <section
-      className={cn(
-        "landing-chapter landing-chapter--forest w-full overflow-hidden py-16 sm:py-20 md:py-24",
-        className,
-      )}
+      className={cn("w-full overflow-hidden", className)}
       aria-labelledby="trust-heading"
       id="trust"
     >
-      <div className="landing-chapter-inner">
-        <h2 id="trust-heading" className="sr-only">
-          {copy.headline} {copy.headlineAccent}
-        </h2>
-        <StazGlassTrustHero onPrimary={onSignup} onSecondary={onDemo} />
-      </div>
+      <h2 id="trust-heading" className="sr-only">
+        {copy.headline} {copy.headlineAccent}
+      </h2>
+      <HeroSection />
     </section>
   );
 }

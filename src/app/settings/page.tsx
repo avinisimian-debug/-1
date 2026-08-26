@@ -8,8 +8,8 @@ import { PayPalSubscribeButton } from "@/components/billing/PayPalSubscribeButto
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
 import { Pricing, type PricingPlan } from "@/components/blocks/pricing";
-import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
 import { DashboardShell } from "@/components/layout/DashboardShell";
+import { AnimatedDrawer } from "@/components/spectrumui/animateddrawer";
 import { VintageKeyboard } from "@/components/ui/vintage-keyboard";
 import { LANDING } from "@/lib/landing-copy";
 import { useLocale } from "@/context/LocaleContext";
@@ -155,10 +155,10 @@ export default function SettingsPage() {
 
   const settingsPlans: PricingPlan[] = [
     {
-      name: pricingCopy.freeTitle,
+      name: "FREE",
       price: "0",
       yearlyPrice: "0",
-      period: "",
+      period: pricingCopy.perMonth,
       description: pricingCopy.freeTag,
       features: [...pricingCopy.freeBullets],
       buttonText:
@@ -166,14 +166,11 @@ export default function SettingsPage() {
       note: pricingCopy.freeNote,
       disabled: plan === "free",
       isPopular: false,
-      priceNode: (
-        <p className="text-4xl font-bold tracking-tight text-foreground">$0</p>
-      ),
     },
     {
-      name: "Pro",
-      price: snap.active ? snap.launchPrice : snap.originalPrice,
-      yearlyPrice: snap.originalPrice,
+      name: "PRO",
+      price: snap.originalPrice,
+      yearlyPrice: snap.active ? snap.launchPrice : snap.originalPrice,
       period: pricingCopy.perMonth,
       description: pricingCopy.proValue,
       features: [...pricingCopy.proBullets],
@@ -184,22 +181,10 @@ export default function SettingsPage() {
             ? `Pro · ${snap.launchPriceLabel}`
             : pricingCopy.proCta,
       note: snap.active ? snap.billingNoteHe : pricingCopy.proNote(proPrice),
-      badge: snap.active ? `${snap.discountPercent}% הנחה` : "הכי משתלם",
+      badge: snap.active ? `${snap.discountPercent}% הנחה` : "Most Popular",
       onClick: plan === "pro" ? undefined : scrollToCheckout,
       disabled: plan === "pro",
       isPopular: true,
-      priceNode: snap.active ? (
-        <LaunchPriceStack size="md" />
-      ) : (
-        <p className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-4xl font-bold tracking-tight text-foreground">
-            {proPrice}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {pricingCopy.perMonth}
-          </span>
-        </p>
-      ),
     },
   ];
 
@@ -220,7 +205,7 @@ export default function SettingsPage() {
             plans={settingsPlans}
             title={t.pricingTitle}
             description={t.pricingSubtitle}
-            showToggle={false}
+            showToggle={snap.active}
             tone="default"
           />
 
@@ -360,12 +345,24 @@ export default function SettingsPage() {
                   מקלדת רטרו
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  נסו להקליד — אנימציית לחיצה כמו בקומפוננטת 21st Vintage Keyboard.
+                  קומפוננטת Vintage Keyboard מהפקודה — בלי שינוי עיצוב.
                 </p>
               </div>
             </div>
             <div className="rounded-2xl bg-[#120e0b] px-2 py-6 sm:px-4">
               <VintageKeyboard />
+            </div>
+          </section>
+
+          <section className="lat-panel overflow-hidden rounded-xl p-6">
+            <h2 className="mb-2 text-base font-semibold text-foreground">
+              Animated Drawer
+            </h2>
+            <p className="mb-4 text-xs text-muted-foreground">
+              קומפוננטת Spectrum / 21st animated-drawer — כפי שהותקנה מהפקודה.
+            </p>
+            <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-border bg-muted/30">
+              <AnimatedDrawer />
             </div>
           </section>
         </div>
