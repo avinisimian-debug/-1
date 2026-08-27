@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { LandingPricing } from "@/components/auth/LandingPricing";
 import { SignIn1 } from "@/components/ui/modern-stunning-sign-in";
-import { VintageKeyboard } from "@/components/ui/vintage-keyboard";
 import { AhaEvidenceSection } from "@/components/landing/AhaEvidenceSection";
 import { AudienceValueSection } from "@/components/landing/AudienceValueSection";
 import { CapabilityStories } from "@/components/landing/CapabilityStories";
@@ -21,6 +20,7 @@ import { WhyNotJustChat } from "@/components/landing/WhyNotJustChat";
 import { WhyStazSection } from "@/components/landing/WhyStazSection";
 import { LandingChapter } from "@/components/landing/ui/LandingChapter";
 import { StazButton } from "@/components/landing/ui/StazButton";
+import { TrustSection } from "@/components/trust/TrustSection";
 import { PublicDemoWorkspace } from "@/features/staz-workspace";
 import { useLocale } from "@/context/LocaleContext";
 import { LANDING, LANDING_CTA } from "@/lib/landing-copy";
@@ -223,6 +223,13 @@ export function LoginScreen() {
       <CapabilityStories />
       <WhyNotJustChat />
       <RoiSection />
+
+      <TrustSection
+        variant="landing"
+        onSignup={scrollToSignup}
+        onDemo={scrollToDemo}
+      />
+
       <AudienceValueSection />
 
       <LandingChapter
@@ -239,34 +246,16 @@ export function LoginScreen() {
 
       <LandingFaq />
 
-      <LandingChapter tone="cool" className="!bg-[#0a0806] !py-14 sm:!py-20">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-brand text-2xl tracking-tight text-white sm:text-3xl">
-            מקלדת רטרו
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-zinc-400">
-            רגע קטן לשחק — לחצו על המקשים או הקלידו במקלדת האמיתית.
-          </p>
-          <div className="mt-8">
-            <VintageKeyboard />
-          </div>
-        </div>
-      </LandingChapter>
-
-      <LandingChapter
-        tone="quiet"
-        id="signup"
-        className="!bg-[#121212] !py-16 sm:!py-24"
-      >
+      <LandingChapter tone="quiet" id="signup">
         <div className="mx-auto max-w-xl" aria-labelledby="signup-heading">
           <div className="mb-8 text-center">
             <h2
               id="signup-heading"
-              className="font-brand text-2xl tracking-tight text-white sm:text-3xl"
+              className="font-brand text-2xl tracking-tight text-[var(--staz-ink)] sm:text-3xl"
             >
               {copy.signup.headline}
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-400 sm:text-base">
+            <p className="mt-3 text-sm leading-relaxed text-[var(--staz-muted)] sm:text-base">
               {copy.signup.subhead}
             </p>
           </div>

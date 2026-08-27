@@ -3,27 +3,29 @@ description: Keep 21st/Spectrum design-command components visually unchanged
 alwaysApply: true
 ---
 
-# Design commands — do not alter visuals
+# Design commands — integrate, don’t paste
 
-The following UI came from explicit design install commands. **Do not change their visual design, layout, motion, or structure** unless the user explicitly asks to redesign them.
+The following UI came from explicit design install commands. **Do not restyle locked component source files** unless the user explicitly asks.
+
+Product pages must **wire** these via wrappers with Staz copy, CTAs, and surface tokens — never drop raw demos (portfolio hero, English “Simple Pricing”, keyboard playground) into the live landing or settings.
 
 ## Locked component sources
 
-- `src/components/ui/glassmorphism-trust-hero.tsx` (easemize glassmorphism-trust-hero) — especially the default `HeroSection` export
+- `src/components/ui/glassmorphism-trust-hero.tsx` — use `StazGlassTrustHero` / `StazGlassWorkCard` in product; keep default `HeroSection` for `/demo` only
 - `src/components/ui/modern-stunning-sign-in.tsx` / `modern-stunning-sign-in-demo.tsx`
-- `src/components/ui/vintage-keyboard.tsx`
+- `src/components/ui/vintage-keyboard.tsx` — demo routes only unless product-framed
 - `src/components/blocks/pricing.tsx` (Codehagen pricing block API + look)
-- `src/components/spectrumui/animateddrawer.tsx` (Spectrum / 21st animated-drawer)
+- `src/components/spectrumui/animateddrawer.tsx` — account/upgrade drawers, not settings playground
 - `src/shared/demo.tsx` (drawer demo icons)
 
 ## Allowed
 
-- Wire components into pages via **wrappers** (`TrustSection`, `LandingPricing`, `AppShell`, settings, demos)
-- Pass product props (Staz plans, OTP handlers, open/close state)
-- Fix build/type errors without changing the intended look
+- Wire via wrappers (`TrustSection`, `LandingPricing`, `AppShell`, settings plan block, demos)
+- Pass product props (Staz plans, Hebrew copy, OTP handlers, open/close state)
+- Fix build/type errors without changing the intended look of locked files
 
 ## Not allowed without explicit user request
 
 - Restyling colors, spacing, typography, or animations inside locked files
-- Replacing the command UI with a simplified/custom redesign
-- “Adapting” the design away from the command’s original composition
+- Replacing the command UI with a simplified/custom redesign inside locked files
+- Pasting unmodified command demos into the main product surface
