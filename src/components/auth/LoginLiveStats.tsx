@@ -13,9 +13,13 @@ interface PublicStats {
   saleActive: boolean;
 }
 
-const POLL_MS = 3 * 60 * 1000;
+/** Poll often enough that modest live bumps feel real. */
+const POLL_MS = 50_000;
 
-function useAnimatedNumber(target: number, durationMs = 900) {
+const STAT_KEYS = ["users", "downloads", "transcriptions"] as const;
+type StatKey = (typeof STAT_KEYS)[number];
+
+function useAnimatedNumber(target: number, durationMs = 700) {
   const [display, setDisplay] = useState(target);
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export function usePublicStats() {
     let active = true;
 
     const load = () => {
-      fetch("/api/stats/public")
+      fetch("/api/stats/public", { cache: "no-store" })
         .then((res) => res.json())
         .then((body: { data?: PublicStats }) => {
           if (active && body.data) setStats(body.data);
@@ -69,10 +73,21 @@ export function usePublicStats() {
 export function LoginLiveStats({ className }: { className?: string }) {
   const { t, locale } = useLocale();
   const stats = usePublicStats();
+  const [highlight, setHighlight] = useState<StatKey>("users");
 
   const users = useAnimatedNumber(stats?.totalUsers ?? 0);
   const downloads = useAnimatedNumber(stats?.downloadsToday ?? 0);
   const transcriptions = useAnimatedNumber(stats?.transcriptionsToday ?? 0);
+
+  useEffect(() => {
+    const rotate = setInterval(() => {
+      setHighlight((prev) => {
+        const i = STAT_KEYS.indexOf(prev);
+        return STAT_KEYS[(i + 1) % STAT_KEYS.length];
+      });
+    }, 6_500);
+    return () => clearInterval(rotate);
+  }, []);
 
   if (!stats) return null;
 
@@ -98,18 +113,21 @@ export function LoginLiveStats({ className }: { className?: string }) {
       <div className="grid w-full max-w-lg grid-cols-3 gap-3 sm:gap-6">
         <StatCell
           icon={Users}
-          value={`${usersFormatted}+`}
+          value={usersFormatted}
           label={t.authLiveUsersLabel}
+          active={highlight === "users"}
         />
         <StatCell
           icon={Download}
           value={downloadsFormatted}
           label={t.authLiveDownloadsLabel}
+          active={highlight === "downloads"}
         />
         <StatCell
           icon={Activity}
           value={transcriptionsFormatted}
           label={t.authLiveTodayLabel}
+          active={highlight === "transcriptions"}
         />
       </div>
     </div>
@@ -120,15 +138,35 @@ function StatCell({
   icon: Icon,
   value,
   label,
+  active,
 }: {
   icon: typeof Users;
   value: string;
   label: string;
+  active?: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 text-center">
-      <Icon className="h-4 w-4 text-[#5eead4]" aria-hidden />
-      <p className="text-xl font-bold tabular-nums leading-none text-white sm:text-2xl">
+    <div
+      className={cn(
+        "flex flex-col items-center gap-1.5 rounded-xl px-2 py-2 text-center transition-all duration-500",
+        active
+          ? "bg-white/[0.06] ring-1 ring-[#5eead4]/35"
+          : "bg-transparent ring-1 ring-transparent",
+      )}
+    >
+      <Icon
+        className={cn(
+          "h-4 w-4 transition-colors duration-500",
+          active ? "text-[#5eead4]" : "text-white/40",
+        )}
+        aria-hidden
+      />
+      <p
+        className={cn(
+          "text-xl font-bold tabular-nums leading-none transition-colors duration-500 sm:text-2xl",
+          active ? "text-white" : "text-white/85",
+        )}
+      >
         {value}
       </p>
       <p className="text-[10px] leading-snug text-white/45 sm:text-xs">{label}</p>
@@ -153,9 +191,7 @@ export function CompactLiveStats({ className }: { className?: string }) {
         className,
       )}
     >
-      <span className="font-medium text-[var(--ink-secondary)]">
-        {users}+
-      </span>{" "}
+      <span className="font-medium text-[var(--ink-secondary)]">{users}</span>{" "}
       {t.authLiveUsersLabel}
       <span className="mx-1.5 text-[var(--ink-tertiary)]">·</span>
       <span className="font-medium text-[var(--ink-secondary)]">{downloads}</span>{" "}

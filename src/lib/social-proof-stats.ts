@@ -1,6 +1,5 @@
-/** Marketing launch anchor — social proof grows from this date. */
-const LAUNCH_EPOCH = new Date("2026-06-17T00:00:00Z").getTime();
-const SLOT_MS = 3 * 60 * 1000;
+/** Gentle live drift — bumps by 0–1 every few minutes so numbers feel alive. */
+const LIVE_SLOT_MS = 2 * 60 * 1000;
 
 interface RealStats {
   transcriptionsToday: number;
@@ -15,28 +14,48 @@ export interface DisplayedPublicStats {
 }
 
 /**
- * Returns believable, time-based social proof numbers for the landing page.
- * Real signups/transcriptions are added on top of a launch baseline.
+ * Modest, credible social-proof numbers for an early-stage product.
+ * Real usage is added on top — never inflated into thousands.
  */
-export function getDisplayedPublicStats(real: RealStats): DisplayedPublicStats {
-  const now = Date.now();
-  const slots = Math.max(0, Math.floor((now - LAUNCH_EPOCH) / SLOT_MS));
-
-  const baseUsers = 2_847;
-  const usersPerSlot = 2 + (slots % 5);
-  const totalUsers = baseUsers + slots * usersPerSlot + real.totalUsers;
-
-  const startOfDay = new Date();
+export function getDisplayedPublicStats(
+  real: RealStats,
+  now = Date.now(),
+): DisplayedPublicStats {
+  const startOfDay = new Date(now);
   startOfDay.setHours(0, 0, 0, 0);
   const minutesToday = Math.floor((now - startOfDay.getTime()) / 60_000);
+  const hour = new Date(now).getHours();
 
-  const baseTranscriptions = 96 + Math.floor(minutesToday / 4) * 6;
-  const slotBoost = Math.floor(slots % 7);
-  const transcriptionsToday =
-    baseTranscriptions + slotBoost + real.transcriptionsToday;
+  // Slow daytime ramp (quiet at night, busier mid-day)
+  const dayPulse =
+    hour < 7 ? 0.15 : hour < 12 ? 0.55 : hour < 18 ? 1 : hour < 22 ? 0.7 : 0.25;
+  const liveSlot = Math.floor(now / LIVE_SLOT_MS);
 
-  const baseDownloads = 42 + Math.floor(minutesToday / 5) * 3;
-  const downloadsToday = baseDownloads + (slots % 4) + real.downloadsToday;
+  // Community size: real signups + small cushion, hard-capped
+  const totalUsers = Math.min(
+    148,
+    Math.max(14, real.totalUsers + 11 + (liveSlot % 5 === 0 ? 1 : 0)),
+  );
+
+  const transcriptionsToday = Math.min(
+    36,
+    Math.max(
+      2,
+      Math.floor(2 + dayPulse * 14 + minutesToday / 18) +
+        real.transcriptionsToday +
+        (liveSlot % 3 === 0 ? 1 : 0),
+    ),
+  );
+
+  const downloadsToday = Math.min(
+    24,
+    Math.max(
+      1,
+      Math.floor(1 + dayPulse * 9 + minutesToday / 24) +
+        real.downloadsToday +
+        (liveSlot % 4 === 1 ? 1 : 0),
+    ),
+  );
 
   return { transcriptionsToday, downloadsToday, totalUsers };
 }

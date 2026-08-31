@@ -89,8 +89,8 @@ export function LiveActivityToast({ landingOffset }: LiveActivityToastProps) {
       setTimeout(() => {
         setEvent(pickRandomLiveActivity(locale));
         setVisible(true);
-      }, 420);
-    }, 8500);
+      }, 380);
+    }, 11_000);
 
     return () => clearInterval(cycle);
   }, [dismissed, locale]);
