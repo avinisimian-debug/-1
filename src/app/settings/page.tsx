@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { Bell, CheckCircle2, Crown, Shield, Wallet } from "lucide-react";
 import { PayPalSubscribeButton } from "@/components/billing/PayPalSubscribeButton";
 import { PlanFeatureComparison } from "@/components/billing/PlanFeatureComparison";
+import { ProUnlockedPanel } from "@/components/billing/ProUnlockedPanel";
 import { ProPlanPrice } from "@/components/billing/ProPlanPrice";
 import { Pricing, type PricingPlan } from "@/components/blocks/pricing";
 import { LaunchPriceStack } from "@/components/launch/LaunchPriceStack";
@@ -15,6 +16,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
 import { getProPlanPriceLabel } from "@/lib/constants";
 import { getLaunchCampaignSnapshot } from "@/lib/launch-campaign";
+import { markProWelcomePending, notifyPlanUpdated } from "@/lib/plan-events";
 import { markStepComplete } from "@/lib/onboarding-store";
 import { scrollToUpgradeWithRetry } from "@/lib/upgrade-navigation";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,7 @@ export default function SettingsPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [showProUnlocked, setShowProUnlocked] = useState(false);
 
   const loadPlanDetails = useCallback(async () => {
     try {
@@ -109,6 +112,9 @@ export default function SettingsPage() {
         if (res.ok) {
           await syncPlan();
           await loadPlanDetails();
+          markProWelcomePending();
+          notifyPlanUpdated();
+          setShowProUnlocked(true);
           setSubMessage({ type: "success", text: t.paypalSuccess });
           void import("@/lib/launch-campaign").then(({ trackLaunchEvent }) => {
             trackLaunchEvent("checkout_completed");
@@ -243,7 +249,11 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {showProActive && (
+          {showProUnlocked && isPro ? (
+            <ProUnlockedPanel className="mt-6" />
+          ) : null}
+
+          {showProActive && !showProUnlocked ? (
             <div className="mt-6 space-y-2 text-center">
               <p className="text-xs font-medium text-emerald-700">
                 {t.settingsProActive}
@@ -254,7 +264,7 @@ export default function SettingsPage() {
                   : t.settingsProLifetime}
               </p>
             </div>
-          )}
+          ) : null}
 
           {showCheckout && (
             <div className="mt-8 scroll-mt-24 space-y-4" id="upgrade" data-paypal-section>

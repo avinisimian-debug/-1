@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 import type { Provider } from "next-auth/providers";
 import { isAdminEmail } from "@/lib/admin";
 import { getGoogleClientIdFromEnv } from "@/lib/auth-oauth";
-import { registerOrUpdateUser } from "@/lib/users-store";
+import { findUserByEmail, registerOrUpdateUser } from "@/lib/users-store";
 import { verifyGoogleIdToken } from "@/lib/verify-google-token";
 import { verifyEmailOtp } from "@/lib/email-otp";
 
@@ -22,7 +22,7 @@ const providers: Provider[] = [
       const email = credentials?.email as string | undefined;
       const otp = credentials?.otp as string | undefined;
 
-      if (!name?.trim() || !email?.trim() || !otp?.trim()) return null;
+      if (!email?.trim() || !otp?.trim()) return null;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) return null;
@@ -31,9 +31,16 @@ const providers: Provider[] = [
       const otpValid = await verifyEmailOtp(normalized, otp);
       if (!otpValid) return null;
 
+      let resolvedName = name?.trim();
+      if (!resolvedName) {
+        const existing = await findUserByEmail(normalized);
+        resolvedName =
+          existing?.name ?? normalized.split("@")[0] ?? "User";
+      }
+
       return {
         id: normalized,
-        name: name.trim(),
+        name: resolvedName,
         email: normalized,
       };
     },

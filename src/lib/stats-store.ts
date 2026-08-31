@@ -5,6 +5,7 @@ import { tmpdir } from "os";
 interface DailyStats {
   date: string;
   transcriptions: number;
+  downloads: number;
 }
 
 function getDataDir(): string {
@@ -30,11 +31,15 @@ async function readStats(): Promise<DailyStats> {
     const raw = await readFile(STATS_FILE, "utf8");
     const parsed = JSON.parse(raw) as DailyStats;
     if (parsed.date !== todayKey()) {
-      return { date: todayKey(), transcriptions: 0 };
+      return { date: todayKey(), transcriptions: 0, downloads: 0 };
     }
-    return parsed;
+    return {
+      date: parsed.date,
+      transcriptions: parsed.transcriptions ?? 0,
+      downloads: parsed.downloads ?? 0,
+    };
   } catch {
-    return { date: todayKey(), transcriptions: 0 };
+    return { date: todayKey(), transcriptions: 0, downloads: 0 };
   }
 }
 
@@ -48,12 +53,29 @@ export async function incrementTranscriptionsToday(): Promise<number> {
   const next = {
     date: todayKey(),
     transcriptions: stats.transcriptions + 1,
+    downloads: stats.downloads,
   };
   await writeStats(next);
   return next.transcriptions;
 }
 
+export async function incrementDownloadsToday(): Promise<number> {
+  const stats = await readStats();
+  const next = {
+    date: todayKey(),
+    transcriptions: stats.transcriptions,
+    downloads: stats.downloads + 1,
+  };
+  await writeStats(next);
+  return next.downloads;
+}
+
 export async function getTranscriptionsToday(): Promise<number> {
   const stats = await readStats();
   return stats.transcriptions;
+}
+
+export async function getDownloadsToday(): Promise<number> {
+  const stats = await readStats();
+  return stats.downloads;
 }

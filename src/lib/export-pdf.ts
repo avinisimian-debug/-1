@@ -1,5 +1,6 @@
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import { trackFileDownload } from "@/lib/track-download";
 
 function sanitizeFileName(name: string): string {
   const stripped = name
@@ -43,6 +44,7 @@ export async function downloadPdfFromElement(
   }
 
   pdf.save(fileName);
+  trackFileDownload();
 }
 
 export async function downloadPdfReport(

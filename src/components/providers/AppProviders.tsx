@@ -7,6 +7,7 @@ import { FeatureGateProvider } from "@/context/FeatureGateContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SocialProofLayer } from "@/components/trust/SocialProofLayer";
 
 function LocalizedErrorBoundary({ children }: { children: React.ReactNode }) {
   const { t } = useLocale();
@@ -29,7 +30,10 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           <ToastProvider>
             <PlanProvider>
               <FeatureGateProvider>
-                <LocalizedErrorBoundary>{children}</LocalizedErrorBoundary>
+                <LocalizedErrorBoundary>
+                  {children}
+                  <SocialProofLayer />
+                </LocalizedErrorBoundary>
               </FeatureGateProvider>
             </PlanProvider>
           </ToastProvider>

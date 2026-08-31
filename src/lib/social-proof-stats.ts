@@ -4,11 +4,13 @@ const SLOT_MS = 3 * 60 * 1000;
 
 interface RealStats {
   transcriptionsToday: number;
+  downloadsToday: number;
   totalUsers: number;
 }
 
 export interface DisplayedPublicStats {
   transcriptionsToday: number;
+  downloadsToday: number;
   totalUsers: number;
 }
 
@@ -33,7 +35,10 @@ export function getDisplayedPublicStats(real: RealStats): DisplayedPublicStats {
   const transcriptionsToday =
     baseTranscriptions + slotBoost + real.transcriptionsToday;
 
-  return { transcriptionsToday, totalUsers };
+  const baseDownloads = 42 + Math.floor(minutesToday / 5) * 3;
+  const downloadsToday = baseDownloads + (slots % 4) + real.downloadsToday;
+
+  return { transcriptionsToday, downloadsToday, totalUsers };
 }
 
 export function formatSocialProofNumber(value: number, locale: string): string {

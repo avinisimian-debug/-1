@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { LoginScreen } from "@/components/auth/LoginScreen";
+import { FocusedLoginPage } from "@/components/auth/FocusedLoginPage";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export default async function LoginPage() {
@@ -12,7 +12,7 @@ export default async function LoginPage() {
   return (
     <>
       <JsonLd />
-      <LoginScreen />
+      <FocusedLoginPage />
     </>
   );
 }

@@ -19,6 +19,7 @@ import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useLocale } from "@/context/LocaleContext";
 import { usePlan } from "@/context/PlanContext";
+import { CompactLiveStats } from "@/components/auth/LoginLiveStats";
 import { useUsage } from "@/hooks/useUsage";
 import { NAV_ITEMS } from "@/lib/constants";
 import type { Locale, Translations } from "@/lib/i18n/translations";
@@ -138,6 +139,7 @@ export function Sidebar({ onNavigate, className }: SidebarProps) {
       </nav>
 
       <div className="space-y-3 border-t border-[var(--line-subtle)] p-4">
+        <CompactLiveStats className="px-1" />
         <div className="flex flex-wrap items-center gap-2 sm:hidden">
           <ThemeToggle className="flex" />
           <div className="flex min-w-0 flex-1 items-center gap-1.5">

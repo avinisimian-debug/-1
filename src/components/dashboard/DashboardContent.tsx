@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { DashboardWorkspace } from "@/components/dashboard/DashboardWorkspace";
 import { LaunchDashboardCard } from "@/components/launch/LaunchDashboardCard";
+import { ProWelcomeBanner } from "@/components/billing/ProWelcomeBanner";
 import { StazGlassWorkCard } from "@/components/ui/glassmorphism-trust-hero";
 import {
   ErrorState,
@@ -43,6 +44,7 @@ export function DashboardContent() {
     >
       {idle && (
         <div className="mx-auto max-w-2xl space-y-4">
+          <ProWelcomeBanner />
           <LaunchDashboardCard isPro={isPro} />
           <StazGlassWorkCard
             title={

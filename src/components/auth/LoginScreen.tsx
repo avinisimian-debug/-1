@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { LandingPricing } from "@/components/auth/LandingPricing";
-import { SignIn1 } from "@/components/ui/modern-stunning-sign-in";
+import { StazAuthPanel } from "@/components/auth/StazAuthPanel";
+import { LoginLiveStats } from "@/components/auth/LoginLiveStats";
 import { AhaEvidenceSection } from "@/components/landing/AhaEvidenceSection";
 import { AudienceValueSection } from "@/components/landing/AudienceValueSection";
 import { CapabilityStories } from "@/components/landing/CapabilityStories";
@@ -23,7 +24,7 @@ import { StazButton } from "@/components/landing/ui/StazButton";
 import { TrustSection } from "@/components/trust/TrustSection";
 import { PublicDemoWorkspace } from "@/features/staz-workspace";
 import { useLocale } from "@/context/LocaleContext";
-import { LANDING, LANDING_CTA } from "@/lib/landing-copy";
+import { LANDING_CTA } from "@/lib/landing-copy";
 import { LaunchAnnouncementBar } from "@/components/launch/LaunchAnnouncementBar";
 import {
   LaunchMonthModal,
@@ -31,23 +32,21 @@ import {
 } from "@/components/launch/LaunchMonthModal";
 
 export function LoginScreen() {
+  const router = useRouter();
   const { t, locale, setLocale, localeLabels, locales } = useLocale();
   const signupRef = useRef<HTMLDivElement>(null);
   const pastDemoRef = useRef(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [pastDemo, setPastDemo] = useState(false);
   const [launchModalOpen, setLaunchModalOpen] = useState(false);
   const autoLaunch = useLaunchMonthAutoModal(false);
-  const copy = LANDING;
 
   const openLaunchOffer = useCallback(() => {
     setLaunchModalOpen(true);
   }, []);
+
+  const goLogin = useCallback(() => {
+    router.push("/login");
+  }, [router]);
 
   const scrollToDemo = useCallback(() => {
     document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" });
@@ -79,14 +78,13 @@ export function LoginScreen() {
     } catch {
       /* ignore */
     }
-    scrollToSignup();
-  }, [scrollToSignup]);
+    goLogin();
+  }, [goLogin]);
 
   useEffect(() => {
     const demoEl = document.getElementById("demo");
     if (!demoEl) return;
 
-    // visualViewport height is read for CTA label only — never drives layout.
     const onScroll = () => {
       const viewportH = window.visualViewport?.height ?? window.innerHeight;
       const rect = demoEl.getBoundingClientRect();
@@ -104,79 +102,6 @@ export function LoginScreen() {
       window.visualViewport?.removeEventListener("resize", onScroll);
     };
   }, []);
-
-  const requestOtp = async () => {
-    const trimmedName = name.trim();
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!trimmedName) {
-      setError(t.authErrorName);
-      return false;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-      setError(t.authErrorEmail);
-      return false;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/auth/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmedName, email: normalizedEmail }),
-      });
-      const data = (await res.json()) as { error?: string };
-      if (!res.ok) {
-        setError(data.error ?? t.authErrorSignIn);
-        return false;
-      }
-      setOtpSent(true);
-      return true;
-    } catch {
-      setError(t.authErrorSignIn);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!otpSent) {
-      await requestOtp();
-      return;
-    }
-
-    const trimmedName = name.trim();
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!otp.trim()) {
-      setError("נא להזין את קוד האימות שנשלח לאימייל.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await signIn("email-otp", {
-        name: trimmedName,
-        email: normalizedEmail,
-        otp: otp.trim(),
-        redirect: false,
-        callbackUrl: "/",
-      });
-
-      if (result?.ok) {
-        window.location.assign("/");
-        return;
-      }
-
-      setError("קוד שגוי או שפג תוקפו. בקשו קוד חדש.");
-    } catch {
-      setError(t.authErrorSignIn);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const showLaunchModal = launchModalOpen || autoLaunch.open;
   const closeLaunchModal = () => {
@@ -199,7 +124,7 @@ export function LoginScreen() {
           onOutcomes={scrollToOutcomes}
           onAudience={scrollToAudience}
           onPricing={scrollToPricing}
-          onLogin={scrollToSignup}
+          onLogin={goLogin}
           onSignup={scrollToSignup}
         />
       </div>
@@ -209,6 +134,15 @@ export function LoginScreen() {
         onSignup={scrollToSignup}
         onLaunchOffer={openLaunchOffer}
       />
+
+      <LandingChapter tone="cool" className="!bg-[#05080a] !py-12 sm:!py-16">
+        <div className="mx-auto max-w-md px-4 sm:px-0">
+          <StazAuthPanel ref={signupRef} />
+          <div className="mt-8">
+            <LoginLiveStats />
+          </div>
+        </div>
+      </LandingChapter>
 
       <WhyStazSection />
       <TransformationFlow />
@@ -246,35 +180,6 @@ export function LoginScreen() {
 
       <LandingFaq />
 
-      <LandingChapter tone="quiet" id="signup">
-        <div className="mx-auto max-w-xl" aria-labelledby="signup-heading">
-          <div className="mb-8 text-center">
-            <h2
-              id="signup-heading"
-              className="font-brand text-2xl tracking-tight text-[var(--staz-ink)] sm:text-3xl"
-            >
-              {copy.signup.headline}
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--staz-muted)] sm:text-base">
-              {copy.signup.subhead}
-            </p>
-          </div>
-          <SignIn1
-            ref={signupRef}
-            name={name}
-            email={email}
-            otp={otp}
-            otpSent={otpSent}
-            error={error}
-            loading={loading}
-            onNameChange={setName}
-            onEmailChange={setEmail}
-            onOtpChange={setOtp}
-            onSubmit={handleSubmit}
-          />
-        </div>
-      </LandingChapter>
-
       <FinalCta
         onDemo={scrollToDemo}
         onSignup={scrollToSignup}
@@ -288,7 +193,6 @@ export function LoginScreen() {
         source={launchModalOpen ? "manual" : "auto"}
       />
 
-      {/* Fixed CTA — does not alter document height; safe-area via padding only */}
       <div
         className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#05080a]/90 px-3 pt-3 backdrop-blur-xl lg:hidden"
         style={{

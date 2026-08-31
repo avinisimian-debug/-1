@@ -194,6 +194,17 @@ export async function registerOrUpdateUser(input: {
   return user;
 }
 
+export async function findUserByEmail(
+  email: string,
+): Promise<StoredUser | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
+  const users = await readUsers();
+  const existing = users.find((u) => u.email === normalized);
+  if (!existing) return null;
+  return withEffectivePlan(existing);
+}
+
 export async function getAllUsers(): Promise<StoredUser[]> {
   const users = await readUsers();
   let changed = false;

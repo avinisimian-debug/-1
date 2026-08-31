@@ -35,6 +35,7 @@ export interface Translations {
   authLiveTodayLabel: string;
   authLiveUsers: string;
   authLiveUsersLabel: string;
+  authLiveDownloadsLabel: string;
   authDemoEyebrow: string;
   authDemoTitle: string;
   authDemoSubtitle: string;
@@ -73,6 +74,32 @@ export interface Translations {
   authErrorSignIn: string;
   authGoogleUnavailable: string;
   authLoading: string;
+  authStepEmailTitle: string;
+  authStepEmailSub: string;
+  authStepNameTitle: string;
+  authStepNameSub: string;
+  authStepOtpTitle: string;
+  authStepOtpSub: string;
+  authContinue: string;
+  authSendCode: string;
+  authVerifyCode: string;
+  authBack: string;
+  authChangeEmail: string;
+  authResend: string;
+  authResendIn: string;
+  authReturningWelcome: string;
+  authNameHint: string;
+  authEmailPlaceholder: string;
+  authOtpRequired: string;
+  authOtpInvalid: string;
+  authFocusedHeadline: string;
+  authFocusedSubhead: string;
+  proUnlockedTitle: string;
+  proUnlockedCta: string;
+  proWelcomeTitle: string;
+  proWelcomeBody: string;
+  proWelcomeLibraryCta: string;
+  proWelcomeDismiss: string;
   // Nav
   navDashboard: string;
   navHistory: string;
@@ -708,6 +735,7 @@ export interface Translations {
   liveActivityTranscription: string;
   liveActivityUpgrade: string;
   liveActivityExport: string;
+  liveActivityDownload: string;
 }
 
 const en: Translations = {
@@ -741,6 +769,7 @@ const en: Translations = {
   authLiveTodayLabel: "transcriptions today",
   authLiveUsers: "{n}+ users joined",
   authLiveUsersLabel: "users joined",
+  authLiveDownloadsLabel: "downloads today",
   authDemoEyebrow: "Product demo",
   authDemoTitle: "See Staz AI in action",
   authDemoSubtitle:
@@ -784,6 +813,33 @@ const en: Translations = {
   authGoogleUnavailable:
     "Google sign-in is not configured. Use email or contact support.",
   authLoading: "Signing in...",
+  authStepEmailTitle: "Sign in or create account",
+  authStepEmailSub: "Enter your work email — we'll send a quick code.",
+  authStepNameTitle: "What's your name?",
+  authStepNameSub: "One last step before we send your verification code.",
+  authStepOtpTitle: "Enter the code",
+  authStepOtpSub: "We sent a 6-digit code to {email}",
+  authContinue: "Continue",
+  authSendCode: "Send code",
+  authVerifyCode: "Verify & sign in",
+  authBack: "Back",
+  authChangeEmail: "Change email",
+  authResend: "Resend code",
+  authResendIn: "Resend in {seconds}s",
+  authReturningWelcome: "Welcome back, {name}",
+  authNameHint: "Shown on your meeting summaries.",
+  authEmailPlaceholder: "name@company.com",
+  authOtpRequired: "Please enter the verification code.",
+  authOtpInvalid: "Invalid or expired code. Request a new one.",
+  authFocusedHeadline: "Sign in to close your meetings",
+  authFocusedSubhead: "Google or email code — no password to remember.",
+  proUnlockedTitle: "Pro is active — here's what's unlocked",
+  proUnlockedCta: "Start working →",
+  proWelcomeTitle: "Welcome to Pro",
+  proWelcomeBody:
+    "Your cloud library, larger uploads, PDF export, and deeper analysis are ready.",
+  proWelcomeLibraryCta: "Open your meeting library →",
+  proWelcomeDismiss: "Dismiss",
   navDashboard: "Closeout",
   navHistory: "Library",
   navSettings: "Settings",
@@ -1447,6 +1503,7 @@ const en: Translations = {
   liveActivityTranscription: "{name} from {location} completed a transcription",
   liveActivityUpgrade: "{name} from {location} upgraded to Pro",
   liveActivityExport: "{name} from {location} exported a PDF report",
+  liveActivityDownload: "{name} from {location} downloaded a file",
 };
 
 const he: Translations = {
@@ -1480,6 +1537,7 @@ const he: Translations = {
   authLiveTodayLabel: "תמלולים היום",
   authLiveUsers: "{n}+ משתמשים הצטרפו",
   authLiveUsersLabel: "משתמשים הצטרפו",
+  authLiveDownloadsLabel: "הורדות היום",
   authDemoEyebrow: "הדגמה",
   authDemoTitle: "ראו את Staz AI בפעולה",
   authDemoSubtitle:
@@ -1523,6 +1581,33 @@ const he: Translations = {
   authGoogleUnavailable:
     "התחברות עם Google לא מוגדרת. השתמש באימייל או פנה לתמיכה.",
   authLoading: "מתחבר...",
+  authStepEmailTitle: "כניסה או הרשמה",
+  authStepEmailSub: "הזינו אימייל עבודה — נשלח קוד קצר.",
+  authStepNameTitle: "איך קוראים לכם?",
+  authStepNameSub: "שלב אחרון לפני שליחת קוד האימות.",
+  authStepOtpTitle: "הזינו את הקוד",
+  authStepOtpSub: "שלחנו קוד בן 6 ספרות ל־{email}",
+  authContinue: "המשך",
+  authSendCode: "שלחו קוד",
+  authVerifyCode: "אימות וכניסה",
+  authBack: "חזרה",
+  authChangeEmail: "שנו אימייל",
+  authResend: "שלחו קוד שוב",
+  authResendIn: "שליחה חוזרת בעוד {seconds} שנ׳",
+  authReturningWelcome: "שמחים לראות אתכם שוב, {name}",
+  authNameHint: "יופיע בתמציות הפגישות שלכם.",
+  authEmailPlaceholder: "name@company.co.il",
+  authOtpRequired: "נא להזין את קוד האימות.",
+  authOtpInvalid: "קוד שגוי או שפג תוקפו. בקשו קוד חדש.",
+  authFocusedHeadline: "התחברו לסגירת הפגישות",
+  authFocusedSubhead: "Google או קוד באימייל — בלי סיסמה לזכור.",
+  proUnlockedTitle: "Pro פעיל — זה מה שפתוח לכם עכשיו",
+  proUnlockedCta: "התחילו לעבוד →",
+  proWelcomeTitle: "ברוכים הבאים ל-Pro",
+  proWelcomeBody:
+    "ספריית הענן, העלאות גדולות יותר, ייצוא PDF וניתוח מעמיק — הכל מוכן.",
+  proWelcomeLibraryCta: "לספריית הפגישות →",
+  proWelcomeDismiss: "סגירה",
   navDashboard: "סגירת פגישה",
   navHistory: "ספרייה",
   navSettings: "הגדרות",
@@ -2180,6 +2265,7 @@ const he: Translations = {
   liveActivityTranscription: "{name} מ{location} סיים/ה תמלול",
   liveActivityUpgrade: "{name} מ{location} שדרג/ה ל-Pro",
   liveActivityExport: "{name} מ{location} ייצא/ה דוח PDF",
+  liveActivityDownload: "{name} מ{location} הוריד/ה קובץ",
 };
 
 const ar: Translations = {

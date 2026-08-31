@@ -10,9 +10,16 @@ const FEATURE_ORDER: FeatureKey[] = [
   "smartDecisions",
   "actionItems",
   "copyToClipboard",
-  "pdfExport",
   "history",
+  "meetingQuota",
   "largeFiles",
+  "pdfExport",
+  "meetingChapters",
+  "keyQuotes",
+  "sentimentAnalysis",
+  "speakerDiarization",
+  "summaryTemplates",
+  "integrationsPush",
 ];
 
 const FEATURE_LABEL_KEYS: Record<FeatureKey, keyof import("@/lib/i18n/translations").Translations> = {

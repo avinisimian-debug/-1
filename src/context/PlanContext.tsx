@@ -10,6 +10,7 @@ import {
 import { useSession } from "next-auth/react";
 import type { PlanTier } from "@/lib/constants";
 import { PLAN_LIMITS } from "@/lib/constants";
+import { notifyPlanUpdated } from "@/lib/plan-events";
 
 interface PlanContextValue {
   plan: PlanTier;
@@ -49,7 +50,26 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     }
   }, [status, syncPlan]);
 
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    const onFocus = () => {
+      void syncPlan();
+    };
+    const onPlanUpdated = () => {
+      void syncPlan();
+    };
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("staz:plan-updated", onPlanUpdated);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("staz:plan-updated", onPlanUpdated);
+    };
+  }, [status, syncPlan]);
+
   const upgradeToPro = useCallback(() => {
+    notifyPlanUpdated();
     window.setTimeout(() => {
       void syncPlan();
     }, 800);

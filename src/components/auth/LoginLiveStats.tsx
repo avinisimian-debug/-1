@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Users } from "lucide-react";
+import { Activity, Download, Users } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { formatSocialProofNumber } from "@/lib/social-proof-stats";
 import { cn } from "@/lib/utils";
 
 interface PublicStats {
   transcriptionsToday: number;
+  downloadsToday: number;
   totalUsers: number;
   saleActive: boolean;
 }
@@ -39,8 +40,7 @@ function useAnimatedNumber(target: number, durationMs = 900) {
   return display;
 }
 
-export function LoginLiveStats({ className }: { className?: string }) {
-  const { t, locale } = useLocale();
+export function usePublicStats() {
   const [stats, setStats] = useState<PublicStats | null>(null);
 
   useEffect(() => {
@@ -63,22 +63,31 @@ export function LoginLiveStats({ className }: { className?: string }) {
     };
   }, []);
 
+  return stats;
+}
+
+export function LoginLiveStats({ className }: { className?: string }) {
+  const { t, locale } = useLocale();
+  const stats = usePublicStats();
+
   const users = useAnimatedNumber(stats?.totalUsers ?? 0);
+  const downloads = useAnimatedNumber(stats?.downloadsToday ?? 0);
   const transcriptions = useAnimatedNumber(stats?.transcriptionsToday ?? 0);
 
   if (!stats) return null;
 
   const usersFormatted = formatSocialProofNumber(users, locale);
+  const downloadsFormatted = formatSocialProofNumber(downloads, locale);
   const transcriptionsFormatted = formatSocialProofNumber(transcriptions, locale);
 
   return (
     <div
       className={cn(
-        "flex w-full flex-wrap items-center justify-center gap-4 sm:justify-between",
+        "flex w-full flex-col items-center gap-4",
         className,
       )}
     >
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-200">
         <span className="relative flex h-2 w-2">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -86,31 +95,71 @@ export function LoginLiveStats({ className }: { className?: string }) {
         {t.authLiveLabel}
       </span>
 
-      <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8">
-        <div className="flex items-center gap-2.5 text-center sm:text-start">
-          <Users className="h-5 w-5 shrink-0 text-accent" aria-hidden />
-          <div>
-            <p className="text-2xl font-bold tabular-nums leading-none text-foreground sm:text-3xl">
-              {usersFormatted}+
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t.authLiveUsersLabel}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 text-center sm:text-start">
-          <Activity className="h-5 w-5 shrink-0 text-accent" aria-hidden />
-          <div>
-            <p className="text-2xl font-bold tabular-nums leading-none text-foreground sm:text-3xl">
-              {transcriptionsFormatted}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t.authLiveTodayLabel}
-            </p>
-          </div>
-        </div>
+      <div className="grid w-full max-w-lg grid-cols-3 gap-3 sm:gap-6">
+        <StatCell
+          icon={Users}
+          value={`${usersFormatted}+`}
+          label={t.authLiveUsersLabel}
+        />
+        <StatCell
+          icon={Download}
+          value={downloadsFormatted}
+          label={t.authLiveDownloadsLabel}
+        />
+        <StatCell
+          icon={Activity}
+          value={transcriptionsFormatted}
+          label={t.authLiveTodayLabel}
+        />
       </div>
     </div>
+  );
+}
+
+function StatCell({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: typeof Users;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 text-center">
+      <Icon className="h-4 w-4 text-[#5eead4]" aria-hidden />
+      <p className="text-xl font-bold tabular-nums leading-none text-white sm:text-2xl">
+        {value}
+      </p>
+      <p className="text-[10px] leading-snug text-white/45 sm:text-xs">{label}</p>
+    </div>
+  );
+}
+
+/** One-line stats for sidebar / compact surfaces. */
+export function CompactLiveStats({ className }: { className?: string }) {
+  const { t, locale } = useLocale();
+  const stats = usePublicStats();
+
+  if (!stats) return null;
+
+  const users = formatSocialProofNumber(stats.totalUsers, locale);
+  const downloads = formatSocialProofNumber(stats.downloadsToday, locale);
+
+  return (
+    <p
+      className={cn(
+        "text-center text-[10px] leading-relaxed text-[var(--ink-tertiary)]",
+        className,
+      )}
+    >
+      <span className="font-medium text-[var(--ink-secondary)]">
+        {users}+
+      </span>{" "}
+      {t.authLiveUsersLabel}
+      <span className="mx-1.5 text-[var(--ink-tertiary)]">·</span>
+      <span className="font-medium text-[var(--ink-secondary)]">{downloads}</span>{" "}
+      {t.authLiveDownloadsLabel}
+    </p>
   );
 }

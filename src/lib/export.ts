@@ -1,4 +1,5 @@
 import type { ActionItem, TranscriptionResult } from "./types";
+import { trackFileDownload } from "@/lib/track-download";
 import {
   applySpeakerLabelOverrides,
 } from "@/features/transcription/lib/speaker-labels";
@@ -124,6 +125,7 @@ export function downloadTextFile(
   anchor.download = fileName;
   anchor.click();
   URL.revokeObjectURL(url);
+  trackFileDownload();
 }
 
 export function downloadTranscript(
@@ -148,6 +150,7 @@ export function downloadVtt(result: TranscriptionResult): void {
   anchor.download = `${base}.vtt`;
   anchor.click();
   URL.revokeObjectURL(url);
+  trackFileDownload();
 }
 
 export function downloadFullReport(
