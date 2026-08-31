@@ -17,7 +17,7 @@ export function FocusedLoginPage() {
       <div className="absolute inset-0" aria-hidden>
         <Image
           src="/marketing/staz-hero-cinema.webp"
-          alt=""
+          alt="Staz AI — כלי AI לתמלול וסיכום פגישות בעברית"
           fill
           priority
           sizes="100vw"

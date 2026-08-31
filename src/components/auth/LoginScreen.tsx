@@ -12,6 +12,7 @@ import { DayInLifeSection } from "@/components/landing/DayInLifeSection";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { LandingFaq } from "@/components/landing/LandingFaq";
 import { RoiSection } from "@/components/landing/RoiSection";
+import { SeoDiscoverSection } from "@/components/seo/SeoDiscoverSection";
 import { StazFooter } from "@/components/landing/StazFooter";
 import { StazHero } from "@/components/landing/StazHero";
 import { StazNav } from "@/components/landing/StazNav";
@@ -135,7 +136,7 @@ export function LoginScreen() {
         onLaunchOffer={openLaunchOffer}
       />
 
-      <LandingChapter tone="cool" className="!bg-[#05080a] !py-12 sm:!py-16">
+      <LandingChapter tone="cool" className="!bg-[#05080a] !py-12 sm:!py-16" id="signup">
         <div className="mx-auto max-w-md px-4 sm:px-0">
           <StazAuthPanel ref={signupRef} />
           <div className="mt-8">
@@ -177,6 +178,8 @@ export function LoginScreen() {
           onProSignup={scrollToSignupForPro}
         />
       </LandingChapter>
+
+      <SeoDiscoverSection />
 
       <LandingFaq />
 

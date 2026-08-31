@@ -6,6 +6,8 @@ import {
   isLaunchWeekActive,
   PRO_PLAN_INTRO_PRICE_LABEL,
 } from "@/lib/constants";
+import { SEO_KEYWORDS } from "@/lib/seo-keywords";
+import { SEO_PAGE_LIST } from "@/lib/seo-pages";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
@@ -13,24 +15,14 @@ export const SITE_URL =
   "https://1stazai.com";
 
 export const SITE_TITLE = isLaunchWeekActive()
-  ? `Staz AI — Launch Month · PRO ${PRO_PLAN_INTRO_PRICE_LABEL}`
-  : "Staz AI — עוזר הסגירה של הפגישה";
+  ? `Staz AI — תמלול וסיכום פגישות בעברית | PRO ${PRO_PLAN_INTRO_PRICE_LABEL}`
+  : "Staz AI — תמלול וסיכום פגישות בעברית | כלי AI לסגירת פגישות";
 
 export const SITE_DESCRIPTION = isLaunchWeekActive()
-  ? `Staz AI Launch Month: PRO ב־${getProPlanPriceLabel()} (במקום ${getProPlanRegularPriceLabel()} לחודש ראשון). תמלול, סיכום, החלטות ומשימות מפגישות.`
-  : "Staz הופך פגישות בעברית לתמצית מנהלים, החלטות ומשימות — ומחבר כל החלטה לרגע המדויק שבו היא נאמרה.";
+  ? `כלי AI לתמלול וסיכום פגישות בעברית. חודש השקה: Pro ב־${getProPlanPriceLabel()} (במקום ${getProPlanRegularPriceLabel()}). תמצית מנהלים, החלטות, משימות וקישור לתמלול.`
+  : "כלי AI לתמלול, סיכום וסגירת פגישות בעברית. תמצית מנהלים, החלטות, משימות — וקפיצה למשפט בתמלול. חינם להתחלה.";
 
-export const SITE_KEYWORDS = [
-  "סגירת פגישה",
-  "תמצית מנהלים",
-  "החלטות מפגישה",
-  "משימות מפגישה",
-  "תמלול בעברית",
-  "עוזר סגירת פגישות",
-  "Staz AI",
-  "1stazai",
-  "meeting closeout Hebrew",
-];
+export const SITE_KEYWORDS = SEO_KEYWORDS;
 
 const ogImage = `${SITE_URL}/marketing/staz-hero-cinema.webp`;
 const ogLogo = `${SITE_URL}/logo.png`;
@@ -142,6 +134,38 @@ function deepMergeMetadata(
   };
 }
 
+export function buildPageMetadata(
+  title: string,
+  description: string,
+  path: string,
+  keywords?: string[],
+): Metadata {
+  const url = `${SITE_URL}${path}`;
+
+  return buildSiteMetadata({
+    title,
+    description,
+    keywords: keywords ? [...new Set([...keywords, ...SITE_KEYWORDS])] : undefined,
+    alternates: {
+      canonical: url,
+      languages: {
+        "he-IL": url,
+        "en-US": url,
+        "x-default": url,
+      },
+    },
+    openGraph: {
+      url,
+      title,
+      description,
+    },
+    twitter: {
+      title,
+      description,
+    },
+  });
+}
+
 export function buildPrivatePageMetadata(
   title: string,
   description?: string,
@@ -158,4 +182,8 @@ export const privatePageRobots: Metadata = {
 };
 
 /** Public routes included in sitemap.xml */
-export const PUBLIC_ROUTES = ["/", "/login"] as const;
+export const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  ...SEO_PAGE_LIST.map((p) => p.path),
+] as const;

@@ -6,7 +6,14 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/login", "/ads.txt"],
+        allow: [
+          "/",
+          "/login",
+          "/ai-meeting-transcription",
+          "/meeting-summary-hebrew",
+          "/meeting-closeout",
+          "/ads.txt",
+        ],
         disallow: [
           "/api/",
           "/admin/",

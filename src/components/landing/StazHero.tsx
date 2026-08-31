@@ -32,7 +32,7 @@ export function StazHero({ onDemo, onSignup, onLaunchOffer }: StazHeroProps) {
         <div className="absolute inset-0" aria-hidden>
           <Image
             src="/marketing/staz-hero-cinema.webp"
-            alt=""
+            alt="Staz AI — תמלול וסיכום פגישות בעברית עם בינה מלאכותית"
             fill
             priority
             sizes="100vw"

@@ -50,6 +50,8 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [filter, setFilter] = useState<PlanFilter>("all");
+  const [syncingSupabase, setSyncingSupabase] = useState(false);
+  const [supabaseSyncMsg, setSupabaseSyncMsg] = useState<string | null>(null);
 
   const isAdmin = session?.user?.isAdmin;
 
@@ -118,6 +120,37 @@ export default function AdminUsersPage() {
     window.location.href = `mailto:?bcc=${encodeURIComponent(emails)}`;
   };
 
+  const syncSupabase = async () => {
+    setSyncingSupabase(true);
+    setSupabaseSyncMsg(null);
+    try {
+      const res = await fetch("/api/admin/users/sync-supabase", {
+        method: "POST",
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        synced?: number;
+        total?: number;
+        error?: string;
+      };
+      if (!res.ok) {
+        throw new Error(data.error ?? t.adminSyncSupabaseError);
+      }
+      setSupabaseSyncMsg(
+        `${t.adminSyncSupabaseDone}: ${data.synced ?? 0}/${data.total ?? users.length}`,
+      );
+    } catch (err) {
+      setSupabaseSyncMsg(
+        err instanceof Error ? err.message : t.adminSyncSupabaseError,
+      );
+    } finally {
+      setSyncingSupabase(false);
+    }
+  };
+
+  const supabaseTableUrl =
+    "https://supabase.com/dashboard/project/ozepeioedrgrlwelwtls/editor?schema=public&table=staz_users";
+
   if (!isAdmin) {
     return (
       <DashboardShell title={t.adminTitle} description={t.adminDesc}>
@@ -177,6 +210,25 @@ export default function AdminUsersPage() {
               />
               {t.adminRefresh}
             </button>
+            <button
+              type="button"
+              onClick={syncSupabase}
+              disabled={syncingSupabase}
+              className="btn-secondary inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", syncingSupabase && "animate-spin")}
+              />
+              {t.adminSyncSupabase}
+            </button>
+            <a
+              href={supabaseTableUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium"
+            >
+              {t.adminOpenSupabase}
+            </a>
             {filteredUsers.length > 0 && (
               <>
                 <button
@@ -229,6 +281,12 @@ export default function AdminUsersPage() {
             </button>
           ))}
         </div>
+
+        {supabaseSyncMsg && (
+          <p className="text-center text-sm text-[var(--ink-secondary)]">
+            {supabaseSyncMsg}
+          </p>
+        )}
 
         {error && (
           <p className="text-center text-sm text-red-600">{error}</p>

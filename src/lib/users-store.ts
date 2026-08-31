@@ -1,5 +1,6 @@
 import { isLaunchWeekActive } from "@/lib/constants";
 import { isProGranted } from "@/lib/pro-grants";
+import { syncUsersToSupabase } from "@/lib/supabase/users-sync";
 import { readPersistedJson, writePersistedJson } from "@/lib/user-persistence";
 
 export type ProSubscriptionStatus =
@@ -46,6 +47,9 @@ async function readUsers(): Promise<StoredUser[]> {
 
 async function writeUsers(users: StoredUser[]) {
   await writePersistedJson(users);
+  void syncUsersToSupabase(users).catch((error) => {
+    console.error("[users-store] Supabase sync failed:", error);
+  });
 }
 
 function isTrialActive(user: StoredUser, now = Date.now()): boolean {

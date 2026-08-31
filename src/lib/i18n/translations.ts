@@ -347,6 +347,10 @@ export interface Translations {
   adminNoAccess: string;
   adminEmpty: string;
   adminEmailsCopied: string;
+  adminSyncSupabase: string;
+  adminSyncSupabaseDone: string;
+  adminSyncSupabaseError: string;
+  adminOpenSupabase: string;
   // PayPal
   paypalTitle: string;
   paypalDesc: string;
@@ -1103,6 +1107,10 @@ const en: Translations = {
   adminNoAccess: "You don't have permission to view this page.",
   adminEmpty: "No users registered yet.",
   adminEmailsCopied: "Emails copied to clipboard",
+  adminSyncSupabase: "Sync to Supabase",
+  adminSyncSupabaseDone: "Users synced to Supabase",
+  adminSyncSupabaseError: "Supabase sync failed",
+  adminOpenSupabase: "Open in Supabase",
   paypalTitle: "Upgrade with PayPal",
   paypalDesc:
     "PayPal only — one secure payment. Pro is yours forever — no monthly subscription.",
@@ -1871,6 +1879,10 @@ const he: Translations = {
   adminNoAccess: "אין לך הרשאה לצפות בדף זה.",
   adminEmpty: "עדיין אין משתמשים רשומים.",
   adminEmailsCopied: "המיילים הועתקו ללוח",
+  adminSyncSupabase: "סנכרון ל-Supabase",
+  adminSyncSupabaseDone: "המשתמשים סונכרנו ל-Supabase",
+  adminSyncSupabaseError: "סנכרון Supabase נכשל",
+  adminOpenSupabase: "פתיחה ב-Supabase",
   paypalTitle: "שדרוג עם PayPal",
   paypalDesc:
     "רק PayPal — תשלום מאובטח אחד. Pro שלכם לנצח — בלי מנוי חודשי.",
